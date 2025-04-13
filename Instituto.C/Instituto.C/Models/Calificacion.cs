@@ -8,5 +8,6 @@
         public Profesor Profesor { get; set; }
         public Inscripcion Inscripcion { get; set; }
         public Alumno Alumno { get; set; }
+
     }
 }
