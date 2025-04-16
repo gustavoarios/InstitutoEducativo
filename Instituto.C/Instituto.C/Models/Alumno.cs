@@ -3,7 +3,6 @@
     public class Alumno : Persona
     {
         //declaro las propiedades del Alumno
-        public int Id { get; set; }
         public int NumeroMatricula { get; set; }
         public Carrera Carrera { get; set; }
         public List<Inscripcion> Inscripciones { get; set; }
