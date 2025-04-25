@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Instituto.C.Helpers;
 
 namespace Instituto.C.Models
 {
@@ -13,10 +14,10 @@ namespace Instituto.C.Models
         public Alumno Alumno { get; set; }
         public MateriaCursada MateriaCursada { get; set; }
 
-        [Required(ErrorMessage = "Debe indicar la fecha de inscripción")]
+        [Required(ErrorMessage = Messages.FechaRequerida)]
         [DataType(DataType.Date)]
         public DateTime FechaInscripcion { get; set; }
-        [Required(ErrorMessage = "El estado de la inscripción es obligatorio")]
+        [Required(ErrorMessage = Messages.CampoObligatorio)]
         public bool Activa { get; set; }
 
     }
