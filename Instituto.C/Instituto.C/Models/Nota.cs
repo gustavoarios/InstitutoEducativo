@@ -2,6 +2,7 @@
 {
     public enum Nota
     {
+        SinNota,
         Desaprobado,
         Regular,
         Aprobado,
