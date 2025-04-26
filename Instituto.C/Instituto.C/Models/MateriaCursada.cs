@@ -1,4 +1,6 @@
-﻿namespace Instituto.C.Models
+﻿using System.Collections.Generic;
+
+namespace Instituto.C.Models
 {
     public class MateriaCursada
     {

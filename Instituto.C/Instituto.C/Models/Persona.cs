@@ -1,4 +1,6 @@
-﻿namespace Instituto.C.Models
+﻿using System;
+
+namespace Instituto.C.Models
 {
     public  abstract class Persona
     {
