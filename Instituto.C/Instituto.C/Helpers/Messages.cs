@@ -8,5 +8,7 @@
         public const string RestriccionNumeros = "El campo {0} debe contener solo números.";
         public const string RestriccionLetras = "El campo {0} debe contener solo letras.";
         public const string Rango = "El campo {0} debe estar en el rango de {1} a {2} caracteres.";
+        public const string EmaiInvalido = "El formato del correo electronico no es valido.";
+        public const string TelefonoInvalido = "El número de telefono no es valido.";
     }
 }
