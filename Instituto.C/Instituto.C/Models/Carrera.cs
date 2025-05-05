@@ -19,8 +19,8 @@ namespace Instituto.C.Models
         [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = Messages.RestriccionAlfanumerica)]
         public string CodigoCarrera { get; set; }
 
-        public List<Materia> Materias { get; set; }
-        public List<Alumno> Alumnos { get; set; }
+        public List<Materia> Materias { get; set; } = new List<Materia>(); //Lista de materias que pertenecen a la carrera
+        public List<Alumno> Alumnos { get; set; } = new List<Alumno>(); //Lista de alumnos que pertenecen a la carrera
 
     }
 }

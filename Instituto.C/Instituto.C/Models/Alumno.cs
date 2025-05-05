@@ -6,6 +6,9 @@ namespace Instituto.C.Models
 {
     public class Alumno : Persona
     {
+
+        //no incluyo la propiedad Id porque hereda de Persona
+
         //declaro las propiedades del Alumno
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
@@ -18,10 +21,12 @@ namespace Instituto.C.Models
         public Carrera Carrera { get; set; }
 
         //propiedad relacional
+        [Required(ErrorMessage = Messages.CampoObligatorio)]
         public int CarreraId { get; set; }
 
-        public List<Inscripcion> Inscripciones { get; set; }
-        public List<Calificacion> Calificaciones { get; set; }
+        public List<Inscripcion> Inscripciones { get; set; } = new List<Inscripcion>(); //Lista de materias que cursa el alumno
+        public List<Calificacion> Calificaciones { get; set; } = new List<Calificacion>(); //Lista de calificaciones que tiene el alumno
+
 
     }
 }
