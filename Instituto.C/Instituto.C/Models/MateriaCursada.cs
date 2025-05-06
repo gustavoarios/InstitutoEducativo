@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Instituto.C.Helpers;
 
@@ -10,8 +11,8 @@ namespace Instituto.C.Models
         public int Id { get; set; } //Id de la materia cursada
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
-        [StringLength(1, MinimumLength = 1, ErrorMessage = Messages.StrMaxMin)]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = Messages.RestriccionLetras)]
+        [StringLength(1, ErrorMessage = Messages.StringMax)]
+        [RegularExpression(@"^[A-Z]+$", ErrorMessage = Messages.RestriccionLetras)]
         [Display(Name = "Código de Cursada (A, B, C, etc)")]
         public string CodigoCursada { get; set; } //Ej: "A", "B", "C", etc.
 
@@ -21,7 +22,7 @@ namespace Instituto.C.Models
         [Display(Name = "Año de Cursada")]
         [DisplayFormat(DataFormatString = "{0:yyyy}")]
         [DataType(DataType.Date)]
-        public int Anio { get; set; } //Ej: 2025
+        public DateOnly Anio { get; set; } //Ej: 2025
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [Range(1, 2, ErrorMessage = Messages.Rango)]
@@ -30,10 +31,12 @@ namespace Instituto.C.Models
         public int Cuatrimestre { get; set; } //Ej: 1 o 2
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
-        public bool Activo { get; set; } //Indica si la cursada esta activa o no
+        public bool Activo { get; set; } = false; //Indica si la cursada esta activa o no
 
-        public Profesor Profesor { get; set; } //Profesor a cargo de la materia
-        public Materia Materia { get; set; } //Materia que se cursa
+        public Profesor Profesor { get; set; } //Propiedad Relacional
+        public Materia Materia { get; set; } //Propiedad Relacional
+        public int MateriaId { get; set; } //Id de la materia, propiedad relacional
+        public int ProfesorId { get; set; } //Id del profesor a cargo de la cursada, propiedad relacional
         public List<Inscripcion> Inscripciones { get; set; } //Inscripciones a la materia 
 
         //propiedad calculada

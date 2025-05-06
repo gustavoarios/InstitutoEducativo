@@ -8,18 +8,28 @@ namespace Instituto.C.Models
     {
         private const int CARACTERES_MAXIMOS = 8;
         private const int CARACTERES_MINIMOS = 7;
+        private const string ERROR_CARACTERES_DNI = "El DNI debe tener entre 7 y 8 caracteres.";
+        //hay mensajes de error en el helper para usar :)
         
         public int Id { get; set; }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(100, ErrorMessage = Messages.StrMaxMin)]
+        [Required(ErrorMessage = ERROR_CAMPO_REQUERIDO)]
+        [StringLength(100, ErrorMessage = ERROR_EXCESO_CARACTERES)] //falta el minimo
         public string UserName { get; set; }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(100, ErrorMessage = Messages.StrMaxMin)]
         [EmailAddress (ErrorMessage = Messages.EmaiInvalido)]
+
+        [Required(ErrorMessage = ERROR_CAMPO_REQUERIDO)]
+        [StringLength(100, ErrorMessage = ERROR_EXCESO_CARACTERES)] //EmailAdressAttribute ya tiene un techo de 254 caracteres
+        [EmailAddress (ErrorMessage = ERROR_EMAIL_INVALIDO)]
         public string Email { get; set; }
         public DateTime FechaAlta { get; set; } = DateTime.Today;
+
+        public DateTime FechaAlta { get; set; } = DateTime.Today; //cambiar a Now
 
         [Required (ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(100, ErrorMessage = Messages.StrMaxMin)]
