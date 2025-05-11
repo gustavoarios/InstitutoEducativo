@@ -20,7 +20,7 @@ namespace Instituto.C.Models
         public Alumno Alumno { get; set; }
         public MateriaCursada MateriaCursada { get; set; }
 
-        [Required(ErrorMessage = Messages.CampoObligatorio)]
+        //[Required(ErrorMessage = Messages.CampoObligatorio)] No hace falta porque la agrega el sistema
         [DataType(DataType.Date, ErrorMessage = Messages.RestriccionNumeros)]
         public DateTime FechaInscripcion { get; set; } = DateTime.Now;
 
