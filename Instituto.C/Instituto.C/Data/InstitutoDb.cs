@@ -16,5 +16,6 @@ namespace Instituto.C.Data
         public DbSet<Materia> Materias { get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Profesor> Profesores { get; set; }
+        public DbSet<Instituto.C.Models.Inscripcion> Inscripcion { get; set; }
     }
 }
