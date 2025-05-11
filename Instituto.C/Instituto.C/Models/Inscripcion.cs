@@ -27,6 +27,6 @@ namespace Instituto.C.Models
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         public bool Activa { get; set; }
 
-        public ICollection<Calificacion> Calificaciones { get; set; } = new List<Calificacion>();
+        public List<Calificacion> Calificaciones { get; set; } = new List<Calificacion>();
     }
 }
