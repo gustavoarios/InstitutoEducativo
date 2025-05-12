@@ -11,5 +11,8 @@
         public const string EmaiInvalido = "El formato del correo electronico no es valido.";
         public const string TelefonoInvalido = "El número de telefono no es valido.";
         public const string StringMax = "El campo {0} no puede superar la cantidad de {1} caracter(es).";
+        public const string RegEx = "El {nombre} solo puede contener letras y espacios (3 a 100 caracteres).";
+        public const string Dni = "El DNI debe tener 7 u 8 dígitos, sin puntos ni letras.";
+
     }
 }

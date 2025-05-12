@@ -4,12 +4,17 @@ namespace Instituto.C.Models
 {
     public class Empleado : Persona
     {
-        private static int _contadorLegajo = 0;
-        public int Legajo { get { return _contadorLegajo; } set { } }
+        public int _contadorLegajo = 0;
+        public int Legajo { get { return GetLegajo(); } set { } }
         public Empleado()
         {
             _contadorLegajo++;
             Legajo = _contadorLegajo;
+        }
+
+        public int GetLegajo()
+        {
+            return Legajo;
         }
     }
 }
