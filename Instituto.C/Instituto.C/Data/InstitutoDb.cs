@@ -33,6 +33,9 @@ namespace Instituto.C.Data
                .WithMany(m => m.Inscripciones)
                .HasForeignKey(mi => mi.MateriaCursadaId);
 
+            modelBuilder.Entity<Alumno>()
+                .HasIndex(a => a.NumeroMatricula) //indicamos a entity framework que la propiedad NumeroMatricula es un indice
+                .IsUnique(); // osea no hay 2 alumnos con el mismo numero de matricula
 
         }
 

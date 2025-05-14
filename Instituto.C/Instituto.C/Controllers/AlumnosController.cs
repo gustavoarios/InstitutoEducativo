@@ -68,7 +68,7 @@ namespace Instituto.C.Controllers
 
                 //asigno el número de matrícula
                 var gestor = new GestorAlumnos(); //instancio al gestor para usar el metodo que asigna la matricula, pasandole el alumno recien creado
-                gestor.AsignarNumeroMatricula(alumno);
+                gestor.AsignarNumeroMatricula(alumno, _context); //aparte del alumno, le paso el campo privado de acceso a la base de datos que se usa en AlumnosController
 
                 //guardo nuevamente para actualizar la matrícula
                 _context.Update(alumno);
