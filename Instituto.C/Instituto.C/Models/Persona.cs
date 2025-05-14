@@ -16,7 +16,7 @@ namespace Instituto.C.Models
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [EmailAddress(ErrorMessage = Messages.EmaiInvalido)]
         public string Email { get; set; }
-        public DateTime FechaAlta { get; set; } = DateTime.Today;
+        public DateTime FechaAlta { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(100, MinimumLength = 2, ErrorMessage = Messages.StrMaxMin)]
