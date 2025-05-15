@@ -46,6 +46,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos/Create
+
         public IActionResult Create()
         {
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera");
@@ -57,7 +58,30 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
+
+        public async Task<IActionResult> Create([Bind("CarreraId,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(alumno);
+                await _context.SaveChangesAsync(); // acá el alumno ya tiene Id asignado
+
+                //asigno el número de matrícula
+                var gestor = new GestorAlumnos(); //instancio al gestor para usar el metodo que asigna la matricula, pasandole el alumno recien creado
+                gestor.AsignarNumeroMatricula(alumno, _context); //aparte del alumno, le paso el campo privado de acceso a la base de datos que se usa en AlumnosController
+
+                //guardo nuevamente para actualizar la matrícula
+                _context.Update(alumno);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
+            return View(alumno);
+        }
+
+
+        /*public async Task<IActionResult> Create([Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
         {
             if (ModelState.IsValid)
             {
@@ -67,7 +91,8 @@ namespace Instituto.C.Controllers
             }
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
             return View(alumno);
-        }
+        }*/
+
 
         // GET: Alumnos/Edit/5
         public async Task<IActionResult> Edit(int? id)

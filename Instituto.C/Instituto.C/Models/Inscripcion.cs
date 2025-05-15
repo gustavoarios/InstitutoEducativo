@@ -18,10 +18,14 @@ namespace Instituto.C.Models
         public int MateriaCursadaId { get; set; }
 
         public Alumno Alumno { get; set; }
+
+        [Display(Name =Alias.MateriaCursada)]
         public MateriaCursada MateriaCursada { get; set; }
 
         //[Required(ErrorMessage = Messages.CampoObligatorio)] No hace falta porque la agrega el sistema
         [DataType(DataType.Date, ErrorMessage = Messages.RestriccionNumeros)]
+
+        [Display(Name = Alias.FechaInscripcion)]
         public DateTime FechaInscripcion { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
