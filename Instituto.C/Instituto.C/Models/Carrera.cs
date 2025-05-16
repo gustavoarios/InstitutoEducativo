@@ -13,6 +13,7 @@ namespace Instituto.C.Models
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(50, MinimumLength = 5, ErrorMessage = Messages.StrMaxMin)]
         [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", ErrorMessage = Messages.RestriccionLetras)]
+        [Display(Name = Alias.Carrera)]
         public string Nombre { get; set; }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
