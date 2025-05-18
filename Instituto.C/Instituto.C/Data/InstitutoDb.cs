@@ -14,14 +14,16 @@ namespace Instituto.C.Data
         public DbSet<Materia> Materias { get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Profesor> Profesores { get; set; }
-        public DbSet<Instituto.C.Models.Inscripcion> Inscripcion { get; set; }
-        public DbSet<Instituto.C.Models.MateriaCursada> MateriaCursada { get; set; }
+        public DbSet<Inscripcion> Inscripcion { get; set; } //debería estar en plural? Inscripciones?
+        public DbSet<MateriaCursada> MateriasCursadas { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Inscripcion>().HasKey(cv => new { cv.AlumnoId, cv.MateriaCursadaId });
+            base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Inscripcion>()
+                .HasKey(cv => new { cv.AlumnoId, cv.MateriaCursadaId });
 
             modelBuilder.Entity<Inscripcion>()
                 .HasOne(ai => ai.Alumno)
@@ -37,6 +39,9 @@ namespace Instituto.C.Data
                 .HasIndex(a => a.NumeroMatricula) //indicamos a entity framework que la propiedad NumeroMatricula es un indice
                 .IsUnique(); // osea no hay 2 alumnos con el mismo numero de matricula
 
+            modelBuilder.Entity<MateriaCursada>()
+                .HasIndex(mc => new { mc.MateriaId, mc.Anio, mc.Cuatrimestre, mc.CodigoCursada })
+                .IsUnique(); // Asegura que no puedan existir dos cursadas con esos mismos datos
         }
 
 
