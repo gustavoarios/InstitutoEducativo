@@ -22,7 +22,7 @@ namespace Instituto.C.Controllers
         // GET: MateriasCursadas
         public async Task<IActionResult> Index()
         {
-            var institutoDb = _context.MateriaCursada.Include(m => m.Materia).Include(m => m.Profesor);
+            var institutoDb = _context.MateriasCursadas.Include(m => m.Materia).Include(m => m.Profesor);
             return View(await institutoDb.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
-            var materiaCursada = await _context.MateriaCursada
+            var materiaCursada = await _context.MateriasCursadas
                 .Include(m => m.Materia)
                 .Include(m => m.Profesor)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -61,6 +61,18 @@ namespace Instituto.C.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,CodigoCursada,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
         {
+            //Chequeo la duplicidad antes de ModelState.IsValid
+            bool existeDuplicado = _context.MateriasCursadas.Any(mc =>
+                mc.Anio == materiaCursada.Anio &&
+                mc.Cuatrimestre == materiaCursada.Cuatrimestre &&
+                mc.MateriaId == materiaCursada.MateriaId &&
+                mc.CodigoCursada == materiaCursada.CodigoCursada);
+
+            if (existeDuplicado)
+            {
+                ModelState.AddModelError("", "Ya existe una cursada con ese Año, Cuatrimestre y Código para esa materia.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(materiaCursada);
@@ -69,6 +81,7 @@ namespace Instituto.C.Controllers
             }
             ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria", materiaCursada.MateriaId);
             ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", materiaCursada.ProfesorId);
+
             return View(materiaCursada);
         }
 
@@ -80,7 +93,7 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
-            var materiaCursada = await _context.MateriaCursada.FindAsync(id);
+            var materiaCursada = await _context.MateriasCursadas.FindAsync(id);
             if (materiaCursada == null)
             {
                 return NotFound();
@@ -135,7 +148,7 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
-            var materiaCursada = await _context.MateriaCursada
+            var materiaCursada = await _context.MateriasCursadas
                 .Include(m => m.Materia)
                 .Include(m => m.Profesor)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -152,10 +165,10 @@ namespace Instituto.C.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var materiaCursada = await _context.MateriaCursada.FindAsync(id);
+            var materiaCursada = await _context.MateriasCursadas.FindAsync(id);
             if (materiaCursada != null)
             {
-                _context.MateriaCursada.Remove(materiaCursada);
+                _context.MateriasCursadas.Remove(materiaCursada);
             }
 
             await _context.SaveChangesAsync();
@@ -164,7 +177,7 @@ namespace Instituto.C.Controllers
 
         private bool MateriaCursadaExists(int id)
         {
-            return _context.MateriaCursada.Any(e => e.Id == id);
+            return _context.MateriasCursadas.Any(e => e.Id == id);
         }
     }
 }
