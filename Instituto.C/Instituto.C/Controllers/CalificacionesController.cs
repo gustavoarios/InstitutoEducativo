@@ -51,8 +51,9 @@ namespace Instituto.C.Controllers
         public IActionResult Create()
         {
             ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido");
-            ViewData["InscripcionId"] = new SelectList(_context.Inscripcion, "Id", "Id");
+            ViewData["InscripcionId"] = new SelectList(_context.Inscripciones, "Id", "Id");
             ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido");
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
             return View();
         }
 
@@ -70,7 +71,7 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido", calificacion.AlumnoId);
-            ViewData["InscripcionId"] = new SelectList(_context.Inscripcion, "Id", "Id", calificacion.InscripcionId);
+            ViewData["InscripcionId"] = new SelectList(_context.Inscripciones, "Id", "Id", calificacion.InscripcionId);
             ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", calificacion.ProfesorId);
             return View(calificacion);
         }
@@ -89,7 +90,7 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
             ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido", calificacion.AlumnoId);
-            ViewData["InscripcionId"] = new SelectList(_context.Inscripcion, "Id", "Id", calificacion.InscripcionId);
+            ViewData["InscripcionId"] = new SelectList(_context.Inscripciones, "Id", "Id", calificacion.InscripcionId);
             ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", calificacion.ProfesorId);
             return View(calificacion);
         }
@@ -127,7 +128,7 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido", calificacion.AlumnoId);
-            ViewData["InscripcionId"] = new SelectList(_context.Inscripcion, "Id", "Id", calificacion.InscripcionId);
+            ViewData["InscripcionId"] = new SelectList(_context.Inscripciones, "Id", "Id", calificacion.InscripcionId);
             ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", calificacion.ProfesorId);
             return View(calificacion);
         }

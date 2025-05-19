@@ -22,7 +22,7 @@ namespace Instituto.C.Models
         [Display(Name =Alias.MateriaCursada)]
         public MateriaCursada MateriaCursada { get; set; }
 
-        //[Required(ErrorMessage = Messages.CampoObligatorio)] No hace falta porque la agrega el sistema
+        //[Required(ErrorMessage = Messages.CampoObligatorio)] No hace falta si la agrega el sistema, si no se completa la fecha usa la fecha actual
         [DataType(DataType.Date, ErrorMessage = Messages.RestriccionNumeros)]
 
         [Display(Name = Alias.FechaInscripcion)]
