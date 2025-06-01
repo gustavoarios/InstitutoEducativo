@@ -1,4 +1,5 @@
-﻿using Instituto.C.Models;
+﻿using System;
+using Instituto.C.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -39,11 +40,41 @@ namespace Instituto.C.Data
                 .HasIndex(a => a.NumeroMatricula) //indicamos a entity framework que la propiedad NumeroMatricula es un indice
                 .IsUnique(); // osea no hay 2 alumnos con el mismo numero de matricula
 
+
             modelBuilder.Entity<MateriaCursada>()
-                .HasIndex(mc => new { mc.MateriaId, mc.Anio, mc.Cuatrimestre, mc.CodigoCursada })
-                .IsUnique(); // Asegura que no puedan existir dos cursadas con esos mismos datos
+    .HasOne(mc => mc.Profesor)
+    .WithMany() // o .WithMany(p => p.MateriasCursadas) si tenés navegación en Profesor
+    .HasForeignKey(mc => mc.ProfesorId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MateriaCursada>()
+                .HasOne(mc => mc.Materia)
+                .WithMany() // idem: o .WithMany(m => m.MateriasCursadas) si tenés navegación
+                .HasForeignKey(mc => mc.MateriaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            modelBuilder.Entity<Calificacion>()
+    .HasOne(c => c.Alumno)
+    .WithMany(a => a.Calificaciones) // si tenés navegación en Alumno
+    .HasForeignKey(c => c.AlumnoId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Calificacion>()
+   .HasOne(c => c.Profesor)
+   .WithMany(p => p.Calificaciones) // si tenés navegación en Alumno
+   .HasForeignKey(c => c.ProfesorId)
+   .OnDelete(DeleteBehavior.Restrict);
+
         }
+
+       
+
 
 
     }
+
+
 }
+

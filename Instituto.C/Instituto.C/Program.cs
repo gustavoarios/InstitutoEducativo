@@ -1,6 +1,7 @@
 using Instituto.C.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -15,8 +16,9 @@ namespace Instituto.C
             builder.Services.AddControllersWithViews();
 
             // Add services to the container.
-            builder.Services.AddDbContext<InstitutoDb>(options => options.UseInMemoryDatabase("InstitutoDb"));
-            
+            //builder.Services.AddDbContext<InstitutoDb>(options => options.UseInMemoryDatabase("InstitutoDb"));
+            builder.Services.AddDbContext<InstitutoDb>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
