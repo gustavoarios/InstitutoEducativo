@@ -1,5 +1,7 @@
 using Instituto.C.Data;
+using Instituto.C.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +20,11 @@ namespace Instituto.C
             // Add services to the container.
             //builder.Services.AddDbContext<InstitutoDb>(options => options.UseInMemoryDatabase("InstitutoDb"));
             builder.Services.AddDbContext<InstitutoDb>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
+
+
+            builder.Services.AddIdentity<Persona, IdentityRole<int>>()
+                .AddEntityFrameworkStores<InstitutoDb>();
+
 
             var app = builder.Build();
 
