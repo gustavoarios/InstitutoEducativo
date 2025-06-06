@@ -1,12 +1,17 @@
-﻿using System;
-using Instituto.C.Models;
+﻿using Instituto.C.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 
 namespace Instituto.C.Data
 {
-    public class InstitutoDb(DbContextOptions options) : DbContext(options)
+    public class InstitutoDb : IdentityDbContext<IdentityUser<int>, IdentityRole<int>, int>
     {
+        public InstitutoDb(DbContextOptions options) : base(options)
+        {
+
+        }
 
         public DbSet<Alumno> Alumnos { get; set; }
         public DbSet<Calificacion> Calificaciones { get; set; }
@@ -17,6 +22,7 @@ namespace Instituto.C.Data
         public DbSet<Profesor> Profesores { get; set; }
         public DbSet<Inscripcion> Inscripciones { get; set; }
         public DbSet<MateriaCursada> MateriasCursadas { get; set; }
+        public DbSet<IdentityUser<int>> MisRoles { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,10 +48,10 @@ namespace Instituto.C.Data
 
 
             modelBuilder.Entity<MateriaCursada>()
-    .HasOne(mc => mc.Profesor)
-    .WithMany() // o .WithMany(p => p.MateriasCursadas) si tenés navegación en Profesor
-    .HasForeignKey(mc => mc.ProfesorId)
-    .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(mc => mc.Profesor)
+                .WithMany() // o .WithMany(p => p.MateriasCursadas) si tenés navegación en Profesor
+                .HasForeignKey(mc => mc.ProfesorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<MateriaCursada>()
                 .HasOne(mc => mc.Materia)
@@ -56,20 +62,31 @@ namespace Instituto.C.Data
 
 
             modelBuilder.Entity<Calificacion>()
-    .HasOne(c => c.Alumno)
-    .WithMany(a => a.Calificaciones) // si tenés navegación en Alumno
-    .HasForeignKey(c => c.AlumnoId)
-    .OnDelete(DeleteBehavior.Restrict);
+                  .HasOne(c => c.Alumno)
+                .WithMany(a => a.Calificaciones) // si tenés navegación en Alumno
+                .HasForeignKey(c => c.AlumnoId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Calificacion>()
-   .HasOne(c => c.Profesor)
-   .WithMany(p => p.Calificaciones) // si tenés navegación en Alumno
-   .HasForeignKey(c => c.ProfesorId)
-   .OnDelete(DeleteBehavior.Restrict);
+               .HasOne(c => c.Profesor)
+               .WithMany(p => p.Calificaciones) // si tenés navegación en Alumno
+               .HasForeignKey(c => c.ProfesorId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            modelBuilder.Entity<IdentityUser<int>>().ToTable("Personas");
+            modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserRole<int>>().ToTable("PersonasRoles");
+
+
+
+
+
 
         }
 
-       
+
 
 
 
