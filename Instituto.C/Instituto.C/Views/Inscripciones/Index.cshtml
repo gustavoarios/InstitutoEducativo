@@ -1,53 +1,43 @@
 ﻿@model IEnumerable<Instituto.C.Models.Inscripcion>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Inscripciones";
 }
 
-<h1>Index</h1>
+<h1>Listado de Inscripciones</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Alumno)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MateriaCursada)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaInscripcion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Activa)
-            </th>
+            <th>Alumno</th>
+            <th>Materia Cursada</th>
+            <th>Fecha de Inscripción</th>
+            <th>Activa</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Alumno.Apellido)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MateriaCursada.CodigoCursada)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaInscripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Activa)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido
+                </td>
+                <td>
+                    @item.MateriaCursadaId - @item.MateriaCursada?.CodigoCursada
+                </td>
+                <td>@item.FechaInscripcion.ToShortDateString()</td>
+                <td>@(item.Activa ? "Sí" : "No")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
