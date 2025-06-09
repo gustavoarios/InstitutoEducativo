@@ -4,6 +4,7 @@ using Instituto.C.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instituto.C.Migrations
 {
     [DbContext(typeof(InstitutoDb))]
-    partial class InstitutoDbModelSnapshot : ModelSnapshot
+    [Migration("20250609155043_ChangeIR2Rol")]
+    partial class ChangeIR2Rol
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -204,11 +207,6 @@ namespace Instituto.C.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -225,10 +223,6 @@ namespace Instituto.C.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("Roles", (string)null);
-
-                    b.HasDiscriminator().HasValue("IdentityRole<int>");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -409,13 +403,6 @@ namespace Instituto.C.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Instituto.C.Models.Rol", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole<int>");
-
-                    b.HasDiscriminator().HasValue("Rol");
                 });
 
             modelBuilder.Entity("Instituto.C.Models.Persona", b =>

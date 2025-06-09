@@ -22,7 +22,7 @@ namespace Instituto.C
             builder.Services.AddDbContext<InstitutoDb>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
 
 
-            builder.Services.AddIdentity<Persona, IdentityRole<int>>()
+            builder.Services.AddIdentity<Persona, Rol>()
                 .AddEntityFrameworkStores<InstitutoDb>();
 
 

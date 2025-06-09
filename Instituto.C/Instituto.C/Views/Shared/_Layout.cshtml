@@ -43,6 +43,31 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
                         </li>
+
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm" asp-action="IniciarSesion" asp-controller="Account">Acceso</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm" asp-action="Registrar" asp-controller="Account">Registrarse</a>
+                            </li>
+
+                        }
+                        else
+                        {
+                            <span>@User.Identity.Name</span>
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm" asp-action="CerrarSesion" asp-controller="Account">Cerrar</a>
+                            </li>
+                        }
+
+
+
+
+
                     </ul>
                 </div>
             </div>

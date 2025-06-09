@@ -22,7 +22,7 @@ namespace Instituto.C.Data
         public DbSet<Profesor> Profesores { get; set; }
         public DbSet<Inscripcion> Inscripciones { get; set; }
         public DbSet<MateriaCursada> MateriasCursadas { get; set; }
-        public DbSet<IdentityUser<int>> MisRoles { get; set; }
+        public DbSet<Rol> MisRoles { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
