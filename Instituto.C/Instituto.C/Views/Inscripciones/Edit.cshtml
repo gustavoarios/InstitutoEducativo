@@ -4,46 +4,55 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
-
-<h4>Inscripcion</h4>
+<h1>Editar Inscripción</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+
+            <!-- Alumno: solo lectura pero con el ID en hidden -->
+            <input asp-for="AlumnoId" type="hidden" />
             <div class="form-group">
-                <label asp-for="AlumnoId" class="control-label"></label>
-                <select asp-for="AlumnoId" class="form-control" asp-items="ViewBag.AlumnoId"></select>
-                <span asp-validation-for="AlumnoId" class="text-danger"></span>
+                <label>Alumno</label>
+                <input class="form-control" value="@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido" readonly />
             </div>
+
+            <!-- MateriaCursada: sí editable -->
             <div class="form-group">
                 <label asp-for="MateriaCursadaId" class="control-label"></label>
                 <select asp-for="MateriaCursadaId" class="form-control" asp-items="ViewBag.MateriaCursadaId"></select>
                 <span asp-validation-for="MateriaCursadaId" class="text-danger"></span>
             </div>
+
+            <!-- FechaInscripcion: no editable -->
+            <input asp-for="FechaInscripcion" type="hidden" />
             <div class="form-group">
-                <label asp-for="FechaInscripcion" class="control-label"></label>
-                <input asp-for="FechaInscripcion" class="form-control" />
-                <span asp-validation-for="FechaInscripcion" class="text-danger"></span>
+                <label>Fecha de inscripción</label>
+                <input class="form-control" value="@Model.FechaInscripcion.ToShortDateString()" readonly />
             </div>
+
+            <!-- Activa: sí editable -->
             <div class="form-group form-check">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="Activa" /> @Html.DisplayNameFor(model => model.Activa)
                 </label>
             </div>
+
+            <!-- Botón de envío -->
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Volver a la lista</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
