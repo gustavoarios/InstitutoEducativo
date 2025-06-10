@@ -8,9 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Instituto.C.Controllers
 {
+
+
+    [Authorize]
+
     public class AlumnosController : Controller
     {
         private readonly InstitutoDb _context;
@@ -62,22 +67,30 @@ namespace Instituto.C.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> Create([Bind("CarreraId,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
+        public async Task<IActionResult> Create([Bind("CarreraId,UserName,Email,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(alumno);
-                await _context.SaveChangesAsync(); // acá el alumno ya tiene Id asignado
 
-                //asigno el número de matrícula
-                var gestor = new GestorAlumnos(); //instancio al gestor para usar el metodo que asigna la matricula, pasandole el alumno recien creado
-                gestor.AsignarNumeroMatricula(alumno, _context); //aparte del alumno, le paso el campo privado de acceso a la base de datos que se usa en AlumnosController
+                var resultado = await _userManager.CreateAsync(alumno);
 
-                //guardo nuevamente para actualizar la matrícula
-                _context.Update(alumno);
-                await _context.SaveChangesAsync();
+
+                if (resultado.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(alumno, "AlumnoRol"); //asigno el rol de AlumnoRol al usuario recien creado
+
+                    //asigno el número de matrícula
+                    var gestor = new GestorAlumnos(); //instancio al gestor para usar el metodo que asigna la matricula, pasandole el alumno recien creado
+                    gestor.AsignarNumeroMatricula(alumno, _context); //aparte del alumno, le paso el campo privado de acceso a la base de datos que se usa en AlumnosController
+
+                    //guardo nuevamente para actualizar la matrícula
+                    _context.Update(alumno);
+                    await _context.SaveChangesAsync();
+
+                }
 
                 return RedirectToAction(nameof(Index));
+
             }
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
             return View(alumno);
@@ -98,6 +111,7 @@ namespace Instituto.C.Controllers
 
 
         // GET: Alumnos/Edit/5
+        
 
         public async Task<IActionResult> Edit(int? id)
         {

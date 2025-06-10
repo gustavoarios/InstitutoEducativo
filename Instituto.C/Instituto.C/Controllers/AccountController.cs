@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Instituto.C.Data;
 using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,17 +12,19 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Instituto.C.Controllers
 {
+
+    [Authorize]
     public class AccountController : Controller
     {
         //POR INYECCION DE DEPENCIA PIDO UNA BASE DE DATOS, CON EL SERVICIO LA TENGO DISPONIBLE
 
 
         private readonly InstitutoDb _context;
-        private readonly UserManager <Persona> _userManager;
+        private readonly UserManager<Persona> _userManager;
         private readonly SignInManager<Persona> _signInManager;
         private readonly RoleManager<Rol> _roleManager;
 
-        public AccountController(InstitutoDb context, UserManager<Persona> userManager, SignInManager<Persona> signInManager, RoleManager<Rol> roleManager) 
+        public AccountController(InstitutoDb context, UserManager<Persona> userManager, SignInManager<Persona> signInManager, RoleManager<Rol> roleManager)
         {
             this._context = context;
             this._userManager = userManager;
@@ -29,13 +32,19 @@ namespace Instituto.C.Controllers
             this._roleManager = roleManager;
         }
 
-        public IActionResult IniciarSesion()
+
+        [AllowAnonymous] //para que no se necesite autenticacion para ver el formulario de inicio de sesion
+        public IActionResult IniciarSesion(string returnurl)//este muestra el formulario
         {
+
+            TempData["returnurl"] = returnurl; //enviamos informacion entre los action metods, por eso usamos tempData
+
+
             return View();
         }
-
+        [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> IniciarSesion(Login model)
+        public async Task<IActionResult> IniciarSesion(Login model)//metodo para procesar los datos del formulario
         {
             //lo primero es validar el modelstate
 
@@ -46,7 +55,13 @@ namespace Instituto.C.Controllers
 
                 if (resultado.Succeeded)
                 {
-                    
+                    string returnurl = TempData["returnurl"] as string;
+
+                    if (returnurl is not null)
+                    {
+                        return Redirect(returnurl);
+                    }
+
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -65,17 +80,16 @@ namespace Instituto.C.Controllers
             //cierro sesión y lo mando al home index
             return RedirectToAction("Index", "Home");
         }
-
+        [AllowAnonymous]
         public IActionResult Registrar()
         {
             ViewBag.Carreras = new SelectList(_context.Carreras, "Id", "Nombre");
             return View();
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Registrar(Registrar model)
         {
-
             if (ModelState.IsValid)
             {
                 Alumno alumno = new Alumno();
@@ -88,12 +102,7 @@ namespace Instituto.C.Controllers
                     alumno.DNI = model.DNI;
                     alumno.Telefono = model.Telefono;
                     alumno.CarreraId = model.CarreraId;
-
-
-
-
                 }
-
 
                 var resultado = await _userManager.CreateAsync(alumno, model.Password);
 
@@ -113,7 +122,7 @@ namespace Instituto.C.Controllers
 
                 }
 
-                foreach(var error in resultado.Errors)
+                foreach (var error in resultado.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
@@ -123,9 +132,8 @@ namespace Instituto.C.Controllers
             ViewBag.Carreras = new SelectList(_context.Carreras, "Id", "Nombre");
             return View();
         }
-
-
-
+       
+        //pasar este metodo a seeddata
         public async Task<IActionResult> CrearRoles()
         {
             if (!await _context.MisRoles.AnyAsync())
@@ -134,7 +142,12 @@ namespace Instituto.C.Controllers
                 await _roleManager.CreateAsync(new Rol("EmpleadoRol"));
                 await _roleManager.CreateAsync(new Rol("ProfesorRol"));
             }
-            return RedirectToAction("Index", "Home", new {message = "Roles creados"});
+            return RedirectToAction("Index", "Home", new { message = "Roles creados" });
+        }
+
+        public IActionResult AccesoDenegado()
+        {
+            return Content("No tenes accedo permitido");
         }
 
     }

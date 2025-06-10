@@ -7,10 +7,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
-using Instituto.C.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Instituto.C.Controllers
 {
+
+  
+
     public class ProfesoresController : Controller
     {
         private readonly InstitutoDb _context;
