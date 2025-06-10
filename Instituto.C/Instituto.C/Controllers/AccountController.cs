@@ -5,6 +5,7 @@ using Instituto.C.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -98,7 +99,13 @@ namespace Instituto.C.Controllers
 
                 if (resultado.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(alumno, "AlumnoRol");
+                    await _signInManager.SignInAsync(alumno, false);
 
+                    var gestor = new GestorAlumnos();
+                    gestor.AsignarNumeroMatricula(alumno, _context);
+                    _context.Update(alumno);
+                    await _context.SaveChangesAsync();
                     //si está ok registro
                     //aca se asignan los roles
                     return RedirectToAction("Index", "Alumnos");
@@ -115,6 +122,19 @@ namespace Instituto.C.Controllers
             //lo repito si hay errores
             ViewBag.Carreras = new SelectList(_context.Carreras, "Id", "Nombre");
             return View();
+        }
+
+
+
+        public async Task<IActionResult> CrearRoles()
+        {
+            if (!await _context.MisRoles.AnyAsync())
+            {
+                await _roleManager.CreateAsync(new Rol("AlumnoRol"));
+                await _roleManager.CreateAsync(new Rol("EmpleadoRol"));
+                await _roleManager.CreateAsync(new Rol("ProfesorRol"));
+            }
+            return RedirectToAction("Index", "Home", new {message = "Roles creados"});
         }
 
     }
