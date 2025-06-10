@@ -100,7 +100,10 @@ namespace Instituto.C.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("AlumnoId", "MateriaCursadaId");
 
@@ -474,6 +477,9 @@ namespace Instituto.C.Migrations
             modelBuilder.Entity("Instituto.C.Models.Empleado", b =>
                 {
                     b.HasBaseType("Instituto.C.Models.Persona");
+
+                    b.Property<string>("Legajo")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Empleado");
                 });

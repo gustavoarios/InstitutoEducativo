@@ -5,26 +5,24 @@
 namespace Instituto.C.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDbMisRoles : Migration
+    public partial class AgregandoLegajoEnProfesor : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Discriminator",
-                table: "Roles",
-                type: "nvarchar(21)",
-                maxLength: 21,
-                nullable: false,
-                defaultValue: "");
+                name: "Legajo",
+                table: "Personas",
+                type: "nvarchar(max)",
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Discriminator",
-                table: "Roles");
+                name: "Legajo",
+                table: "Personas");
         }
     }
 }

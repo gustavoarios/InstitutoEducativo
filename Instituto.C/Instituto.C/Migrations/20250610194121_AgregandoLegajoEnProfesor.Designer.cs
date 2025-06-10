@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instituto.C.Migrations
 {
     [DbContext(typeof(InstitutoDb))]
-    [Migration("20250609215525_AddDbMisRoles")]
-    partial class AddDbMisRoles
+    [Migration("20250610194121_AgregandoLegajoEnProfesor")]
+    partial class AgregandoLegajoEnProfesor
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -477,6 +477,9 @@ namespace Instituto.C.Migrations
             modelBuilder.Entity("Instituto.C.Models.Empleado", b =>
                 {
                     b.HasBaseType("Instituto.C.Models.Persona");
+
+                    b.Property<string>("Legajo")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Empleado");
                 });

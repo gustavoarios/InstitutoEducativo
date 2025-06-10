@@ -14,8 +14,11 @@ namespace Instituto.C.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string message) //no va null porque por defecto el string es null
         {
+
+            ViewBag.Message = message;
+
             return View();
         }
 
