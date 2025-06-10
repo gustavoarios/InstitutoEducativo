@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instituto.C.Migrations
 {
     [DbContext(typeof(InstitutoDb))]
-    [Migration("20250609215525_AddDbMisRoles")]
-    partial class AddDbMisRoles
+    [Migration("20250610182123_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,7 +103,10 @@ namespace Instituto.C.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("AlumnoId", "MateriaCursadaId");
 
