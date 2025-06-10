@@ -49,14 +49,26 @@ namespace Instituto.C.Controllers
         // GET: Inscripciones/Create
         public IActionResult Create()
         {
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido");
-            ViewData["MateriaCursadaId"] = new SelectList(_context.Set<MateriaCursada>(), "Id", "CodigoCursada");
+            ViewData["AlumnoId"] = new SelectList(
+                _context.Alumnos.Select(a => new
+                {
+                    a.Id,
+                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+                }),
+                "Id", "Nombre");
+
+            ViewData["MateriaCursadaId"] = new SelectList(
+                _context.MateriasCursadas.Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.CodigoCursada
+                }),
+                "Id", "Nombre");
+
             return View();
         }
 
         // POST: Inscripciones/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
@@ -67,8 +79,23 @@ namespace Instituto.C.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido", inscripcion.AlumnoId);
-            ViewData["MateriaCursadaId"] = new SelectList(_context.Set<MateriaCursada>(), "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
+
+            ViewData["AlumnoId"] = new SelectList(
+                _context.Alumnos.Select(a => new
+                {
+                    a.Id,
+                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+                }),
+                "Id", "Nombre", inscripcion.AlumnoId);
+
+            ViewData["MateriaCursadaId"] = new SelectList(
+                _context.MateriasCursadas.Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.CodigoCursada
+                }),
+                "Id", "Nombre", inscripcion.MateriaCursadaId);
+
             return View(inscripcion);
         }
 
@@ -85,14 +112,27 @@ namespace Instituto.C.Controllers
             {
                 return NotFound();
             }
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido", inscripcion.AlumnoId);
-            ViewData["MateriaCursadaId"] = new SelectList(_context.Set<MateriaCursada>(), "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
+
+            ViewData["AlumnoId"] = new SelectList(
+                _context.Alumnos.Select(a => new
+                {
+                    a.Id,
+                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+                }),
+                "Id", "Nombre", inscripcion.AlumnoId);
+
+            ViewData["MateriaCursadaId"] = new SelectList(
+                _context.MateriasCursadas.Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.CodigoCursada
+                }),
+                "Id", "Nombre", inscripcion.MateriaCursadaId);
+
             return View(inscripcion);
         }
 
         // POST: Inscripciones/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
@@ -122,8 +162,23 @@ namespace Instituto.C.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Apellido", inscripcion.AlumnoId);
-            ViewData["MateriaCursadaId"] = new SelectList(_context.Set<MateriaCursada>(), "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
+
+            ViewData["AlumnoId"] = new SelectList(
+                _context.Alumnos.Select(a => new
+                {
+                    a.Id,
+                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+                }),
+                "Id", "Nombre", inscripcion.AlumnoId);
+
+            ViewData["MateriaCursadaId"] = new SelectList(
+                _context.MateriasCursadas.Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.CodigoCursada
+                }),
+                "Id", "Nombre", inscripcion.MateriaCursadaId);
+
             return View(inscripcion);
         }
 

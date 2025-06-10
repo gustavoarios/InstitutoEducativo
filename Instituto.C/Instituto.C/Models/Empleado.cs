@@ -1,20 +1,28 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Instituto.C.Models
 {
-    public abstract class Empleado : Persona
+    public class Empleado : Persona
     {
-        public int _contadorLegajo = 0;
-        public int Legajo { get { return GetLegajo(); } set { } }
+        private string _legajo;
+
+        public string Legajo
+        {
+            get
+            {
+                return _legajo;
+            }
+        }
         public Empleado()
         {
-            _contadorLegajo++;
-            Legajo = _contadorLegajo;
+            _legajo = GenerarLegajo();
         }
 
-        public int GetLegajo()
+        private string GenerarLegajo()
         {
-            return Legajo;
+            // Ejemplo básico: usar "EMP" + últimos 4 del DNI
+            return this.DNI;
         }
     }
 }

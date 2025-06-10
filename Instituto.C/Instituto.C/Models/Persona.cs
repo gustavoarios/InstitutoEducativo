@@ -1,21 +1,29 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Instituto.C.Helpers;
+using Microsoft.AspNetCore.Identity;
 
 namespace Instituto.C.Models
 {
-    public abstract class Persona
+    public abstract class Persona : IdentityUser<int>
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(30,MinimumLength = 3, ErrorMessage = Messages.StrMaxMin)]
         [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,30}$", ErrorMessage = Messages.RegEx)]
-        public string UserName { get; set; }
+        public override string UserName
+        {
+            get { return base.UserName; }
+            set { base.UserName = value; }
+        }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [EmailAddress(ErrorMessage = Messages.EmaiInvalido)]
-        public string Email { get; set; }
+        public override string Email {
+            get { return base.Email; }
+            set { base.Email = value; }
+        }
         public DateTime FechaAlta { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]

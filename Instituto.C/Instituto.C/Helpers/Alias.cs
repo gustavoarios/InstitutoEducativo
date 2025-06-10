@@ -9,6 +9,8 @@
         public const string MateriaCursada = "Materia Cursada";
         public const string FechaInscripcion = "Fecha de inscripicion";
         public const string Carrera = "Nombre de la carrera";
+        public const string RolName = "Nombre del rol";
+
 
 
 
