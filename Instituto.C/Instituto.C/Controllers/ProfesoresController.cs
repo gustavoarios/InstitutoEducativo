@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
+using Instituto.C.Helpers;
 
 namespace Instituto.C.Controllers
 {
@@ -23,13 +24,11 @@ namespace Instituto.C.Controllers
             _context = context;
         }
 
-        // GET: Profesores
         public async Task<IActionResult> Index()
         {
             return View(await _context.Profesores.ToListAsync());
         }
 
-        // GET: Profesores/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,29 +46,25 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
-        // GET: Profesores/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Profesores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
         {
             if (ModelState.IsValid)
             {
+                profesor.Legajo = GeneradorDeLegajo.GenerarLegajoParaProfesor(profesor);
                 _context.Add(profesor);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(profesor);
         }
-
-        // GET: Profesores/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -85,9 +80,6 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
-        // POST: Profesores/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
@@ -120,7 +112,6 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
-        // GET: Profesores/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -138,7 +129,6 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
-        // POST: Profesores/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
