@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Instituto.C.Controllers
 {
     public class AlumnosController : Controller
     {
         private readonly InstitutoDb _context;
+        private readonly UserManager<Persona> _userManager;
 
-        public AlumnosController(InstitutoDb context)
+        public AlumnosController(InstitutoDb context, UserManager<Persona> userManager)
         {
             _context = context;
+            this._userManager = userManager;
         }
 
         // GET: Alumnos
@@ -95,6 +98,7 @@ namespace Instituto.C.Controllers
 
 
         // GET: Alumnos/Edit/5
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -102,7 +106,25 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
+
+            //cuando es alumno, evaluo
+
+            if (User.IsInRole("AlumnoRol"))
+            {
+
+                var userid = Int32.Parse(_userManager.GetUserId(User));
+
+                //validamos si es si mismo, sino lo redireccionamos
+
+                if (userid != id)
+                {
+                    return RedirectToAction("Edit", new { id = userid });
+
+                }
+            }
+
             var alumno = await _context.Alumnos.FindAsync(id);
+
             if (alumno == null)
             {
                 return NotFound();
@@ -111,10 +133,75 @@ namespace Instituto.C.Controllers
             return View(alumno);
         }
 
+
+
+        /* public async Task<IActionResult> Edit(int? id) //METODO ORIGINAL1
+         {
+             if (id == null)
+             {
+                 return NotFound();
+             }
+
+             var alumno = await _context.Alumnos.FindAsync(id);
+             if (alumno == null)
+             {
+                 return NotFound();
+             }
+             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
+             return View(alumno);
+         }*/                                              //METODO ORIGINAL1
+
+
+
+
+
         // POST: Alumnos/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit([Bind("UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo,CarreraId")] Alumno alumno)
+        {
+            var userId = Int32.Parse(_userManager.GetUserId(User)); // obtener el ID real del usuario logueado
+
+            // buscamos el alumno desde la base
+            var alumnoDb = await _context.Alumnos.FindAsync(userId);
+
+            if (alumnoDb == null)
+            {
+                return NotFound();
+            }
+
+            // actualizamos solo los campos permitidos
+            alumnoDb.UserName = alumno.UserName;
+            alumnoDb.Email = alumno.Email;
+            alumnoDb.FechaAlta = alumno.FechaAlta;
+            alumnoDb.Nombre = alumno.Nombre;
+            alumnoDb.Apellido = alumno.Apellido;
+            alumnoDb.DNI = alumno.DNI;
+            alumnoDb.Telefono = alumno.Telefono;
+            alumnoDb.Direccion = alumno.Direccion;
+            alumnoDb.Activo = alumno.Activo;
+            alumnoDb.CarreraId = alumno.CarreraId;
+
+            try
+            {
+                await _context.SaveChangesAsync(); // actualiza correctamente porque alumnoDb viene del contexto
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Problem("Hubo un problema de concurrencia al intentar guardar los cambios.");
+            }
+        }
+
+
+
+
+
+
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
         {
@@ -145,7 +232,8 @@ namespace Instituto.C.Controllers
             }
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
             return View(alumno);
-        }
+        }*/
+
 
         // GET: Alumnos/Delete/5
         public async Task<IActionResult> Delete(int? id)

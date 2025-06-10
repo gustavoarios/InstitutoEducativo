@@ -20,7 +20,7 @@ namespace Instituto.C.Models
 
                 do
                 {
-                    int ValorRandom = new Random().Next(0000000, 999999); //genero un numero aleatorio de 6 digitos entre 000000 y 999999
+                    int ValorRandom = new Random().Next(000000, 999999); //genero un numero aleatorio de 6 digitos entre 000000 y 999999
                     string UltimoTresDni = alumno.DNI.Substring(alumno.DNI.Length - 3); //obtengo los ultimos 3 digitos del dni
                     matriculaPotencial = $"{PREFIJO_MATRICULA}{ValorRandom}{SEPARADOR}{UltimoTresDni}"; //asigno la matricula a una variable, pero antes verificamos que otro alumno no la tenga.
                     matriculaExistente = context.Alumnos.Any(a => a.NumeroMatricula == matriculaPotencial); //valido en si hay otra igual a la recién "creada" en la instancia de la DbContext

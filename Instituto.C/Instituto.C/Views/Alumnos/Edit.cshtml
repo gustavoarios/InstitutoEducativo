@@ -17,7 +17,7 @@
                 <select asp-for="CarreraId" class="form-control" asp-items="ViewBag.CarreraId"></select>
                 <span asp-validation-for="CarreraId" class="text-danger"></span>
             </div>
-            <input type="hidden" asp-for="Id" />
+            <!-- <input type="hidden" asp-for="Id" /> //si esto se queda, no puedo editar un usuario siendo redirigido por el sistema -->
             <div class="form-group">
                 <label asp-for="UserName" class="control-label"></label>
                 <input asp-for="UserName" class="form-control" />
