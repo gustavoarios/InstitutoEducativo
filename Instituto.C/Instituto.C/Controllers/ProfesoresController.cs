@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
+using Instituto.C.Helpers;
 
 namespace Instituto.C.Controllers
 {
