@@ -59,7 +59,9 @@ namespace Instituto.C.Data
                 .HasForeignKey(mc => mc.MateriaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
+            modelBuilder.Entity<Materia>()
+                .HasIndex(m => new { m.CarreraId, m.Nombre })
+                .IsUnique();
 
             modelBuilder.Entity<Calificacion>()
                   .HasOne(c => c.Alumno)

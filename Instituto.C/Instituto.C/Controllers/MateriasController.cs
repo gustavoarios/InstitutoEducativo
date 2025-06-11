@@ -48,7 +48,14 @@ namespace Instituto.C.Controllers
         // GET: Materias/Create
         public IActionResult Create()
         {
-            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera");
+            var carreras = _context.Carreras
+    .Select(c => new {
+        c.Id,
+        Display = c.CodigoCarrera + " - " + c.Nombre
+    })
+    .ToList();
+
+            ViewData["CarreraId"] = new SelectList(carreras, "Id", "Display");
             return View();
         }
 
@@ -61,10 +68,22 @@ namespace Instituto.C.Controllers
         {
             if (ModelState.IsValid)
             {
+                // VALIDACIÓN: que no exista otra materia con el mismo nombre en la misma carrera
+                bool materiaRepetida = await _context.Materias
+                    .AnyAsync(m => m.Nombre == materia.Nombre && m.CarreraId == materia.CarreraId);
+
+                if (materiaRepetida)
+                {
+                    ModelState.AddModelError("Nombre", "Ya existe una materia con ese nombre en esta carrera.");
+                    ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", materia.CarreraId);
+                    return View(materia);
+                }
+
                 _context.Add(materia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", materia.CarreraId);
             return View(materia);
         }
@@ -100,6 +119,17 @@ namespace Instituto.C.Controllers
 
             if (ModelState.IsValid)
             {
+                // VALIDACIÓN: evitar duplicado al editar (excluyendo el actual)
+                bool materiaRepetida = await _context.Materias
+                    .AnyAsync(m => m.Id != materia.Id && m.Nombre == materia.Nombre && m.CarreraId == materia.CarreraId);
+
+                if (materiaRepetida)
+                {
+                    ModelState.AddModelError("Nombre", "Ya existe una materia con ese nombre en esta carrera.");
+                    ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", materia.CarreraId);
+                    return View(materia);
+                }
+
                 try
                 {
                     _context.Update(materia);
@@ -118,6 +148,7 @@ namespace Instituto.C.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", materia.CarreraId);
             return View(materia);
         }
