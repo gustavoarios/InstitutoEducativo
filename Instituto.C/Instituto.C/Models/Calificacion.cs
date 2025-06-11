@@ -29,6 +29,8 @@ namespace Instituto.C.Models
         [Range(1, int.MaxValue, ErrorMessage = Messages.RestriccionNumeros)]
         public int MateriaCursadaId { get; set; }
 
+        public MateriaCursada MateriaCursada { get; set; }
+
         public Inscripcion Inscripcion { get; set; }
     }
 }

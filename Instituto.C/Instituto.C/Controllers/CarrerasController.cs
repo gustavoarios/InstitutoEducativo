@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Instituto.C.Controllers
 {
@@ -48,6 +49,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Carreras/Create
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             return View();
@@ -58,6 +60,7 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("Id,Nombre,CodigoCarrera")] Carrera carrera)
         {
             if (ModelState.IsValid)

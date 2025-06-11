@@ -6,9 +6,10 @@
 
 <h1>Carreras</h1>
 
-<p>
+<!-- Eliminar el botón Crear Nueva -->
+<!-- <p>
     <a asp-action="Create">Crear Nueva</a>
-</p>
+</p> -->
 
 <table class="table table-bordered">
     <thead>
@@ -20,7 +21,7 @@
                 @Html.DisplayNameFor(model => model.CodigoCarrera)
             </th>
             <th>Materias</th>
-            <th></th>
+            <!-- Eliminamos la columna vacía para acciones -->
         </tr>
     </thead>
     <tbody>
@@ -48,12 +49,9 @@
                         <em>Sin materias</em>
                     }
                 </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-                </td>
+                <!-- Eliminamos la celda con enlaces Editar, Detalles, Eliminar -->
             </tr>
         }
     </tbody>
 </table>
+

@@ -189,15 +189,20 @@ namespace Instituto.C.Controllers
 
             // actualizamos solo los campos permitidos
             alumnoDb.UserName = alumno.UserName;
-            alumnoDb.Email = alumno.Email;
-            alumnoDb.FechaAlta = alumno.FechaAlta;
             alumnoDb.Nombre = alumno.Nombre;
             alumnoDb.Apellido = alumno.Apellido;
             alumnoDb.DNI = alumno.DNI;
-            alumnoDb.Telefono = alumno.Telefono;
             alumnoDb.Direccion = alumno.Direccion;
-            alumnoDb.Activo = alumno.Activo;
             alumnoDb.CarreraId = alumno.CarreraId;
+
+            
+            if (!User.IsInRole("AlumnoRol")) // Email, Telefono y Activo solo los puede modificar un administrador u otro rol
+            {
+                alumnoDb.Email = alumno.Email;
+                alumnoDb.Telefono = alumno.Telefono;
+                alumnoDb.Activo = alumno.Activo;
+                alumnoDb.FechaAlta = alumno.FechaAlta;
+            }
 
             try
             {

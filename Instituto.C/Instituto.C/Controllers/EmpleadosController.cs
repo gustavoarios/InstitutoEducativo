@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Instituto.C.Controllers
 {
+
+    [Authorize(Roles = "EmpleadoRol")]
     public class EmpleadosController : Controller
     {
         private readonly InstitutoDb _context;

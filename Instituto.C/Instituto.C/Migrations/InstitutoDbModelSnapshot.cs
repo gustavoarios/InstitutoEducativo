@@ -47,6 +47,8 @@ namespace Instituto.C.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MateriaCursadaId");
+
                     b.HasIndex("ProfesorId");
 
                     b.HasIndex("AlumnoId", "MateriaCursadaId");
@@ -486,6 +488,12 @@ namespace Instituto.C.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Instituto.C.Models.MateriaCursada", "MateriaCursada")
+                        .WithMany()
+                        .HasForeignKey("MateriaCursadaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Instituto.C.Models.Profesor", "Profesor")
                         .WithMany("Calificaciones")
                         .HasForeignKey("ProfesorId")
@@ -501,6 +509,8 @@ namespace Instituto.C.Migrations
                     b.Navigation("Alumno");
 
                     b.Navigation("Inscripcion");
+
+                    b.Navigation("MateriaCursada");
 
                     b.Navigation("Profesor");
                 });

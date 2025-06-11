@@ -46,6 +46,7 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             return View();
@@ -53,6 +54,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
         {
             if (ModelState.IsValid)
