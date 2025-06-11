@@ -11,35 +11,41 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <!-- Alumno: solo lectura pero con el ID en hidden -->
+            <!-- Clave compuesta: AlumnoId + MateriaCursadaId -->
             <input asp-for="AlumnoId" type="hidden" />
+            <input asp-for="MateriaCursadaId" type="hidden" />
+
+            <!-- Mostrar alumno (solo lectura) -->
             <div class="form-group">
                 <label>Alumno</label>
-                <input class="form-control" value="@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido" readonly />
+                <input class="form-control"
+                       value="@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido"
+                       readonly />
             </div>
 
-            <!-- MateriaCursada: sí editable -->
+            <!-- Mostrar materia cursada (solo lectura) -->
             <div class="form-group">
-                <label asp-for="MateriaCursadaId" class="control-label"></label>
-                <select asp-for="MateriaCursadaId" class="form-control" asp-items="ViewBag.MateriaCursadaId"></select>
-                <span asp-validation-for="MateriaCursadaId" class="text-danger"></span>
+                <label>Materia Cursada</label>
+                <input class="form-control"
+                       value="@Model.MateriaCursada?.CodigoCursada"
+                       readonly />
             </div>
 
-            <!-- FechaInscripcion: no editable -->
+            <!-- Fecha de inscripción: no editable -->
             <input asp-for="FechaInscripcion" type="hidden" />
             <div class="form-group">
-                <label>Fecha de inscripción</label>
+                <label>Fecha de Inscripción</label>
                 <input class="form-control" value="@Model.FechaInscripcion.ToShortDateString()" readonly />
             </div>
 
-            <!-- Activa: sí editable -->
+            <!-- Activa: editable -->
             <div class="form-group form-check">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="Activa" /> @Html.DisplayNameFor(model => model.Activa)
                 </label>
             </div>
 
-            <!-- Botón de envío -->
+            <!-- Botón guardar -->
             <div class="form-group">
                 <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>

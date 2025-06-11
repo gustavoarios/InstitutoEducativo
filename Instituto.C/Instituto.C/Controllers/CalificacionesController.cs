@@ -21,11 +21,11 @@ namespace Instituto.C.Controllers
         // GET: Calificaciones
         public async Task<IActionResult> Index()
         {
-            var institutoDb = _context.Calificaciones
+            var calificaciones = _context.Calificaciones
                 .Include(c => c.Alumno)
                 .Include(c => c.Inscripcion)
                 .Include(c => c.Profesor);
-            return View(await institutoDb.ToListAsync());
+            return View(await calificaciones.ToListAsync());
         }
 
         // GET: Calificaciones/Details/5
@@ -47,79 +47,91 @@ namespace Instituto.C.Controllers
         // GET: Calificaciones/Create
         public IActionResult Create()
         {
-            ViewData["AlumnoId"] = new SelectList(
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
+
+            // Cargar lista de alumnos
+            ViewBag.AlumnoId = new SelectList(
                 _context.Alumnos.Select(a => new
                 {
                     a.Id,
                     Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
                 }),
-                "Id", "Nombre");
+                "Id", "Nombre"
+            );
 
-            ViewData["ProfesorId"] = new SelectList(
+            // Cargar lista de materias cursadas
+            ViewBag.MateriaCursadaId = new SelectList(
+                _context.MateriasCursadas
+                    .Include(mc => mc.Materia)
+                    .Select(mc => new
+                    {
+                        mc.Id,
+                        Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
+                    }),
+                "Id", "Nombre"
+            );
+
+            ViewBag.ProfesorId = new SelectList(
                 _context.Profesores.Select(p => new
                 {
                     p.Id,
                     Nombre = p.Nombre + " " + p.Apellido
                 }),
-                "Id", "Nombre");
+                "Id", "Nombre"
+            );
 
-            ViewData["InscripcionId"] = new SelectList(
-                _context.Inscripciones.Include(i => i.Alumno).Include(i => i.MateriaCursada)
-                .Select(i => new
-                {
-                    i.Id,
-                    Descripcion = i.Alumno.Nombre + " " + i.Alumno.Apellido + " - " + i.MateriaCursada.CodigoCursada
-                }),
-                "Id", "Descripcion");
-
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
             return View();
         }
 
+
+
         // POST: Calificaciones/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Fecha,Nota,ProfesorId,AlumnoId,InscripcionId")] Calificacion calificacion)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
+{
+    if (calificacion.Fecha == DateTime.MinValue)
+        calificacion.Fecha = DateTime.Now;
+
+    // Validación de inscripción válida
+    var existeInscripcion = _context.Inscripciones.Any(i =>
+        i.AlumnoId == calificacion.AlumnoId &&
+        i.MateriaCursadaId == calificacion.MateriaCursadaId);
+
+    if (!existeInscripcion)
+        ModelState.AddModelError("", "El alumno no está inscripto en esa materia cursada.");
+
+    if (ModelState.IsValid)
+    {
+        _context.Add(calificacion);
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
+
+    ViewBag.ProfesorId = new SelectList(
+        _context.Profesores.Select(p => new
         {
-            if (calificacion.Fecha == DateTime.MinValue)
-            {
-                calificacion.Fecha = DateTime.Now;
-            }
-            if (ModelState.IsValid)
-            {
-                _context.Add(calificacion);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+            p.Id,
+            Nombre = p.Nombre + " " + p.Apellido
+        }), "Id", "Nombre", calificacion.ProfesorId);
 
-            ViewData["AlumnoId"] = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre", calificacion.AlumnoId);
+    var inscripciones = _context.Inscripciones
+        .Include(i => i.Alumno)
+        .Include(i => i.MateriaCursada)
+        .Select(i => new
+        {
+            AlumnoId = i.AlumnoId,
+            MateriaCursadaId = i.MateriaCursadaId,
+            Descripcion = $"{i.Alumno.NumeroMatricula} - {i.Alumno.Nombre} {i.Alumno.Apellido} | {i.MateriaCursada.CodigoCursada}"
+        }).ToList();
 
-            ViewData["ProfesorId"] = new SelectList(
-                _context.Profesores.Select(p => new
-                {
-                    p.Id,
-                    Nombre = p.Nombre + " " + p.Apellido
-                }),
-                "Id", "Nombre", calificacion.ProfesorId);
+    ViewBag.Inscripciones = new SelectList(inscripciones, "AlumnoId", "Descripcion", calificacion.AlumnoId);
 
-            ViewData["InscripcionId"] = new SelectList(
-                _context.Inscripciones.Include(i => i.Alumno).Include(i => i.MateriaCursada)
-                .Select(i => new
-                {
-                    i.Id,
-                    Descripcion = i.Alumno.Nombre + " " + i.Alumno.Apellido + " - " + i.MateriaCursada.CodigoCursada
-                }),
-                "Id", "Descripcion", calificacion.InscripcionId);
+    return View(calificacion);
+}
 
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
-            return View(calificacion);
-        }
 
         // GET: Calificaciones/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -129,30 +141,24 @@ namespace Instituto.C.Controllers
             var calificacion = await _context.Calificaciones.FindAsync(id);
             if (calificacion == null) return NotFound();
 
-            ViewData["AlumnoId"] = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre", calificacion.AlumnoId);
+            ViewData["AlumnoId"] = new SelectList(_context.Alumnos.Select(a => new
+            {
+                a.Id,
+                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+            }), "Id", "Nombre", calificacion.AlumnoId);
 
-            ViewData["ProfesorId"] = new SelectList(
-                _context.Profesores.Select(p => new
-                {
-                    p.Id,
-                    Nombre = p.Nombre + " " + p.Apellido
-                }),
-                "Id", "Nombre", calificacion.ProfesorId);
+            ViewData["ProfesorId"] = new SelectList(_context.Profesores.Select(p => new
+            {
+                p.Id,
+                Nombre = p.Nombre + " " + p.Apellido
+            }), "Id", "Nombre", calificacion.ProfesorId);
 
-            ViewData["InscripcionId"] = new SelectList(
-                _context.Inscripciones.Include(i => i.Alumno).Include(i => i.MateriaCursada)
-                .Select(i => new
+            ViewData["MateriaCursadaId"] = new SelectList(_context.MateriasCursadas.Include(mc => mc.Materia)
+                .Select(mc => new
                 {
-                    i.Id,
-                    Descripcion = i.Alumno.Nombre + " " + i.Alumno.Apellido + " - " + i.MateriaCursada.CodigoCursada
-                }),
-                "Id", "Descripcion", calificacion.InscripcionId);
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " " + mc.Anio
+                }), "Id", "Nombre", calificacion.MateriaCursadaId);
 
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
             return View(calificacion);
@@ -161,7 +167,7 @@ namespace Instituto.C.Controllers
         // POST: Calificaciones/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Fecha,Nota,ProfesorId,AlumnoId,InscripcionId")] Calificacion calificacion)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
         {
             if (id != calificacion.Id) return NotFound();
 
@@ -182,30 +188,24 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["AlumnoId"] = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre", calificacion.AlumnoId);
+            ViewData["AlumnoId"] = new SelectList(_context.Alumnos.Select(a => new
+            {
+                a.Id,
+                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+            }), "Id", "Nombre", calificacion.AlumnoId);
 
-            ViewData["ProfesorId"] = new SelectList(
-                _context.Profesores.Select(p => new
-                {
-                    p.Id,
-                    Nombre = p.Nombre + " " + p.Apellido
-                }),
-                "Id", "Nombre", calificacion.ProfesorId);
+            ViewData["ProfesorId"] = new SelectList(_context.Profesores.Select(p => new
+            {
+                p.Id,
+                Nombre = p.Nombre + " " + p.Apellido
+            }), "Id", "Nombre", calificacion.ProfesorId);
 
-            ViewData["InscripcionId"] = new SelectList(
-                _context.Inscripciones.Include(i => i.Alumno).Include(i => i.MateriaCursada)
-                .Select(i => new
+            ViewData["MateriaCursadaId"] = new SelectList(_context.MateriasCursadas.Include(mc => mc.Materia)
+                .Select(mc => new
                 {
-                    i.Id,
-                    Descripcion = i.Alumno.Nombre + " " + i.Alumno.Apellido + " - " + i.MateriaCursada.CodigoCursada
-                }),
-                "Id", "Descripcion", calificacion.InscripcionId);
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " " + mc.Anio
+                }), "Id", "Nombre", calificacion.MateriaCursadaId);
 
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
             return View(calificacion);

@@ -35,7 +35,7 @@
                     @item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido
                 </td>
                 <td>
-                    @item.InscripcionId - Materia: @item.Inscripcion?.MateriaCursada?.CodigoCursada
+                    @item.AlumnoId - @item.MateriaCursadaId - @item.Inscripcion?.MateriaCursada?.CodigoCursada
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |

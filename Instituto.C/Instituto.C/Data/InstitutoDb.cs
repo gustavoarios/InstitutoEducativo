@@ -29,11 +29,7 @@ namespace Instituto.C.Data
 
             // Inscripcion
             modelBuilder.Entity<Inscripcion>()
-                .HasKey(i => i.Id);
-
-            modelBuilder.Entity<Inscripcion>()
-                .HasIndex(i => new { i.AlumnoId, i.MateriaCursadaId })
-                .IsUnique();
+               .HasKey(i => new { i.AlumnoId, i.MateriaCursadaId });
 
             modelBuilder.Entity<Inscripcion>()
                 .HasOne(i => i.Alumno)
@@ -44,6 +40,7 @@ namespace Instituto.C.Data
                 .HasOne(i => i.MateriaCursada)
                 .WithMany(mc => mc.Inscripciones)
                 .HasForeignKey(i => i.MateriaCursadaId);
+
 
             // Alumno
             modelBuilder.Entity<Alumno>()
@@ -84,7 +81,7 @@ namespace Instituto.C.Data
             modelBuilder.Entity<Calificacion>()
                 .HasOne(c => c.Inscripcion)
                 .WithMany(i => i.Calificaciones)
-                .HasForeignKey(c => c.InscripcionId)
+                .HasForeignKey(c => new { c.AlumnoId, c.MateriaCursadaId })
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Identity mappings

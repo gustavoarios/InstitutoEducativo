@@ -4,46 +4,52 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<h1>Crear Calificación</h1>
 
-<h4>Calificacion</h4>
+<h4>Calificación</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <input asp-for="Fecha" type="hidden" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
-            </div>
+
+            <!-- Fecha como campo oculto -->
+            <input asp-for="Fecha" type="hidden" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
+
             <div class="form-group">
                 <label asp-for="Nota" class="control-label"></label>
                 <select asp-for="Nota" class="form-control" asp-items="ViewBag.Notas"></select>
-
                 <span asp-validation-for="Nota" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="ProfesorId" class="control-label"></label>
-                <select asp-for="ProfesorId" class ="form-control" asp-items="ViewBag.ProfesorId"></select>
+                <select asp-for="ProfesorId" class="form-control" asp-items="ViewBag.ProfesorId"></select>
             </div>
+
             <div class="form-group">
                 <label asp-for="AlumnoId" class="control-label"></label>
-                <select asp-for="AlumnoId" class ="form-control" asp-items="ViewBag.AlumnoId"></select>
+                <select asp-for="AlumnoId" class="form-control" asp-items="ViewBag.AlumnoId"></select>
             </div>
+
             <div class="form-group">
-                <label asp-for="InscripcionId" class="control-label"></label>
-                <select asp-for="InscripcionId" class ="form-control" asp-items="ViewBag.InscripcionId"></select>
+                <label asp-for="MateriaCursadaId" class="control-label">Materia Cursada</label>
+                <select asp-for="MateriaCursadaId" class="form-control" asp-items="ViewBag.MateriaCursadaId"></select>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Volver al Listado</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

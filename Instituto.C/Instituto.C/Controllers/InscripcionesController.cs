@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -22,26 +21,25 @@ namespace Instituto.C.Controllers
         // GET: Inscripciones
         public async Task<IActionResult> Index()
         {
-            var institutoDb = _context.Inscripciones.Include(i => i.Alumno).Include(i => i.MateriaCursada);
-            return View(await institutoDb.ToListAsync());
+            var inscripciones = _context.Inscripciones
+                .Include(i => i.Alumno)
+                .Include(i => i.MateriaCursada);
+            return View(await inscripciones.ToListAsync());
         }
 
-        // GET: Inscripciones/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Inscripciones/Details
+        public async Task<IActionResult> Details(int? alumnoId, int? materiaCursadaId)
         {
-            if (id == null)
-            {
+            if (alumnoId == null || materiaCursadaId == null)
                 return NotFound();
-            }
 
             var inscripcion = await _context.Inscripciones
                 .Include(i => i.Alumno)
                 .Include(i => i.MateriaCursada)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.AlumnoId == alumnoId && m.MateriaCursadaId == materiaCursadaId);
+
             if (inscripcion == null)
-            {
                 return NotFound();
-            }
 
             return View(inscripcion);
         }
@@ -54,16 +52,14 @@ namespace Instituto.C.Controllers
                 {
                     a.Id,
                     Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre");
+                }), "Id", "Nombre");
 
             ViewData["MateriaCursadaId"] = new SelectList(
                 _context.MateriasCursadas.Select(mc => new
                 {
                     mc.Id,
                     Nombre = mc.CodigoCursada
-                }),
-                "Id", "Nombre");
+                }), "Id", "Nombre");
 
             return View();
         }
@@ -71,10 +67,18 @@ namespace Instituto.C.Controllers
         // POST: Inscripciones/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
+        public async Task<IActionResult> Create([Bind("AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
         {
             if (inscripcion.FechaInscripcion == DateTime.MinValue)
                 inscripcion.FechaInscripcion = DateTime.Now;
+
+            if (_context.Inscripciones.Any(i =>
+                i.AlumnoId == inscripcion.AlumnoId &&
+                i.MateriaCursadaId == inscripcion.MateriaCursadaId))
+            {
+                ModelState.AddModelError("", "Ya existe una inscripción con esa combinación.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(inscripcion);
@@ -82,68 +86,36 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["AlumnoId"] = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre", inscripcion.AlumnoId);
-
-            ViewData["MateriaCursadaId"] = new SelectList(
-                _context.MateriasCursadas.Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.CodigoCursada
-                }),
-                "Id", "Nombre", inscripcion.MateriaCursadaId);
-
+            ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Nombre", inscripcion.AlumnoId);
+            ViewData["MateriaCursadaId"] = new SelectList(_context.MateriasCursadas, "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
             return View(inscripcion);
         }
 
-        // GET: Inscripciones/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Inscripciones/Edit
+        public async Task<IActionResult> Edit(int? alumnoId, int? materiaCursadaId)
         {
-            if (id == null)
-            {
+            if (alumnoId == null || materiaCursadaId == null)
                 return NotFound();
-            }
 
-            var inscripcion = await _context.Inscripciones.FindAsync(id);
+            var inscripcion = await _context.Inscripciones
+                .Include(i => i.Alumno)
+                .Include(i => i.MateriaCursada)
+                .FirstOrDefaultAsync(i => i.AlumnoId == alumnoId && i.MateriaCursadaId == materiaCursadaId);
+
             if (inscripcion == null)
-            {
                 return NotFound();
-            }
-
-            ViewData["AlumnoId"] = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre", inscripcion.AlumnoId);
 
             ViewData["MateriaCursadaId"] = new SelectList(
-                _context.MateriasCursadas.Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.CodigoCursada
-                }),
-                "Id", "Nombre", inscripcion.MateriaCursadaId);
+                _context.MateriasCursadas, "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
 
             return View(inscripcion);
         }
 
-        // POST: Inscripciones/Edit/5
+        // POST: Inscripciones/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
+        public async Task<IActionResult> Edit([Bind("AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
         {
-            if (id != inscripcion.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -153,75 +125,56 @@ namespace Instituto.C.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!InscripcionExists(inscripcion.Id))
-                    {
+                    if (!InscripcionExists(inscripcion.AlumnoId, inscripcion.MateriaCursadaId))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["AlumnoId"] = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre", inscripcion.AlumnoId);
-
             ViewData["MateriaCursadaId"] = new SelectList(
-                _context.MateriasCursadas.Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.CodigoCursada
-                }),
-                "Id", "Nombre", inscripcion.MateriaCursadaId);
-
+                _context.MateriasCursadas, "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
             return View(inscripcion);
         }
 
-        // GET: Inscripciones/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Inscripciones/Delete
+        public async Task<IActionResult> Delete(int? alumnoId, int? materiaCursadaId)
         {
-            if (id == null)
-            {
+            if (alumnoId == null || materiaCursadaId == null)
                 return NotFound();
-            }
 
             var inscripcion = await _context.Inscripciones
                 .Include(i => i.Alumno)
                 .Include(i => i.MateriaCursada)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.AlumnoId == alumnoId && m.MateriaCursadaId == materiaCursadaId);
+
             if (inscripcion == null)
-            {
                 return NotFound();
-            }
 
             return View(inscripcion);
         }
 
-        // POST: Inscripciones/Delete/5
+        // POST: Inscripciones/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int alumnoId, int materiaCursadaId)
         {
-            var inscripcion = await _context.Inscripciones.FindAsync(id);
+            var inscripcion = await _context.Inscripciones
+                .FirstOrDefaultAsync(i => i.AlumnoId == alumnoId && i.MateriaCursadaId == materiaCursadaId);
+
             if (inscripcion != null)
             {
                 _context.Inscripciones.Remove(inscripcion);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool InscripcionExists(int id)
+        private bool InscripcionExists(int alumnoId, int materiaCursadaId)
         {
-            return _context.Inscripciones.Any(e => e.Id == id);
+            return _context.Inscripciones.Any(e => e.AlumnoId == alumnoId && e.MateriaCursadaId == materiaCursadaId);
         }
     }
 }
