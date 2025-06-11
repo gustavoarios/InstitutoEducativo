@@ -10,7 +10,6 @@ namespace Instituto.C.Data
     {
         public InstitutoDb(DbContextOptions options) : base(options)
         {
-
         }
 
         public DbSet<Alumno> Alumnos { get; set; }
@@ -24,76 +23,74 @@ namespace Instituto.C.Data
         public DbSet<MateriaCursada> MateriasCursadas { get; set; }
         public DbSet<Rol> MisRoles { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Inscripcion
             modelBuilder.Entity<Inscripcion>()
-                .HasKey(cv => new { cv.AlumnoId, cv.MateriaCursadaId });
+                .HasKey(i => i.Id);
 
             modelBuilder.Entity<Inscripcion>()
-                .HasOne(ai => ai.Alumno)
-                .WithMany(i => i.Inscripciones)
-                .HasForeignKey(ai => ai.AlumnoId);
+                .HasIndex(i => new { i.AlumnoId, i.MateriaCursadaId })
+                .IsUnique();
 
             modelBuilder.Entity<Inscripcion>()
-               .HasOne(mi => mi.MateriaCursada)
-               .WithMany(m => m.Inscripciones)
-               .HasForeignKey(mi => mi.MateriaCursadaId);
+                .HasOne(i => i.Alumno)
+                .WithMany(a => a.Inscripciones)
+                .HasForeignKey(i => i.AlumnoId);
 
+            modelBuilder.Entity<Inscripcion>()
+                .HasOne(i => i.MateriaCursada)
+                .WithMany(mc => mc.Inscripciones)
+                .HasForeignKey(i => i.MateriaCursadaId);
+
+            // Alumno
             modelBuilder.Entity<Alumno>()
-                .HasIndex(a => a.NumeroMatricula) //indicamos a entity framework que la propiedad NumeroMatricula es un indice
-                .IsUnique(); // osea no hay 2 alumnos con el mismo numero de matricula
+                .HasIndex(a => a.NumeroMatricula)
+                .IsUnique();
 
-
+            // MateriaCursada
             modelBuilder.Entity<MateriaCursada>()
                 .HasOne(mc => mc.Profesor)
-                .WithMany() // o .WithMany(p => p.MateriasCursadas) si tenés navegación en Profesor
+                .WithMany()
                 .HasForeignKey(mc => mc.ProfesorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<MateriaCursada>()
                 .HasOne(mc => mc.Materia)
-                .WithMany() // idem: o .WithMany(m => m.MateriasCursadas) si tenés navegación
+                .WithMany()
                 .HasForeignKey(mc => mc.MateriaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Materia
             modelBuilder.Entity<Materia>()
                 .HasIndex(m => new { m.CarreraId, m.Nombre })
                 .IsUnique();
 
+            // Calificacion
             modelBuilder.Entity<Calificacion>()
-                  .HasOne(c => c.Alumno)
-                .WithMany(a => a.Calificaciones) // si tenés navegación en Alumno
+                .HasOne(c => c.Alumno)
+                .WithMany(a => a.Calificaciones)
                 .HasForeignKey(c => c.AlumnoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Calificacion>()
-               .HasOne(c => c.Profesor)
-               .WithMany(p => p.Calificaciones) // si tenés navegación en Alumno
-               .HasForeignKey(c => c.ProfesorId)
-               .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(c => c.Profesor)
+                .WithMany(p => p.Calificaciones)
+                .HasForeignKey(c => c.ProfesorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Calificacion>()
+                .HasOne(c => c.Inscripcion)
+                .WithMany(i => i.Calificaciones)
+                .HasForeignKey(c => c.InscripcionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-
+            // Identity mappings
             modelBuilder.Entity<IdentityUser<int>>().ToTable("Personas");
             modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
             modelBuilder.Entity<IdentityUserRole<int>>().ToTable("PersonasRoles");
-
-
-
-
-
-
         }
-
-
-
-
-
     }
-
-
 }
-
