@@ -22,7 +22,11 @@ namespace Instituto.C.Controllers
         // GET: Carreras
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Carreras.ToListAsync());
+            var carreras = await _context.Carreras
+                                         .Include(c => c.Materias)
+                                         .ToListAsync();
+
+            return View(carreras);
         }
 
         // GET: Carreras/Details/5
@@ -153,5 +157,10 @@ namespace Instituto.C.Controllers
         {
             return _context.Carreras.Any(e => e.Id == id);
         }
+
+
+       
+
+
     }
 }

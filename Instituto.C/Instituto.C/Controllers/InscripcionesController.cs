@@ -73,6 +73,8 @@ namespace Instituto.C.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
         {
+            if (inscripcion.FechaInscripcion == DateTime.MinValue)
+                inscripcion.FechaInscripcion = DateTime.Now;
             if (ModelState.IsValid)
             {
                 _context.Add(inscripcion);
