@@ -33,10 +33,11 @@
                 <td>@item.FechaInscripcion.ToShortDateString()</td>
                 <td>@(item.Activa ? "Sí" : "No")</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    <a asp-action="Edit" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Editar</a> |
+                    <a asp-action="Details" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Detalles</a> |
+                    <a asp-action="Delete" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Eliminar</a>
                 </td>
+
             </tr>
         }
     </tbody>

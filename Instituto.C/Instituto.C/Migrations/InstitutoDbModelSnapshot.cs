@@ -36,13 +36,7 @@ namespace Instituto.C.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("InscripcionAlumnoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("InscripcionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("InscripcionMateriaCursadaId")
+                    b.Property<int>("MateriaCursadaId")
                         .HasColumnType("int");
 
                     b.Property<int>("Nota")
@@ -53,11 +47,9 @@ namespace Instituto.C.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AlumnoId");
-
                     b.HasIndex("ProfesorId");
 
-                    b.HasIndex("InscripcionAlumnoId", "InscripcionMateriaCursadaId");
+                    b.HasIndex("AlumnoId", "MateriaCursadaId");
 
                     b.ToTable("Calificaciones");
                 });
@@ -99,12 +91,6 @@ namespace Instituto.C.Migrations
                     b.Property<DateTime>("FechaInscripcion")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.HasKey("AlumnoId", "MateriaCursadaId");
 
                     b.HasIndex("MateriaCursadaId");
@@ -138,12 +124,13 @@ namespace Instituto.C.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CarreraId");
+                    b.HasIndex("CarreraId", "Nombre")
+                        .IsUnique();
 
                     b.ToTable("Materias");
                 });
@@ -507,8 +494,8 @@ namespace Instituto.C.Migrations
 
                     b.HasOne("Instituto.C.Models.Inscripcion", "Inscripcion")
                         .WithMany("Calificaciones")
-                        .HasForeignKey("InscripcionAlumnoId", "InscripcionMateriaCursadaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("AlumnoId", "MateriaCursadaId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Alumno");

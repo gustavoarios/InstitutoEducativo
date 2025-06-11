@@ -8,7 +8,6 @@ namespace Instituto.C.Models
     {
         public int Id { get; set; }
 
-        // [Required(ErrorMessage = Messages.CampoObligatorio)] No hace falta porque la agrega el sistema
         [DataType(DataType.Date, ErrorMessage = Messages.RestriccionNumeros)]
         public DateTime Fecha { get; set; } = DateTime.Now;
 
@@ -28,7 +27,7 @@ namespace Instituto.C.Models
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [Range(1, int.MaxValue, ErrorMessage = Messages.RestriccionNumeros)]
-        public int InscripcionId { get; set; }
+        public int MateriaCursadaId { get; set; }
 
         public Inscripcion Inscripcion { get; set; }
     }

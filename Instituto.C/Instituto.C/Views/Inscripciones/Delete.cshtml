@@ -23,8 +23,9 @@
     </dl>
 </div>
 
-<form asp-action="DeleteConfirmed">
-    <input type="hidden" asp-for="Id" />
+<form asp-action="Delete">
+    <input type="hidden" asp-for="AlumnoId" />
+    <input type="hidden" asp-for="MateriaCursadaId" />
     <input type="submit" value="Eliminar" class="btn btn-danger" /> |
     <a asp-action="Index">Cancelar</a>
 </form>
