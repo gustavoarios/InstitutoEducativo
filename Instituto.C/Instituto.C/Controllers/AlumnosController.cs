@@ -54,7 +54,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos/Create
-
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera");
@@ -66,6 +66,7 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
 
         public async Task<IActionResult> Create([Bind("CarreraId,UserName,Email,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
         {
@@ -97,22 +98,9 @@ namespace Instituto.C.Controllers
         }
 
 
-        /*public async Task<IActionResult> Create([Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(alumno);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
-            return View(alumno);
-        }*/
-
-
         // GET: Alumnos/Edit/5
-        
 
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -147,66 +135,60 @@ namespace Instituto.C.Controllers
             return View(alumno);
         }
 
-
-
-        /* public async Task<IActionResult> Edit(int? id) //METODO ORIGINAL1
-         {
-             if (id == null)
-             {
-                 return NotFound();
-             }
-
-             var alumno = await _context.Alumnos.FindAsync(id);
-             if (alumno == null)
-             {
-                 return NotFound();
-             }
-             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
-             return View(alumno);
-         }*/                                              //METODO ORIGINAL1
-
-
-
-
-
         // POST: Alumnos/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo,CarreraId")] Alumno alumno)
+        [Authorize(Roles = "EmpleadoRol")]
+        public async Task<IActionResult> Edit(int id, [Bind("UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo,CarreraId")] Alumno alumno)
         {
-            var userId = Int32.Parse(_userManager.GetUserId(User)); // obtener el ID real del usuario logueado
+            Alumno alumnoDb;
 
-            // buscamos el alumno desde la base
-            var alumnoDb = await _context.Alumnos.FindAsync(userId);
+            if (User.IsInRole("AlumnoRol"))
+            {
+                var userId = Int32.Parse(_userManager.GetUserId(User));
+
+                // Seguridad: el alumno solo puede editarse a sí mismo
+                if (userId != id)
+                {
+                    return Forbid();
+                }
+
+                alumnoDb = await _context.Alumnos.FindAsync(userId);
+            }
+            else
+            {
+                alumnoDb = await _context.Alumnos.FindAsync(id);
+            }
 
             if (alumnoDb == null)
             {
                 return NotFound();
             }
 
-            // actualizamos solo los campos permitidos
-            alumnoDb.UserName = alumno.UserName;
-            alumnoDb.Nombre = alumno.Nombre;
-            alumnoDb.Apellido = alumno.Apellido;
-            alumnoDb.DNI = alumno.DNI;
-            alumnoDb.Direccion = alumno.Direccion;
-            alumnoDb.CarreraId = alumno.CarreraId;
-
+            // Campos editables por todos
             
-            if (!User.IsInRole("AlumnoRol")) // Email, Telefono y Activo solo los puede modificar un administrador u otro rol
+
+            // Campos solo editables por empleados (no alumnos)
+            if (User.IsInRole("EmpleadoRol"))
             {
                 alumnoDb.Email = alumno.Email;
                 alumnoDb.Telefono = alumno.Telefono;
                 alumnoDb.Activo = alumno.Activo;
                 alumnoDb.FechaAlta = alumno.FechaAlta;
+                alumnoDb.UserName = alumno.UserName;
+                alumnoDb.Nombre = alumno.Nombre;
+                alumnoDb.Apellido = alumno.Apellido;
+                alumnoDb.DNI = alumno.DNI;
+                alumnoDb.Direccion = alumno.Direccion;
+                alumnoDb.CarreraId = alumno.CarreraId;
             }
 
             try
             {
-                await _context.SaveChangesAsync(); // actualiza correctamente porque alumnoDb viene del contexto
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -216,45 +198,8 @@ namespace Instituto.C.Controllers
         }
 
 
-
-
-
-
-        /*[HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
-        {
-            if (id != alumno.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(alumno);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AlumnoExists(alumno.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
-            return View(alumno);
-        }*/
-
-
         // GET: Alumnos/Delete/5
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -275,6 +220,7 @@ namespace Instituto.C.Controllers
 
         // POST: Alumnos/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "EmpleadoRol")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

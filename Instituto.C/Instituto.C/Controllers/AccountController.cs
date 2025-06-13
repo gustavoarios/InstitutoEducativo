@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Instituto.C.Data;
 using Instituto.C.Models;
@@ -23,6 +24,9 @@ namespace Instituto.C.Controllers
         private readonly UserManager<Persona> _userManager;
         private readonly SignInManager<Persona> _signInManager;
         private readonly RoleManager<Rol> _roleManager;
+
+       
+
 
         public AccountController(InstitutoDb context, UserManager<Persona> userManager, SignInManager<Persona> signInManager, RoleManager<Rol> roleManager)
         {
@@ -134,7 +138,7 @@ namespace Instituto.C.Controllers
         }
        
         //pasar este metodo a seeddata
-        public async Task<IActionResult> CrearRoles()
+        /*public async Task<IActionResult> CrearRoles()
         {
             if (!await _context.MisRoles.AnyAsync())
             {
@@ -143,11 +147,11 @@ namespace Instituto.C.Controllers
                 await _roleManager.CreateAsync(new Rol("ProfesorRol"));
             }
             return RedirectToAction("Index", "Home", new { message = "Roles creados" });
-        }
+        }*/
 
         public IActionResult AccesoDenegado()
         {
-            return Content("No tenes accedo permitido");
+            return View();
         }
 
     }

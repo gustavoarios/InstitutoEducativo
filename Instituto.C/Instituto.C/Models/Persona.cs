@@ -11,7 +11,7 @@ namespace Instituto.C.Models
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(30,MinimumLength = 3, ErrorMessage = Messages.StrMaxMin)]
-        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,30}$", ErrorMessage = Messages.RegEx)]
+        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]{3,30}$", ErrorMessage = Messages.RegEx)]
         public override string UserName
         {
             get { return base.UserName; }

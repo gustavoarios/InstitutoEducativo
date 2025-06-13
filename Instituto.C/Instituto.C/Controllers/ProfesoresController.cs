@@ -9,19 +9,23 @@ using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
 using Instituto.C.Helpers;
+using Microsoft.AspNetCore.Identity;
 
 namespace Instituto.C.Controllers
 {
 
-  
 
+    
     public class ProfesoresController : Controller
     {
         private readonly InstitutoDb _context;
+        private readonly UserManager<Persona> _userManager;
 
-        public ProfesoresController(InstitutoDb context)
+        public ProfesoresController(InstitutoDb context, UserManager<Persona> userManager)
         {
             _context = context;
+            _userManager = userManager;
+
         }
 
         public async Task<IActionResult> Index()
@@ -29,6 +33,7 @@ namespace Instituto.C.Controllers
             return View(await _context.Profesores.ToListAsync());
         }
 
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -60,13 +65,26 @@ namespace Instituto.C.Controllers
             if (ModelState.IsValid)
             {
                 profesor.Legajo = GeneradorDeLegajo.GenerarLegajoParaProfesor(profesor);
-                _context.Add(profesor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                profesor.EmailConfirmed = true;
+
+                var resultado = await _userManager.CreateAsync(profesor, "Password1!"); // contraseñas temporales o definidas
+                if (resultado.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(profesor, "ProfesorRol");
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Si hay errores, los mostramos
+                foreach (var error in resultado.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
+
             return View(profesor);
         }
-        
+
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -84,6 +102,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int id, [Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
         {
             if (id != profesor.Id)
@@ -114,6 +133,7 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,6 +153,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var profesor = await _context.Profesores.FindAsync(id);

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Instituto.C.Controllers
 {
@@ -16,16 +17,21 @@ namespace Instituto.C.Controllers
     public class EmpleadosController : Controller
     {
         private readonly InstitutoDb _context;
+        private readonly UserManager<Persona> _userManager;
 
-        public EmpleadosController(InstitutoDb context)
+        public EmpleadosController(InstitutoDb context, UserManager<Persona> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Empleados
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Empleados.ToListAsync());
+            
+            var soloEmpleados = await _context.Empleados.Where(e => !(e is Profesor)).ToListAsync(); // Filtra los que NO son profesores
+
+            return View(soloEmpleados);
         }
 
         // GET: Empleados/Details/5
@@ -61,10 +67,23 @@ namespace Instituto.C.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(empleado);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                empleado.FechaAlta = DateTime.Now;
+                empleado.EmailConfirmed = true;
+
+                var resultado = await _userManager.CreateAsync(empleado, "Password1!"); // contraseña temporal
+
+                if (resultado.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(empleado, "EmpleadoRol");
+                    return RedirectToAction(nameof(Index));
+                }
+
+                foreach (var error in resultado.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
+
             return View(empleado);
         }
 

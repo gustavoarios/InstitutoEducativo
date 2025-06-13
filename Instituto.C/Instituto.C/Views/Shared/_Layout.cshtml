@@ -21,21 +21,17 @@
 				</button>
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 					<ul class="navbar-nav flex-grow-1">
+
+
+
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-controller="Home" asp-action="Nosotros">Nosotros</a>
 						</li>
-
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-						</li>
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Profesores" asp-action="Index">Profesores</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Alumnos" asp-action="Index">Alumnos</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Carreras" asp-action="Index">Carreras</a>
@@ -43,20 +39,32 @@
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Materias" asp-action="Index">Materias</a>
 						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="MateriasCursadas" asp-action="Index">MateriasCursadas</a>
-						</li>
-						@if (!User.IsInRole("AlumnoRol"))
-						{ // Ocultamos para alumnos
+
+
+
+						@if (User.Identity.IsAuthenticated)
+						{
+
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Empleados" asp-action="Index">Empleados</a>
+								<a class="nav-link text-dark" asp-area="" asp-controller="Alumnos" asp-action="Index">Alumnos</a>
 							</li>
+
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="MateriasCursadas" asp-action="Index">MateriasCursadas</a>
+							</li>
+
+							if(User.IsInRole("EmpleadoRol")){
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-area="" asp-controller="Empleados" asp-action="Index">Empleados</a>
+								</li>
+							}
+							
 						}
 					</ul>
 					<ul class="navbar-nav">
@@ -65,17 +73,21 @@
 							<li class="nav-item">
 								<a class="btn btn-primary btn-sm" asp-action="IniciarSesion" asp-controller="Account">Acceso</a>
 							</li>
-							<li class="nav-item">
+							<li class="nav-item" style="margin-left: 10px;"> 
 								<a class="btn btn-primary btn-sm" asp-action="Registrar" asp-controller="Account">Registrarse</a>
 							</li>
 
 						}
 						else
 						{
-							<span>@User.Identity.Name</span>
+						//TODO<span>@User.Identity.Name</span>
 							<li class="nav-item">
-								<a class="btn btn-primary btn-sm" asp-action="CerrarSesion" asp-controller="Account">Cerrar</a>
+								<span class="nav-link text-dark">Bienvenido, @User.Identity.Name!</span>
 							</li>
+							<li class="nav-item">
+								<a class="btn btn-danger btn-sm" asp-controller="Account" asp-action="CerrarSesion">Cerrar sesión</a>
+							</li>
+
 						}
 					</ul>
 				</div>
@@ -90,7 +102,8 @@
 
 	<footer class="border-top footer text-muted">
 		<div class="container">
-			&copy; 2025 - Instituto.C - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+			&copy; 2025 - Sprienfield Elementary School - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+			<a asp-action="Seed" asp-controller="PreCarga" class="btn btn-sm btn-info">Pre Carga Db</a>
 		</div>
 	</footer>
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>

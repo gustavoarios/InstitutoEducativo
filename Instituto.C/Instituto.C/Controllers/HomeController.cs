@@ -22,12 +22,12 @@ namespace Instituto.C.Controllers
             return View();
         }
 
-        public IActionResult Nosotros()
+        public IActionResult Privacy()
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Nosotros()
         {
             return View();
         }

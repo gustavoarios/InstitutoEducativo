@@ -6,34 +6,33 @@
 
 <h1>Carreras</h1>
 
-<!-- Eliminar el botón Crear Nueva -->
-<!-- <p>
-    <a asp-action="Create">Crear Nueva</a>
-</p> -->
+@* Solo empleados pueden ver el botón para crear nuevas *@
+@if (User.IsInRole("EmpleadoRol"))
+{
+    <p>
+        <a class="btn btn-primary" asp-action="Create">Crear Nueva Carrera</a>
+    </p>
+}
 
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CodigoCarrera)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.CodigoCarrera)</th>
             <th>Materias</th>
-            <!-- Eliminamos la columna vacía para acciones -->
+            @* Solo empleados ven la columna de acciones *@
+            @if (User.IsInRole("EmpleadoRol"))
+            {
+                <th>Acciones</th>
+            }
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Nombre)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CodigoCarrera)
-                </td>
+                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => item.CodigoCarrera)</td>
                 <td>
                     @if (item.Materias != null && item.Materias.Any())
                     {
@@ -49,9 +48,18 @@
                         <em>Sin materias</em>
                     }
                 </td>
-                <!-- Eliminamos la celda con enlaces Editar, Detalles, Eliminar -->
+                @* Solo empleados ven las acciones *@
+                @if (User.IsInRole("EmpleadoRol"))
+                {
+                    <td>
+                        <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                        <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">Detalles</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </td>
+                }
             </tr>
         }
     </tbody>
 </table>
+
 

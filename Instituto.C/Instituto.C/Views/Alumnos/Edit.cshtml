@@ -14,8 +14,12 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <!-- IMPORTANTE: enviar id en la ruta -->
+        <form asp-action="Edit" asp-route-id="@Model.Id">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- IMPORTANTE: enviar id como campo oculto -->
+            <input type="hidden" asp-for="Id" />
 
             <div class="form-group">
                 <label asp-for="CarreraId" class="control-label"></label>
@@ -105,4 +109,5 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
 
