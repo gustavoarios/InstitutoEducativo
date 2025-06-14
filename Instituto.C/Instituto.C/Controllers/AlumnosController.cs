@@ -73,12 +73,25 @@ namespace Instituto.C.Controllers
             if (ModelState.IsValid)
             {
 
-                var resultado = await _userManager.CreateAsync(alumno);
+                IdentityResult resultado;
+
+                if (User.IsInRole("EmpleadoRol"))
+                {
+                    resultado = await _userManager.CreateAsync(alumno, "Password1!");
+                }
+                else
+                {
+                    resultado = await _userManager.CreateAsync(alumno);
+                }
+
+
 
 
                 if (resultado.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(alumno, "AlumnoRol"); //asigno el rol de AlumnoRol al usuario recien creado
+
+
 
                     //asigno el número de matrícula
                     var gestor = new GestorAlumnos(); //instancio al gestor para usar el metodo que asigna la matricula, pasandole el alumno recien creado
@@ -169,7 +182,7 @@ namespace Instituto.C.Controllers
             }
 
             // Campos editables por todos
-            
+
 
             // Campos solo editables por empleados (no alumnos)
             if (User.IsInRole("EmpleadoRol"))

@@ -100,7 +100,7 @@ namespace Instituto.C.Controllers
             return View(profesor);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int id, [Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
@@ -131,7 +131,47 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(profesor);
+        }*/
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
+        public async Task<IActionResult> Edit(int id, [Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
+        {
+            if (id != profesor.Id)
+            {
+                return NotFound();
+            }
+
+            var profesorDb = await _context.Profesores.FindAsync(id);
+            if (profesorDb == null)
+            {
+                return NotFound();
+            }
+
+            // Solo campos que se pueden editar
+            profesorDb.UserName = profesor.UserName;
+            profesorDb.Email = profesor.Email;
+            profesorDb.FechaAlta = profesor.FechaAlta;
+            profesorDb.Nombre = profesor.Nombre;
+            profesorDb.Apellido = profesor.Apellido;
+            profesorDb.DNI = profesor.DNI;
+            profesorDb.Telefono = profesor.Telefono;
+            profesorDb.Direccion = profesor.Direccion;
+            profesorDb.Activo = profesor.Activo;
+            profesorDb.Legajo = profesor.Legajo;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Problem("Hubo un problema de concurrencia al intentar guardar los cambios.");
+            }
         }
+
 
         [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Delete(int? id)
