@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Instituto.C.Data;
+using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Instituto.C.Data;
-using Instituto.C.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
@@ -46,6 +47,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Materias/Create
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             var carreras = _context.Carreras
@@ -64,6 +66,7 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("Id,Nombre,CodigoMateria,Descripcion,CupoMaximo,CarreraId")] Materia materia)
         {
             if (ModelState.IsValid)

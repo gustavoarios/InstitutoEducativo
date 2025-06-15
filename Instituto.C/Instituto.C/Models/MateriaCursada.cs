@@ -42,7 +42,7 @@ namespace Instituto.C.Models
         [StringLength(100, MinimumLength = 2, ErrorMessage = Messages.StrMaxMin)]
         [RegularExpression(@"^[a-zA-Z0-9 ]+$", ErrorMessage = Messages.RestriccionAlfanumerica)]
         [Display(Name = "Nombre de la Cursada")]
-        public string Nombre => $"{Materia?.CodigoMateria ?? "SinMateria"} {Anio} {Cuatrimestre}{CodigoCursada}";
+        public string Nombre => $"{Materia?.CodigoMateria ?? "SinMateria"} {Anio} {Cuatrimestre} {CodigoCursada}"; //BIO101-2025-1C-A
 
         // Método helper para saber si alcanzó el cupo
         public bool EstaLleno()
@@ -81,7 +81,7 @@ namespace Instituto.C.Models
         }
 
         // Método privado helper para obtener la siguiente letra de cursada
-        private string ObtenerSiguienteCodigoCursada(string codigoActual)
+        public string ObtenerSiguienteCodigoCursada(string codigoActual)
         {
             if (string.IsNullOrEmpty(codigoActual)) return "A";
 

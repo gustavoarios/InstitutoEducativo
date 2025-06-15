@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instituto.C.Migrations
 {
     [DbContext(typeof(InstitutoDb))]
-    [Migration("20250614213047_final")]
-    partial class final
+    [Migration("20250615001932_inicial")]
+    partial class inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace Instituto.C.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("InscripcionId")
+                        .HasColumnType("int");
+
                     b.Property<int>("MateriaCursadaId")
                         .HasColumnType("int");
 
@@ -50,11 +53,10 @@ namespace Instituto.C.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MateriaCursadaId");
-
                     b.HasIndex("ProfesorId");
 
-                    b.HasIndex("AlumnoId", "MateriaCursadaId");
+                    b.HasIndex("AlumnoId", "MateriaCursadaId")
+                        .IsUnique();
 
                     b.ToTable("Calificaciones");
                 });
@@ -491,12 +493,6 @@ namespace Instituto.C.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Instituto.C.Models.MateriaCursada", "MateriaCursada")
-                        .WithMany()
-                        .HasForeignKey("MateriaCursadaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Instituto.C.Models.Profesor", "Profesor")
                         .WithMany("Calificaciones")
                         .HasForeignKey("ProfesorId")
@@ -504,16 +500,14 @@ namespace Instituto.C.Migrations
                         .IsRequired();
 
                     b.HasOne("Instituto.C.Models.Inscripcion", "Inscripcion")
-                        .WithMany("Calificaciones")
-                        .HasForeignKey("AlumnoId", "MateriaCursadaId")
+                        .WithOne("Calificacion")
+                        .HasForeignKey("Instituto.C.Models.Calificacion", "AlumnoId", "MateriaCursadaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Alumno");
 
                     b.Navigation("Inscripcion");
-
-                    b.Navigation("MateriaCursada");
 
                     b.Navigation("Profesor");
                 });
@@ -646,7 +640,7 @@ namespace Instituto.C.Migrations
 
             modelBuilder.Entity("Instituto.C.Models.Inscripcion", b =>
                 {
-                    b.Navigation("Calificaciones");
+                    b.Navigation("Calificacion");
                 });
 
             modelBuilder.Entity("Instituto.C.Models.Materia", b =>

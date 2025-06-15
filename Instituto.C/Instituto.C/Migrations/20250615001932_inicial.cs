@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Instituto.C.Migrations
 {
     /// <inheritdoc />
-    public partial class final : Migration
+    public partial class inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -291,6 +291,7 @@ namespace Instituto.C.Migrations
                     Nota = table.Column<int>(type: "int", nullable: false),
                     ProfesorId = table.Column<int>(type: "int", nullable: false),
                     AlumnoId = table.Column<int>(type: "int", nullable: false),
+                    InscripcionId = table.Column<int>(type: "int", nullable: false),
                     MateriaCursadaId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -302,12 +303,6 @@ namespace Instituto.C.Migrations
                         principalTable: "Inscripciones",
                         principalColumns: new[] { "AlumnoId", "MateriaCursadaId" },
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Calificaciones_MateriasCursadas_MateriaCursadaId",
-                        column: x => x.MateriaCursadaId,
-                        principalTable: "MateriasCursadas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Calificaciones_Personas_AlumnoId",
                         column: x => x.AlumnoId,
@@ -340,12 +335,8 @@ namespace Instituto.C.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Calificaciones_AlumnoId_MateriaCursadaId",
                 table: "Calificaciones",
-                columns: new[] { "AlumnoId", "MateriaCursadaId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Calificaciones_MateriaCursadaId",
-                table: "Calificaciones",
-                column: "MateriaCursadaId");
+                columns: new[] { "AlumnoId", "MateriaCursadaId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Calificaciones_ProfesorId",

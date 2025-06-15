@@ -80,8 +80,8 @@ namespace Instituto.C.Data
 
             modelBuilder.Entity<Calificacion>()
                 .HasOne(c => c.Inscripcion)
-                .WithMany(i => i.Calificaciones)
-                .HasForeignKey(c => new { c.AlumnoId, c.MateriaCursadaId })
+                .WithOne(i => i.Calificacion)
+                 .HasForeignKey<Calificacion>(c => new { c.AlumnoId, c.MateriaCursadaId })
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Identity mappings

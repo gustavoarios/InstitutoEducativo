@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
+﻿using Instituto.C.Helpers;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Data
 {
@@ -20,6 +21,7 @@ namespace Instituto.C.Data
             {
                 var emp1 = new Empleado
                 {
+                
                     UserName = "empleado1",
                     Email = "empleado1@ort.edu.ar",
                     Nombre = "Claudia",
@@ -29,8 +31,12 @@ namespace Instituto.C.Data
                     Direccion = "Calle Falsa 123",
                     FechaAlta = DateTime.Now,
                     Activo = true,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    
                 };
+
+                emp1.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(emp1);
+
                 await userManager.CreateAsync(emp1, "Password1!");
                 await userManager.AddToRoleAsync(emp1, "EmpleadoRol");
 
@@ -47,6 +53,8 @@ namespace Instituto.C.Data
                     Activo = true,
                     EmailConfirmed = true
                 };
+
+                emp2.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(emp2);
                 await userManager.CreateAsync(emp2, "Password1!");
                 await userManager.AddToRoleAsync(emp2, "EmpleadoRol");
 
@@ -63,6 +71,7 @@ namespace Instituto.C.Data
                     Activo = true,
                     EmailConfirmed = true
                 };
+                emp3.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(emp3);
                 await userManager.CreateAsync(emp3, "Password1!");
                 await userManager.AddToRoleAsync(emp3, "EmpleadoRol");
             }
@@ -195,7 +204,7 @@ namespace Instituto.C.Data
             if (!context.Materias.Any())
             {
                 // === Ciencias Naturales ===
-                materia1 = new Materia { Nombre = "Biología General", CodigoMateria = "BIO101", Descripcion = "Estudio de los principios básicos de la biología", CupoMaximo = 40, CarreraId = carrera.Id };
+                materia1 = new Materia { Nombre = "Biología General", CodigoMateria = "BIO101", Descripcion = "Estudio de los principios básicos de la biología", CupoMaximo = 2, CarreraId = carrera.Id };
                 materia2 = new Materia { Nombre = "Física I", CodigoMateria = "FIS101", Descripcion = "Conceptos fundamentales de la física clásica", CupoMaximo = 35, CarreraId = carrera.Id };
                 materia3 = new Materia { Nombre = "Química General", CodigoMateria = "QUI101", Descripcion = "Introducción a los conceptos básicos de química", CupoMaximo = 30, CarreraId = carrera.Id };
                 materia4 = new Materia { Nombre = "Matemática Aplicada", CodigoMateria = "MAT201", Descripcion = "Herramientas matemáticas aplicadas a las ciencias naturales", CupoMaximo = 30, CarreraId = carrera.Id };

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Instituto.C.Data;
+using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Instituto.C.Data;
-using Instituto.C.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
@@ -47,6 +48,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: MateriasCursadas/Create
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria");
@@ -59,7 +61,8 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CodigoCursada,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
+        [Authorize(Roles = "EmpleadoRol")]
+        public async Task<IActionResult> Create([Bind("Id,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
         {
             //Chequeo la duplicidad antes de ModelState.IsValid
             bool existeDuplicado = _context.MateriasCursadas.Any(mc =>
