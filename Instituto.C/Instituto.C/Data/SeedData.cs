@@ -21,7 +21,7 @@ namespace Instituto.C.Data
             {
                 var emp1 = new Empleado
                 {
-                
+
                     UserName = "empleado1",
                     Email = "empleado1@ort.edu.ar",
                     Nombre = "Claudia",
@@ -32,10 +32,10 @@ namespace Instituto.C.Data
                     FechaAlta = DateTime.Now,
                     Activo = true,
                     EmailConfirmed = true,
-                    
+
                 };
 
-                emp1.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(emp1);
+                
 
                 await userManager.CreateAsync(emp1, "Password1!");
                 await userManager.AddToRoleAsync(emp1, "EmpleadoRol");
@@ -54,7 +54,6 @@ namespace Instituto.C.Data
                     EmailConfirmed = true
                 };
 
-                emp2.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(emp2);
                 await userManager.CreateAsync(emp2, "Password1!");
                 await userManager.AddToRoleAsync(emp2, "EmpleadoRol");
 
@@ -71,7 +70,7 @@ namespace Instituto.C.Data
                     Activo = true,
                     EmailConfirmed = true
                 };
-                emp3.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(emp3);
+                
                 await userManager.CreateAsync(emp3, "Password1!");
                 await userManager.AddToRoleAsync(emp3, "EmpleadoRol");
             }

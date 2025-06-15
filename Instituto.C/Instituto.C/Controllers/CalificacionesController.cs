@@ -18,25 +18,25 @@ namespace Instituto.C.Controllers
             _context = context;
         }
 
-        // GET: Calificaciones
         public async Task<IActionResult> Index()
         {
             var calificaciones = _context.Calificaciones
                 .Include(c => c.Alumno)
-                .Include(c => c.Inscripcion)
-                .Include(c => c.Profesor);
+                .Include(c => c.Profesor)
+                .Include(c => c.MateriaCursada)
+                .ThenInclude(mc => mc.Materia);
             return View(await calificaciones.ToListAsync());
         }
 
-        // GET: Calificaciones/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
             var calificacion = await _context.Calificaciones
                 .Include(c => c.Alumno)
-                .Include(c => c.Inscripcion)
                 .Include(c => c.Profesor)
+                .Include(c => c.MateriaCursada)
+                .ThenInclude(mc => mc.Materia)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (calificacion == null) return NotFound();
@@ -44,96 +44,80 @@ namespace Instituto.C.Controllers
             return View(calificacion);
         }
 
-        // GET: Calificaciones/Create
         public IActionResult Create()
         {
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
 
-            // Cargar lista de alumnos
-            ViewBag.AlumnoId = new SelectList(
-                _context.Alumnos.Select(a => new
-                {
-                    a.Id,
-                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                }),
-                "Id", "Nombre"
-            );
+            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
+            {
+                a.Id,
+                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+            }), "Id", "Nombre");
 
-            // Cargar lista de materias cursadas
-            ViewBag.MateriaCursadaId = new SelectList(
-                _context.MateriasCursadas
-                    .Include(mc => mc.Materia)
-                    .Select(mc => new
-                    {
-                        mc.Id,
-                        Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
-                    }),
-                "Id", "Nombre"
-            );
-
-            ViewBag.ProfesorId = new SelectList(
-                _context.Profesores.Select(p => new
+            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Select(mc => new
                 {
-                    p.Id,
-                    Nombre = p.Nombre + " " + p.Apellido
-                }),
-                "Id", "Nombre"
-            );
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
+                }), "Id", "Nombre");
+
+            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
+            {
+                p.Id,
+                Nombre = p.Nombre + " " + p.Apellido
+            }), "Id", "Nombre");
 
             return View();
         }
 
-
-
-        // POST: Calificaciones/Create
         [HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
-{
-    if (calificacion.Fecha == DateTime.MinValue)
-        calificacion.Fecha = DateTime.Now;
-
-    // Validación de inscripción válida
-    var existeInscripcion = _context.Inscripciones.Any(i =>
-        i.AlumnoId == calificacion.AlumnoId &&
-        i.MateriaCursadaId == calificacion.MateriaCursadaId);
-
-    if (!existeInscripcion)
-        ModelState.AddModelError("", "El alumno no está inscripto en esa materia cursada.");
-
-    if (ModelState.IsValid)
-    {
-        _context.Add(calificacion);
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
-
-    ViewBag.ProfesorId = new SelectList(
-        _context.Profesores.Select(p => new
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
         {
-            p.Id,
-            Nombre = p.Nombre + " " + p.Apellido
-        }), "Id", "Nombre", calificacion.ProfesorId);
+            if (calificacion.Fecha == DateTime.MinValue)
+                calificacion.Fecha = DateTime.Now;
 
-    var inscripciones = _context.Inscripciones
-        .Include(i => i.Alumno)
-        .Include(i => i.MateriaCursada)
-        .Select(i => new
-        {
-            AlumnoId = i.AlumnoId,
-            MateriaCursadaId = i.MateriaCursadaId,
-            Descripcion = $"{i.Alumno.NumeroMatricula} - {i.Alumno.Nombre} {i.Alumno.Apellido} | {i.MateriaCursada.CodigoCursada}"
-        }).ToList();
+            bool estaInscripto = await _context.Inscripciones.AnyAsync(i =>
+                i.AlumnoId == calificacion.AlumnoId &&
+                i.MateriaCursadaId == calificacion.MateriaCursadaId);
 
-    ViewBag.Inscripciones = new SelectList(inscripciones, "AlumnoId", "Descripcion", calificacion.AlumnoId);
+            if (!estaInscripto)
+                ModelState.AddModelError("", "El alumno no está inscripto en esa materia cursada.");
 
-    return View(calificacion);
-}
+            if (ModelState.IsValid)
+            {
+                _context.Add(calificacion);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
 
+            // Si hubo error, recargar los combos
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
 
-        // GET: Calificaciones/Edit/5
+            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
+            {
+                a.Id,
+                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+            }), "Id", "Nombre", calificacion.AlumnoId);
+
+            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
+                }), "Id", "Nombre", calificacion.MateriaCursadaId);
+
+            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
+            {
+                p.Id,
+                Nombre = p.Nombre + " " + p.Apellido
+            }), "Id", "Nombre", calificacion.ProfesorId);
+
+            return View(calificacion);
+        }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -141,30 +125,31 @@ public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,Ma
             var calificacion = await _context.Calificaciones.FindAsync(id);
             if (calificacion == null) return NotFound();
 
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos.Select(a => new
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
+
+            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
             {
                 a.Id,
                 Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
             }), "Id", "Nombre", calificacion.AlumnoId);
 
-            ViewData["ProfesorId"] = new SelectList(_context.Profesores.Select(p => new
+            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
+                }), "Id", "Nombre", calificacion.MateriaCursadaId);
+
+            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
             {
                 p.Id,
                 Nombre = p.Nombre + " " + p.Apellido
             }), "Id", "Nombre", calificacion.ProfesorId);
 
-            ViewData["MateriaCursadaId"] = new SelectList(_context.MateriasCursadas.Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " " + mc.Anio
-                }), "Id", "Nombre", calificacion.MateriaCursadaId);
-
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
             return View(calificacion);
         }
 
-        // POST: Calificaciones/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
@@ -180,46 +165,47 @@ public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,Ma
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CalificacionExists(calificacion.Id))
-                        return NotFound();
-                    else
-                        throw;
+                    if (!CalificacionExists(calificacion.Id)) return NotFound();
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos.Select(a => new
+            // En caso de error volver a cargar combos
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
+
+            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
             {
                 a.Id,
                 Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
             }), "Id", "Nombre", calificacion.AlumnoId);
 
-            ViewData["ProfesorId"] = new SelectList(_context.Profesores.Select(p => new
+            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
+                }), "Id", "Nombre", calificacion.MateriaCursadaId);
+
+            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
             {
                 p.Id,
                 Nombre = p.Nombre + " " + p.Apellido
             }), "Id", "Nombre", calificacion.ProfesorId);
 
-            ViewData["MateriaCursadaId"] = new SelectList(_context.MateriasCursadas.Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " " + mc.Anio
-                }), "Id", "Nombre", calificacion.MateriaCursadaId);
-
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
             return View(calificacion);
         }
 
-        // GET: Calificaciones/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
             var calificacion = await _context.Calificaciones
                 .Include(c => c.Alumno)
-                .Include(c => c.Inscripcion)
                 .Include(c => c.Profesor)
+                .Include(c => c.MateriaCursada)
+                .ThenInclude(mc => mc.Materia)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (calificacion == null) return NotFound();
@@ -227,7 +213,6 @@ public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,Ma
             return View(calificacion);
         }
 
-        // POST: Calificaciones/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
