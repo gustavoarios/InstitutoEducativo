@@ -12,7 +12,8 @@ namespace Instituto.C.Models
         public DateTime Fecha { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
-        public Nota Nota { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = Messages.RestriccionNumeros)]
+        public int Nota { get; set; }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [Range(1, int.MaxValue, ErrorMessage = Messages.RestriccionNumeros)]
@@ -23,14 +24,13 @@ namespace Instituto.C.Models
         [Range(1, int.MaxValue, ErrorMessage = Messages.RestriccionNumeros)]
         public int AlumnoId { get; set; }
 
-        public Alumno Alumno { get; set; }
+        public Alumno? Alumno { get; set; }
+
+        public Inscripcion? Inscripcion { get; set; }
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
-        [Range(1, int.MaxValue, ErrorMessage = Messages.RestriccionNumeros)]
-        public int MateriaCursadaId { get; set; }
+        public int InscripcionId { get; set; }
 
-        public MateriaCursada MateriaCursada { get; set; }
-
-        public Inscripcion Inscripcion { get; set; }
-    }
+        public int MateriaCursadaId { get; set; } // Added property to fix the error
+    }
 }

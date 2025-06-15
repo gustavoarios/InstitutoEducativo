@@ -28,7 +28,7 @@
                     @item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido
                 </td>
                 <td>
-                    @item.MateriaCursadaId - @item.MateriaCursada?.CodigoCursada
+                    @item.MateriaCursada.Cuatrimestre - @item.MateriaCursada?.CodigoCursada
                 </td>
                 <td>@item.FechaInscripcion.ToShortDateString()</td>
                 <td>@(item.Activa ? "Sí" : "No")</td>

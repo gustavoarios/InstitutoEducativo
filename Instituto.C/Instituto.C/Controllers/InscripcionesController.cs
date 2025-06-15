@@ -67,29 +67,110 @@ namespace Instituto.C.Controllers
         // POST: Inscripciones/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AlumnoId,MateriaCursadaId,FechaInscripcion,Activa")] Inscripcion inscripcion)
+        public async Task<IActionResult> Create([Bind("AlumnoId,MateriaCursadaId")] Inscripcion inscripcion)
         {
-            if (inscripcion.FechaInscripcion == DateTime.MinValue)
-                inscripcion.FechaInscripcion = DateTime.Now;
+            if (inscripcion == null)
+                return BadRequest();
 
-            if (_context.Inscripciones.Any(i =>
-                i.AlumnoId == inscripcion.AlumnoId &&
-                i.MateriaCursadaId == inscripcion.MateriaCursadaId))
+            // Seteo la fecha de inscripción
+            inscripcion.FechaInscripcion = DateTime.Now;
+            inscripcion.Activa = true;
+
+            // Traigo el alumno y sus inscripciones activas o pasadas para validaciones
+            var alumno = await _context.Alumnos
+                .Include(a => a.Inscripciones)
+                .ThenInclude(i => i.MateriaCursada)
+                .FirstOrDefaultAsync(a => a.Id == inscripcion.AlumnoId);
+
+            if (alumno == null)
             {
-                ModelState.AddModelError("", "Ya existe una inscripción con esa combinación.");
+                ModelState.AddModelError("", "Alumno no encontrado.");
+                return View(inscripcion);
             }
 
-            if (ModelState.IsValid)
+            // Traigo la cursada seleccionada con sus inscripciones
+            var cursada = await _context.MateriasCursadas
+                .Include(mc => mc.Inscripciones)
+                .Include(mc => mc.Materia)
+                .Include(mc => mc.Profesor)
+                .FirstOrDefaultAsync(mc => mc.Id == inscripcion.MateriaCursadaId);
+
+            if (cursada == null)
             {
-                _context.Add(inscripcion);
+                ModelState.AddModelError("", "Materia cursada no encontrada.");
+                return View(inscripcion);
+            }
+
+            // 1. Validar que el alumno no esté cursando ni haya cursado la materia
+            bool yaCursada = alumno.Inscripciones.Any(i =>
+                i.MateriaCursada.MateriaId == cursada.MateriaId &&
+                (i.Activa || i.Calificacion != null));
+
+            if (yaCursada)
+            {
+                ModelState.AddModelError("", "Ya cursaste o estás cursando esta materia.");
+                return View(inscripcion);
+            }
+
+            // 2. Validar que no supere 5 materias activas
+            int materiasActivas = alumno.Inscripciones.Count(i => i.Activa);
+            if (materiasActivas >= 5)
+            {
+                ModelState.AddModelError("", "No podés inscribirte en más de 5 materias a la vez."); //debería ser contante el 5??
+                return View(inscripcion);
+            }
+
+            // 3. Validar cupo
+            if (cursada.EstaLleno())
+            {
+                // Crear nueva cursada automáticamente
+                var nuevaCursada = cursada.CrearNuevaCursadaSiEstaLleno();
+
+                if (nuevaCursada == null)
+                {
+                    ModelState.AddModelError("", "No se pudo crear una nueva cursada automática.");
+                    return View(inscripcion);
+                }
+
+                // Asignar profesor automáticamente (ejemplo simple)
+                nuevaCursada.ProfesorId = await ObtenerProfesorDisponible(nuevaCursada.MateriaId);
+                _context.MateriasCursadas.Add(nuevaCursada);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                // Inscribirse en la nueva cursada
+                inscripcion.MateriaCursadaId = nuevaCursada.Id;
+                cursada = nuevaCursada;
             }
 
-            ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "Id", "Nombre", inscripcion.AlumnoId);
-            ViewData["MateriaCursadaId"] = new SelectList(_context.MateriasCursadas, "Id", "CodigoCursada", inscripcion.MateriaCursadaId);
-            return View(inscripcion);
+            // 4. Verificar que no exista inscripción duplicada con esa cursada final (por las dudas)
+            bool inscripcionDuplicada = await _context.Inscripciones.AnyAsync(i =>
+                i.AlumnoId == inscripcion.AlumnoId &&
+                i.MateriaCursadaId == inscripcion.MateriaCursadaId);
+
+            if (inscripcionDuplicada)
+            {
+                ModelState.AddModelError("", "Ya estás inscripto en esta materia cursada.");
+                return View(inscripcion);
+            }
+
+            // 5. Guardar inscripción
+            _context.Inscripciones.Add(inscripcion);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
+
+        //obtener profesor
+        private async Task<int> ObtenerProfesorDisponible(int materiaId)
+        {
+            //devuelve el primer profesor que tenga la materia asignada
+            var profesor = await _context.Profesores
+                .Include(p => p.MateriasCursada)
+                .FirstOrDefaultAsync(p => p.MateriasCursada.Any(m => m.Id == materiaId));
+
+            return profesor?.Id ?? 0; // o manejar caso sin profesor asignado
+        }
+
 
         // GET: Inscripciones/Edit
         public async Task<IActionResult> Edit(int? alumnoId, int? materiaCursadaId)

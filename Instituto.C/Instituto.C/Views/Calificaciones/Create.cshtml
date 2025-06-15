@@ -13,8 +13,8 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <!-- Fecha como campo oculto -->
-            <input asp-for="Fecha" type="hidden" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
+           
+            <input asp-for="Fecha" type="hidden" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />  <!-- Fecha como campo oculto  Fijate igual que inscripcion -->
 
             <div class="form-group">
                 <label asp-for="Nota" class="control-label"></label>
@@ -33,11 +33,6 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="MateriaCursadaId" class="control-label">Materia Cursada</label>
-                <select asp-for="MateriaCursadaId" class="form-control" asp-items="ViewBag.MateriaCursadaId"></select>
-            </div>
-
-            <div class="form-group">
                 <input type="submit" value="Crear" class="btn btn-primary" />
             </div>
         </form>
@@ -51,5 +46,5 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    }
 }
