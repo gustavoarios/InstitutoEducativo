@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Instituto.C.Data;
+﻿using Instituto.C.Data;
+using Instituto.C.Helpers;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
@@ -28,7 +29,7 @@ namespace Instituto.C.Controllers
         // GET: Empleados
         public async Task<IActionResult> Index()
         {
-            
+
             var soloEmpleados = await _context.Empleados.Where(e => !(e is Profesor)).ToListAsync(); // Filtra los que NO son profesores
 
             return View(soloEmpleados);
@@ -67,6 +68,7 @@ namespace Instituto.C.Controllers
         {
             if (ModelState.IsValid)
             {
+                empleado.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(empleado);
                 empleado.FechaAlta = DateTime.Now;
                 empleado.EmailConfirmed = true;
 
@@ -177,3 +179,4 @@ namespace Instituto.C.Controllers
         }
     }
 }
+

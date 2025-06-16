@@ -13,9 +13,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Instituto.C.Controllers
 {
-
-
-    
     public class ProfesoresController : Controller
     {
         private readonly InstitutoDb _context;
