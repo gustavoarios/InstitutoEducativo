@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Instituto.C.Data;
 using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Instituto.C.Controllers
 {
@@ -44,6 +45,8 @@ namespace Instituto.C.Controllers
             return View(calificacion);
         }
 
+
+        [Authorize(Roles = "ProfesorRol")]
         public IActionResult Create()
         {
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
@@ -73,6 +76,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "ProfesorRol")]
         public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
         {
             if (calificacion.Fecha == DateTime.MinValue)

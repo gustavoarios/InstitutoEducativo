@@ -6,6 +6,11 @@
 
 <h1>Listado de Inscripciones</h1>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 <p>
     <a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
 </p>
@@ -24,12 +29,8 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>
-                    @item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido
-                </td>
-                <td>
-                    @item.MateriaCursada.Cuatrimestre - @item.MateriaCursada?.CodigoCursada
-                </td>
+                <td>@item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
+                <td>@item.MateriaCursada?.Nombre</td> <!-- Mejor que mostrar cuatrimestre + código por separado -->
                 <td>@item.FechaInscripcion.ToShortDateString()</td>
                 <td>@(item.Activa ? "Sí" : "No")</td>
                 <td>
@@ -37,8 +38,8 @@
                     <a asp-action="Details" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Detalles</a> |
                     <a asp-action="Delete" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Eliminar</a>
                 </td>
-
             </tr>
         }
     </tbody>
 </table>
+

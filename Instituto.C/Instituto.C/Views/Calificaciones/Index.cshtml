@@ -1,48 +1,52 @@
 ﻿@model IEnumerable<Instituto.C.Models.Calificacion>
 
 @{
-    ViewData["Title"] = "Calificaciones";
+	ViewData["Title"] = "Calificaciones";
 }
 
 <h1>Listado de Calificaciones</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
-</p>
+@if (User.IsInRole("ProfesorRol"))
+{
+	<p>
+		<a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
+	</p>
+}
+
 
 <table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Fecha)</th>
-            <th>@Html.DisplayNameFor(model => model.Nota)</th>
-            <th>Profesor</th>
-            <th>Alumno</th>
-            <th>Inscripción</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Fecha.ToShortDateString()</td>
-                <td>@item.Nota</td>
+	<thead>
+		<tr>
+			<th>@Html.DisplayNameFor(model => model.Fecha)</th>
+			<th>@Html.DisplayNameFor(model => model.Nota)</th>
+			<th>Profesor</th>
+			<th>Alumno</th>
+			<th>Inscripción</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>@item.Fecha.ToShortDateString()</td>
+				<td>@item.Nota</td>
 
-                <td>
-                    @item.ProfesorId - @item.Profesor?.Nombre @item.Profesor?.Apellido
-                </td>
-                <td>
-                    @item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido
-                </td>
-                <td>
-                    @item.AlumnoId - @item.MateriaCursadaId - @item.Inscripcion?.MateriaCursada?.CodigoCursada
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
+				<td>
+					@item.ProfesorId - @item.Profesor?.Nombre @item.Profesor?.Apellido
+				</td>
+				<td>
+					@item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido
+				</td>
+				<td>
+					@item.AlumnoId - @item.MateriaCursadaId - @item.Inscripcion?.MateriaCursada?.CodigoCursada
+				</td>
+				<td>
+					<a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+					<a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
+					<a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+				</td>
+			</tr>
+		}
+	</tbody>
 </table>

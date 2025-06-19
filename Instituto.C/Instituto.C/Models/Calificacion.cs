@@ -29,6 +29,6 @@ namespace Instituto.C.Models
         public int MateriaCursadaId { get; set; }
         public MateriaCursada MateriaCursada { get; set; }
 
-        public Inscripcion? Inscripcion { get; set; } // navegación opcional
+        public Inscripcion Inscripcion { get; set; } // navegación opcional
     }
 }
