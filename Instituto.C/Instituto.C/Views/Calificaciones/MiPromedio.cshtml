@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Mi Promedio";
+    var promedio = ViewBag.Promedio as double? ?? 0;
+}
+
+<h2>Promedio de Calificaciones</h2>
+
+<p><strong>Alumno:</strong> @ViewBag.AlumnoNombre</p>
+
+@if (promedio == 0)
+{
+    <div class="alert alert-info">
+        Todavía no tenés calificaciones que computen en el promedio.
+    </div>
+}
+else
+{
+    <div class="alert alert-success">
+        <h4>Tu promedio es: <span class="badge bg-primary">@promedio.ToString("0.00")</span></h4>
+    </div>
+}

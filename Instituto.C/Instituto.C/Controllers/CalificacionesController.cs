@@ -1,12 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Instituto.C.Data;
+using Instituto.C.Helpers;
+using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Instituto.C.Data;
-using Instituto.C.Models;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
@@ -79,9 +80,23 @@ namespace Instituto.C.Controllers
         [Authorize(Roles = "ProfesorRol")]
         public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
         {
+            var cursada = await _context.MateriasCursadas.FindAsync(calificacion.MateriaCursadaId);
+            if (cursada == null)
+            {
+                ModelState.AddModelError("", "La materia cursada no existe.");
+                return View(calificacion);
+            }
+
+            if (!cursada.Activo)
+            {
+                ModelState.AddModelError("", "No se puede calificar una materia que ya finalizó.");
+                return View(calificacion);
+            }
+
             if (calificacion.Fecha == DateTime.MinValue)
                 calificacion.Fecha = DateTime.Now;
 
+            // Validar si el alumno está inscripto
             bool estaInscripto = await _context.Inscripciones.AnyAsync(i =>
                 i.AlumnoId == calificacion.AlumnoId &&
                 i.MateriaCursadaId == calificacion.MateriaCursadaId);
@@ -89,6 +104,15 @@ namespace Instituto.C.Controllers
             if (!estaInscripto)
                 ModelState.AddModelError("", "El alumno no está inscripto en esa materia cursada.");
 
+            // Validar que el profesor sea el titular de la cursada
+            var userName = User.Identity.Name;
+            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == userName);
+            if (profesor == null || cursada.ProfesorId != profesor.Id)
+            {
+                ModelState.AddModelError("", "No podés calificar esta materia porque no sos el profesor asignado.");
+            }
+
+            // Si todo ok, guardar
             if (ModelState.IsValid)
             {
                 _context.Add(calificacion);
@@ -96,7 +120,7 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si hubo error, recargar los combos
+            // Si hubo errores, recargar combos
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
 
             ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
@@ -233,6 +257,32 @@ namespace Instituto.C.Controllers
         private bool CalificacionExists(int id)
         {
             return _context.Calificaciones.Any(e => e.Id == id);
+        }
+
+        [Authorize(Roles = "AlumnoRol")]
+        public async Task<IActionResult> MiPromedio()
+        {
+            var userName = User.Identity.Name;
+
+            var alumno = await _context.Alumnos
+                .Include(a => a.Calificaciones)
+                .FirstOrDefaultAsync(a => a.UserName == userName);
+
+            if (alumno == null)
+            {
+                return NotFound("Alumno no encontrado.");
+            }
+
+            var notas = alumno.Calificaciones
+                .Where(c => NotasHelper.EsNotaValidaParaPromedio(c.Nota))
+                .Select(c => c.Nota);
+
+            var promedio = NotasHelper.CalcularPromedio(notas);
+
+            ViewBag.AlumnoNombre = alumno.Nombre + " " + alumno.Apellido;
+            ViewBag.Promedio = promedio;
+
+            return View();
         }
     }
 }

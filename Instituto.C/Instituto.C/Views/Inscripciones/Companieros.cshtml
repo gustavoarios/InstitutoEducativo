@@ -1,0 +1,35 @@
+﻿@model List<Instituto.C.Models.Inscripcion>
+
+@{
+    ViewData["Title"] = "Compañeros de Cursada";
+}
+
+<h2>Compañeros de @ViewBag.NombreMateria - @ViewBag.NombreCursada</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No hay alumnos inscriptos en esta cursada.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Matrícula</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inscripcion in Model)
+            {
+                <tr>
+                    <td>@inscripcion.Alumno?.Nombre @inscripcion.Alumno?.Apellido</td>
+                    <td>@inscripcion.Alumno?.NumeroMatricula</td>
+                    <td>@inscripcion.Alumno?.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

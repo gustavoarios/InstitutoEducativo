@@ -1,4 +1,5 @@
 ﻿using Instituto.C.Data;
+using Instituto.C.Helpers;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,29 +65,51 @@ namespace Instituto.C.Controllers
         [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("Id,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
         {
-            //Chequeo la duplicidad antes de ModelState.IsValid
-            bool existeDuplicado = _context.MateriasCursadas.Any(mc =>
-                mc.Anio == materiaCursada.Anio &&
-                mc.Cuatrimestre == materiaCursada.Cuatrimestre &&
-                mc.MateriaId == materiaCursada.MateriaId &&
-                mc.CodigoCursada == materiaCursada.CodigoCursada);
+            // Asignar CodigoCursada automáticamente
+            var ultimaCursada = _context.MateriasCursadas
+                .Where(mc => mc.Anio == materiaCursada.Anio &&
+                             mc.Cuatrimestre == materiaCursada.Cuatrimestre &&
+                             mc.MateriaId == materiaCursada.MateriaId)
+                .OrderByDescending(mc => mc.CodigoCursada)
+                .FirstOrDefault();
 
+            materiaCursada.CodigoCursada = MateriasHelper.ObtenerSiguienteCodigoCursada(ultimaCursada?.CodigoCursada);
+
+            // Traer la materia para calcular el nombre (necesita CodigoMateria)
+            materiaCursada.Materia = await _context.Materias.FindAsync(materiaCursada.MateriaId);
+
+            // Generar nombre
+            var nombreGenerado = MateriasHelper.GenerarNombreCursada(materiaCursada);
+
+            // Validación de duplicados
+            bool existeDuplicado = _context.MateriasCursadas.Any(mc => mc.Nombre == nombreGenerado);
             if (existeDuplicado)
             {
-                ModelState.AddModelError("", "Ya existe una cursada con ese Año, Cuatrimestre y Código para esa materia.");
+                ModelState.AddModelError("", "Ya existe una cursada con ese nombre.");
             }
 
             if (ModelState.IsValid)
             {
+                if (string.IsNullOrEmpty(materiaCursada.CodigoCursada))
+                {
+                    materiaCursada.CodigoCursada = "A";
+                }
+
+                materiaCursada.Nombre = MateriasHelper.GenerarNombreCursada(materiaCursada);
+
                 _context.Add(materiaCursada);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
+
+
             ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria", materiaCursada.MateriaId);
             ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", materiaCursada.ProfesorId);
-
+            // Si hay un error, volvemos a mostrar la vista con los datos ingresados
             return View(materiaCursada);
         }
+
 
         // GET: MateriasCursadas/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -182,5 +205,33 @@ namespace Instituto.C.Controllers
         {
             return _context.MateriasCursadas.Any(e => e.Id == id);
         }
+
+        [Authorize(Roles = "ProfesorRol")]
+        public async Task<IActionResult> CursadasVigentes()
+        {
+            var profe = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+
+            var vigentes = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Where(mc => mc.ProfesorId == profe.Id && mc.Activo)
+                .ToListAsync();
+
+            return View(vigentes);
+        }
+
+        [Authorize(Roles = "ProfesorRol")]
+        public async Task<IActionResult> CursadasPasadas()
+        {
+            var profe = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+
+            var pasadas = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Where(mc => mc.ProfesorId == profe.Id && !mc.Activo)
+                .ToListAsync();
+
+            return View(pasadas);
+        }
+
+
     }
 }

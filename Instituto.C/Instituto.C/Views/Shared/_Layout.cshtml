@@ -64,6 +64,17 @@
 									<a class="nav-link text-dark" asp-area="" asp-controller="Empleados" asp-action="Index">Empleados</a>
 								</li>
 							}
+
+							@if (User.IsInRole("AlumnoRol")){
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-controller="Inscripciones" asp-action="MateriasActuales">Mis Materias</a>
+								</li>
+
+								<li class="nav-item">
+									 <a class="nav-link text-dark" asp-controller="Calificaciones" asp-action="MiPromedio">Mi Promedio</a>
+								</li>
+							}
+
 							
 						}
 					</ul>
