@@ -252,6 +252,82 @@ namespace Instituto.C.Data
                 context.SaveChanges();
             }
 
+            // VER DE BORRAR ESTO, NO SE SI ES NECESARIO, PUEDE SER QUE YA NO SEA NECESARIO, VERIFICAR SI SE PUEDE BORRAR
+            // === ALUMNOS ===
+            if (!context.Users.Any(u => u is Alumno))
+            {
+                var alumno1 = new Alumno
+                {
+                    UserName = "alumno1",
+                    Email = "alumno1@ort.edu.ar",
+                    Nombre = "Lucas",
+                    Apellido = "Ramirez",
+                    DNI = "35123456",
+                    Telefono = "1144455566",
+                    Direccion = "Rivadavia 123",
+                    FechaAlta = DateTime.Now,
+                    Activo = false,
+                    CarreraId = carrera2.Id, // Analista de Sistemas
+                    EmailConfirmed = true
+                };
+
+                var alumno2 = new Alumno
+                {
+                    UserName = "alumno2",
+                    Email = "alumno2@ort.edu.ar",
+                    Nombre = "Sofía",
+                    Apellido = "Gómez",
+                    DNI = "36234567",
+                    Telefono = "1133344455",
+                    Direccion = "Corrientes 456",
+                    FechaAlta = DateTime.Now,
+                    Activo = false,
+                    CarreraId = carrera.Id, // Ciencias Naturales
+                    EmailConfirmed = true
+                };
+
+                var gestor = new GestorAlumnos();
+                gestor.AsignarNumeroMatricula(alumno1, context);
+                gestor.AsignarNumeroMatricula(alumno2, context);
+
+                await userManager.CreateAsync(alumno1, "Password1!");
+                await userManager.AddToRoleAsync(alumno1, "AlumnoRol");
+
+                await userManager.CreateAsync(alumno2, "Password1!");
+                await userManager.AddToRoleAsync(alumno2, "AlumnoRol");
+            }
+
+
+            // === MATERIAS CURSADAS ===
+            if (!context.MateriasCursadas.Any())
+            {
+                var cursada1 = new MateriaCursada
+                {
+                    MateriaId = context.Materias.First(m => m.CodigoMateria == "P1" && m.CarreraId == carrera2.Id).Id,
+                    ProfesorId = context.Profesores.First().Id,
+                    CodigoCursada = "A",
+                    Anio = 2025,
+                    Cuatrimestre = 1,
+                    Activo = true,
+                    Nombre = MateriasHelper.GenerarNombreCursada(cursada1);
+
+                };
+
+                var cursada2 = new MateriaCursada
+                {
+                    MateriaId = context.Materias.First(m => m.CodigoMateria == "BIO101" && m.CarreraId == carrera.Id).Id,
+                    ProfesorId = context.Profesores.Skip(1).First().Id,
+                    CodigoCursada = MateriasHelper.ObtenerSiguienteCodigoCursada(null)
+                    Anio = 2025,
+                    Cuatrimestre = 1,
+                    Activo = true,
+                    Nombre = MateriasHelper.GenerarNombreCursada(cursada1);
+
+                };
+
+                context.MateriasCursadas.AddRange(cursada1, cursada2);
+                context.SaveChanges();
+            }
 
 
 

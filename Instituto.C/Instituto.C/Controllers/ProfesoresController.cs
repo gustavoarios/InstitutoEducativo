@@ -27,8 +27,13 @@ namespace Instituto.C.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Profesores.ToListAsync());
+            var activos = await _context.Profesores
+                .Where(p => p.Activo)
+                .ToListAsync();
+
+            return View(activos);
         }
+
 
         [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Details(int? id)
@@ -196,12 +201,14 @@ namespace Instituto.C.Controllers
             var profesor = await _context.Profesores.FindAsync(id);
             if (profesor != null)
             {
-                _context.Profesores.Remove(profesor);
+                profesor.Activo = false;
+                _context.Profesores.Update(profesor);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool ProfesorExists(int id)
         {

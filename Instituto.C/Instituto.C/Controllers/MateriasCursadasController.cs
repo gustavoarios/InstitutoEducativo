@@ -194,6 +194,13 @@ namespace Instituto.C.Controllers
             var materiaCursada = await _context.MateriasCursadas.FindAsync(id);
             if (materiaCursada != null)
             {
+                var tieneInscripciones = await _context.Inscripciones.AnyAsync(i => i.MateriaCursadaId == materiaCursada.Id);
+                if (tieneInscripciones)
+                {
+                    TempData["Error"] = "No podés eliminar una cursada que tiene alumnos inscriptos.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.MateriasCursadas.Remove(materiaCursada);
             }
 

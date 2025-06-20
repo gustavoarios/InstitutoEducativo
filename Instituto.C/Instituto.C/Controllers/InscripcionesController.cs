@@ -58,25 +58,28 @@ namespace Instituto.C.Controllers
             if (User.IsInRole("EmpleadoRol"))
             {
                 // Empleado: puede elegir cualquier alumno ACTIVO
+                var alumnosActivos = _context.Alumnos
+                    .Where(a => a.Activo)
+                    .ToList(); // 👈 Necesario para evitar errores por herencia en propiedades
+
                 ViewData["AlumnoId"] = new SelectList(
-                    _context.Alumnos
-                        .Where(a => a.Activo)
-                        .Select(a => new
-                        {
-                            a.Id,
-                            Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                        }), "Id", "Nombre");
+                    alumnosActivos.Select(a => new
+                    {
+                        a.Id,
+                        Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+                    }), "Id", "Nombre");
 
                 // Puede ver todas las cursadas disponibles
                 var todasCursadas = _context.MateriasCursadas
                     .Include(mc => mc.Materia)
                     .ToList();
 
-                ViewData["MateriaCursadaId"] = new SelectList(todasCursadas.Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Nombre
-                }), "Id", "Nombre");
+                ViewData["MateriaCursadaId"] = new SelectList(
+                    todasCursadas.Select(mc => new
+                    {
+                        mc.Id,
+                        Nombre = mc.Nombre
+                    }), "Id", "Nombre");
 
                 return View();
             }
@@ -128,11 +131,9 @@ namespace Instituto.C.Controllers
                 return View(new Inscripcion { AlumnoId = alumno.Id });
             }
 
-            // Si por alguna razón no es ni empleado ni alumno (por seguridad)
+            // Seguridad extra: no debería llegar acá nadie más
             return Unauthorized();
         }
-
-
 
 
         // POST: Inscripciones/Create
