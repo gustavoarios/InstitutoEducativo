@@ -45,9 +45,7 @@
 						@if (User.Identity.IsAuthenticated)
 						{
 
-							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Alumnos" asp-action="Index">Alumnos</a>
-							</li>
+							
 
 							<li class="nav-item">
 								<a class="nav-link text-dark" asp-area="" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
@@ -55,15 +53,28 @@
 							<li class="nav-item">
 								<a class="nav-link text-dark" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
 							</li>
-							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="MateriasCursadas" asp-action="Index">Materias Cursadas</a>
-							</li>
+							
 
 							if(User.IsInRole("EmpleadoRol")){
 								<li class="nav-item">
 									<a class="nav-link text-dark" asp-area="" asp-controller="Empleados" asp-action="Index">Empleados</a>
 								</li>
+
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-area="" asp-controller="Alumnos" asp-action="Index">Alumnos</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-area="" asp-controller="MateriasCursadas" asp-action="Index">Materias Cursadas</a>
+								</li>
 							}
+
+							@if (User.IsInRole("ProfesorRol"))
+							{
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-controller="Profesores" asp-action="MisMaterias">Mis Materias</a>
+								</li>
+							}
+
 
 							@if (User.IsInRole("AlumnoRol")){
 								<li class="nav-item">
@@ -74,6 +85,8 @@
 									 <a class="nav-link text-dark" asp-controller="Calificaciones" asp-action="MiPromedio">Mi Promedio</a>
 								</li>
 							}
+
+							
 
 							
 						}

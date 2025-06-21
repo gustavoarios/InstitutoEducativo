@@ -7,10 +7,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
+
+    [Authorize]
     public class CalificacionesController : Controller
     {
         private readonly InstitutoDb _context;
@@ -22,13 +25,44 @@ namespace Instituto.C.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var calificaciones = _context.Calificaciones
+            IQueryable<Calificacion> query = _context.Calificaciones
                 .Include(c => c.Alumno)
                 .Include(c => c.Profesor)
                 .Include(c => c.MateriaCursada)
-                .ThenInclude(mc => mc.Materia);
-            return View(await calificaciones.ToListAsync());
+                    .ThenInclude(mc => mc.Materia);
+
+            if (User.IsInRole("AlumnoRol"))
+            {
+                var userName = User.Identity.Name;
+                var alumno = await _context.Alumnos.FirstOrDefaultAsync(a => a.UserName == userName);
+
+                if (alumno == null)
+                {
+                    TempData["Error"] = "No se pudo identificar al alumno.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                query = query.Where(c => c.AlumnoId == alumno.Id);
+            }
+            else if (User.IsInRole("ProfesorRol"))
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.Id == userId);
+
+                if (profesor == null)
+                {
+                    TempData["Error"] = "No se pudo identificar al profesor.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                query = query.Where(c => c.ProfesorId == profesor.Id);
+            }
+
+            var calificaciones = await query.ToListAsync();
+            return View(calificaciones);
         }
+
+
 
         public async Task<IActionResult> Details(int? id)
         {
@@ -66,11 +100,14 @@ namespace Instituto.C.Controllers
                     Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
                 }), "Id", "Nombre");
 
-            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
-            {
-                p.Id,
-                Nombre = p.Nombre + " " + p.Apellido
-            }), "Id", "Nombre");
+            var userName = User.Identity.Name;
+            var profesor = _context.Profesores.FirstOrDefault(p => p.UserName == userName);
+
+            if (profesor == null) return Unauthorized();
+
+            ViewBag.ProfesorNombre = profesor.Nombre + " " + profesor.Apellido;
+            ViewBag.ProfesorId = profesor.Id;
+
 
             return View();
         }
@@ -78,19 +115,25 @@ namespace Instituto.C.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "ProfesorRol")]
-        public async Task<IActionResult> Create([Bind("Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
+        public async Task<IActionResult> Create(Calificacion calificacion) //al asignar el calificacion.ProfesorId = profesor.Id, sacamos el bind, sino nos tira que el modelstate no va a ser válido
         {
+            var userName = User.Identity.Name;
+            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == userName);
+            if (profesor == null) return Unauthorized();
+
+            calificacion.ProfesorId = profesor.Id;
+
             var cursada = await _context.MateriasCursadas.FindAsync(calificacion.MateriaCursadaId);
             if (cursada == null)
             {
                 ModelState.AddModelError("", "La materia cursada no existe.");
-                return View(calificacion);
+                return RecargarVistaConCombos(calificacion);
             }
 
             if (!cursada.Activo)
             {
                 ModelState.AddModelError("", "No se puede calificar una materia que ya finalizó.");
-                return View(calificacion);
+                return RecargarVistaConCombos(calificacion);
             }
 
             if (calificacion.Fecha == DateTime.MinValue)
@@ -102,17 +145,25 @@ namespace Instituto.C.Controllers
                 i.MateriaCursadaId == calificacion.MateriaCursadaId);
 
             if (!estaInscripto)
+            {
                 ModelState.AddModelError("", "El alumno no está inscripto en esa materia cursada.");
+            }
 
             // Validar que el profesor sea el titular de la cursada
-            var userName = User.Identity.Name;
-            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == userName);
-            if (profesor == null || cursada.ProfesorId != profesor.Id)
+            if (cursada.ProfesorId != profesor.Id)
             {
                 ModelState.AddModelError("", "No podés calificar esta materia porque no sos el profesor asignado.");
             }
 
-            // Si todo ok, guardar
+            // Validar si ya fue calificado
+            bool yaCalificado = await _context.Calificaciones
+                .AnyAsync(c => c.AlumnoId == calificacion.AlumnoId && c.MateriaCursadaId == calificacion.MateriaCursadaId);
+
+            if (yaCalificado)
+            {
+                ModelState.AddModelError("", "El alumno ya fue calificado en esta cursada.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(calificacion);
@@ -120,32 +171,11 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si hubo errores, recargar combos
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
-
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
-            {
-                a.Id,
-                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-            }), "Id", "Nombre", calificacion.AlumnoId);
-
-            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
-                .Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
-                }), "Id", "Nombre", calificacion.MateriaCursadaId);
-
-            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
-            {
-                p.Id,
-                Nombre = p.Nombre + " " + p.Apellido
-            }), "Id", "Nombre", calificacion.ProfesorId);
-
-            return View(calificacion);
+            return RecargarVistaConCombos(calificacion);
         }
 
+
+        [Authorize(Roles = "ProfesorRol")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -180,6 +210,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "ProfesorRol")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
         {
             if (id != calificacion.Id) return NotFound();
@@ -284,5 +315,36 @@ namespace Instituto.C.Controllers
 
             return View();
         }
+        private IActionResult RecargarVistaConCombos(Calificacion calificacion)
+        {
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
+
+            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
+            {
+                a.Id,
+                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+            }), "Id", "Nombre", calificacion.AlumnoId);
+
+            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Select(mc => new
+                {
+                    mc.Id,
+                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
+                }), "Id", "Nombre", calificacion.MateriaCursadaId);
+
+            // mostramos el profesor actual
+            var userName = User.Identity.Name;
+            var profesor = _context.Profesores.FirstOrDefault(p => p.UserName == userName);
+
+            if (profesor != null)
+            {
+                ViewBag.ProfesorNombre = profesor.Nombre + " " + profesor.Apellido;
+                ViewBag.ProfesorId = profesor.Id;
+            }
+
+            return View(calificacion);
+        }
+
     }
 }

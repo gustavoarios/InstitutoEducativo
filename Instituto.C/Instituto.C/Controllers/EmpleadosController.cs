@@ -141,6 +141,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Empleados/Delete/5
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -161,6 +162,7 @@ namespace Instituto.C.Controllers
         // POST: Empleados/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var empleado = await _context.Empleados.FindAsync(id);

@@ -15,8 +15,8 @@ else
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Matrícula</th>
+                <th>Nombre y apellido</th>
+                
                 <th>Email</th>
             </tr>
         </thead>
@@ -25,7 +25,6 @@ else
             {
                 <tr>
                     <td>@inscripcion.Alumno?.Nombre @inscripcion.Alumno?.Apellido</td>
-                    <td>@inscripcion.Alumno?.NumeroMatricula</td>
                     <td>@inscripcion.Alumno?.Email</td>
                 </tr>
             }

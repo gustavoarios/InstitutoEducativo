@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace Instituto.C.Controllers
 {
 
+    [Authorize]
     public class InscripcionesController : Controller
     {
         private readonly InstitutoDb _context;
@@ -24,14 +25,32 @@ namespace Instituto.C.Controllers
         // GET: Inscripciones
         public async Task<IActionResult> Index()
         {
+            if (User.IsInRole("AlumnoRol")) //para que solo vea las suyas
+            {
+                var userName = User.Identity.Name;
+
+                var alumno = await _context.Alumnos
+                    .Include(a => a.Inscripciones)
+                        .ThenInclude(i => i.MateriaCursada)
+                            .ThenInclude(mc => mc.Materia)
+                    .FirstOrDefaultAsync(a => a.UserName == userName);
+
+                if (alumno == null)
+                    return NotFound("No se encontró al alumno logueado.");
+
+                return View(alumno.Inscripciones);
+            }
+
+            // Empleados o roles con más permisos ven todo
             var inscripciones = await _context.Inscripciones
                 .Include(i => i.Alumno)
                 .Include(i => i.MateriaCursada)
-                    .ThenInclude(mc => mc.Materia) // 👈 clave para que funcione Nombre
+                    .ThenInclude(mc => mc.Materia)
                 .ToListAsync();
 
             return View(inscripciones);
         }
+
 
 
         // GET: Inscripciones/Details
@@ -311,6 +330,7 @@ namespace Instituto.C.Controllers
             var inscripcion = await _context.Inscripciones
                 .Include(i => i.Alumno)
                 .Include(i => i.MateriaCursada)
+                .ThenInclude(mc => mc.Materia)
                 .FirstOrDefaultAsync(m => m.AlumnoId == alumnoId && m.MateriaCursadaId == materiaCursadaId);
 
             if (inscripcion == null)
@@ -326,6 +346,7 @@ namespace Instituto.C.Controllers
         {
             var inscripcion = await _context.Inscripciones
                 .Include(i => i.Calificacion)
+                .Include(i => i.MateriaCursada)
                 .FirstOrDefaultAsync(i => i.AlumnoId == alumnoId && i.MateriaCursadaId == materiaCursadaId);
 
             if (inscripcion == null)
@@ -333,18 +354,37 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
-            // no se puede borrar si ya fue calificada
+            // Ya tiene una calificación → no se puede dar de baja
             if (inscripcion.Calificacion != null)
             {
                 TempData["Error"] = "No podés cancelar la inscripción porque ya tenés una calificación registrada.";
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.Inscripciones.Remove(inscripcion);
+            // Obtenemos el profesor asignado a esa materia
+            var profesorId = inscripcion.MateriaCursada?.ProfesorId ?? 0;
+
+            // Creamos una calificación de Baja
+            var calificacion = new Calificacion
+            {
+                AlumnoId = alumnoId,
+                MateriaCursadaId = materiaCursadaId,
+                ProfesorId = profesorId,
+                Fecha = DateTime.Now,
+                Nota = Nota.Baja
+            };
+
+            _context.Calificaciones.Add(calificacion);
+
+            // Guardamos sin eliminar la inscripción
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Te diste de baja correctamente. Se registró una calificación como 'Baja'.";
             return RedirectToAction(nameof(Index));
         }
+
+
+
 
 
         private bool InscripcionExists(int alumnoId, int materiaCursadaId)

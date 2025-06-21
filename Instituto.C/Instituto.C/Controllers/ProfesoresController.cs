@@ -10,6 +10,8 @@ using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
 using Instituto.C.Helpers;
 using Microsoft.AspNetCore.Identity;
+using Instituto.C.ViewModels;
+using System.Security.Claims;
 
 namespace Instituto.C.Controllers
 {
@@ -175,7 +177,7 @@ namespace Instituto.C.Controllers
         }
 
 
-        [Authorize(Roles = "EmpleadoRol")]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -195,7 +197,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "EmpleadoRol")]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var profesor = await _context.Profesores.FindAsync(id);
@@ -214,5 +216,41 @@ namespace Instituto.C.Controllers
         {
             return _context.Profesores.Any(e => e.Id == id);
         }
+
+
+        [Authorize(Roles = "ProfesorRol")]
+        public async Task<IActionResult> MisMaterias()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.Id == userId);
+
+            if (profesor == null)
+            {
+                return NotFound("Profesor no encontrado");
+            }
+
+            var materias = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Include(mc => mc.Inscripciones)
+                    .ThenInclude(i => i.Alumno)
+                .Where(mc => mc.ProfesorId == profesor.Id)
+                .ToListAsync();
+
+            var calificaciones = await _context.Calificaciones
+                .Where(c => c.ProfesorId == profesor.Id) // 🔐 solo las del profesor logueado
+                .ToListAsync();
+
+            var model = new MisMateriasViewModel
+            {
+                Vigentes = materias.Where(mc => mc.EstaVigente()).ToList(),
+                Pasadas = materias.Where(mc => !mc.EstaVigente()).ToList(),
+                Calificaciones = calificaciones
+            };
+
+            return View(model);
+        }
+
+
+
     }
 }

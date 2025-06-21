@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Instituto.C.Helpers;
 using Microsoft.AspNetCore.Identity;
 
@@ -46,6 +47,9 @@ namespace Instituto.C.Models
         [StringLength(100, MinimumLength = 4, ErrorMessage = Messages.StrMaxMin)]
         public string Direccion { get; set; }
         public bool Activo { get; set; }
+
+        [NotMapped]
+        public string NombreCompleto => $"{Apellido}, {Nombre}";
 
     }
 }

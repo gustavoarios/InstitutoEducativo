@@ -28,6 +28,8 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos
+
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Index()
         {
             var institutoDb = _context.Alumnos.Include(a => a.Carrera);
@@ -35,6 +37,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos/Details/5
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -212,7 +215,8 @@ namespace Instituto.C.Controllers
 
 
         // GET: Alumnos/Delete/5
-        [Authorize(Roles = "EmpleadoRol")]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -233,7 +237,7 @@ namespace Instituto.C.Controllers
 
         // POST: Alumnos/Delete/5
         [HttpPost, ActionName("Delete")]
-        [Authorize(Roles = "EmpleadoRol")]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

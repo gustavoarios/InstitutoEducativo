@@ -63,14 +63,25 @@ namespace Instituto.C.Controllers
         [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("Id,Nombre,CodigoCarrera")] Carrera carrera)
         {
+            // Validar que no exista otra carrera con el mismo nombre
+            bool yaExiste = await _context.Carreras
+                .AnyAsync(c => c.Nombre.ToLower() == carrera.Nombre.ToLower());
+
+            if (yaExiste)
+            {
+                ModelState.AddModelError("Nombre", "Ya existe una carrera con ese nombre.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(carrera);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(carrera);
         }
+
 
         // GET: Carreras/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -124,6 +135,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Carreras/Delete/5
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -144,6 +156,7 @@ namespace Instituto.C.Controllers
         // POST: Carreras/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var carrera = await _context.Carreras.FindAsync(id);

@@ -36,9 +36,6 @@ namespace Instituto.C.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("InscripcionId")
-                        .HasColumnType("int");
-
                     b.Property<int>("MateriaCursadaId")
                         .HasColumnType("int");
 
@@ -49,6 +46,8 @@ namespace Instituto.C.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MateriaCursadaId");
 
                     b.HasIndex("ProfesorId");
 
@@ -166,6 +165,11 @@ namespace Instituto.C.Migrations
 
                     b.Property<int?>("MateriaId1")
                         .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("ProfesorId")
                         .HasColumnType("int");
@@ -490,6 +494,12 @@ namespace Instituto.C.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Instituto.C.Models.MateriaCursada", "MateriaCursada")
+                        .WithMany()
+                        .HasForeignKey("MateriaCursadaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Instituto.C.Models.Profesor", "Profesor")
                         .WithMany("Calificaciones")
                         .HasForeignKey("ProfesorId")
@@ -505,6 +515,8 @@ namespace Instituto.C.Migrations
                     b.Navigation("Alumno");
 
                     b.Navigation("Inscripcion");
+
+                    b.Navigation("MateriaCursada");
 
                     b.Navigation("Profesor");
                 });

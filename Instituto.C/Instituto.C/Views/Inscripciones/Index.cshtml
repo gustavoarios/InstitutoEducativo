@@ -29,7 +29,7 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.AlumnoId - @item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
+                <td>@item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
                 <td>@item.MateriaCursada?.Nombre</td> <!-- Mejor que mostrar cuatrimestre + código por separado -->
                 <td>@item.FechaInscripcion.ToShortDateString()</td>
                 <td>@(item.Activa ? "Sí" : "No")</td>

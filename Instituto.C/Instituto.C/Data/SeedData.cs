@@ -11,328 +11,244 @@ namespace Instituto.C.Data
 {
     public static class SeedData
     {
-
         public static async Task InitializeAsync(InstitutoDb context, UserManager<Persona> userManager)
         {
             context.Database.Migrate();
 
-            //creo los empleados
+            // === EMPLEADOS ===
             if (!context.Users.Any(u => u is Empleado))
             {
-                var emp1 = new Empleado
+                var empleados = new[]
                 {
-
-                    UserName = "empleado1",
-                    Email = "empleado1@ort.edu.ar",
-                    Nombre = "Claudia",
-                    Apellido = "Rodriguez",
-                    DNI = "21212121",
-                    Telefono = "1122334455",
-                    Direccion = "Calle Falsa 123",
-                    FechaAlta = DateTime.Now,
-                    Activo = true,
-                    EmailConfirmed = true,
-
+                    new Empleado { UserName = "empleado1", Email = "empleado1@ort.edu.ar", Nombre = "Claudia", Apellido = "Rodriguez", DNI = "21212121", Telefono = "1122334455", Direccion = "Calle Falsa 123", FechaAlta = DateTime.Now, Activo = true, EmailConfirmed = true },
+                    new Empleado { UserName = "empleado2", Email = "empleado2@ort.edu.ar", Nombre = "Luis", Apellido = "Martinez", DNI = "23232323", Telefono = "5566778899", Direccion = "Avenida Siempreviva 742", FechaAlta = DateTime.Now, Activo = true, EmailConfirmed = true },
+                    new Empleado { UserName = "empleado3", Email = "empleado3@ort.edu.ar", Nombre = "Gerardo", Apellido = "Dominguez", DNI = "24242424", Telefono = "5566778899", Direccion = "Boulevard de las Rosas 720", FechaAlta = DateTime.Now, Activo = true, EmailConfirmed = true }
                 };
-
-                
-
-                await userManager.CreateAsync(emp1, "Password1!");
-                await userManager.AddToRoleAsync(emp1, "EmpleadoRol");
-
-                var emp2 = new Empleado
+                foreach (var e in empleados)
                 {
-                    UserName = "empleado2",
-                    Email = "empleado2@ort.edu.ar",
-                    Nombre = "Luis",
-                    Apellido = "Martinez",
-                    DNI = "23232323",
-                    Telefono = "5566778899",
-                    Direccion = "Avenida Siempreviva 742",
-                    FechaAlta = DateTime.Now,
-                    Activo = true,
-                    EmailConfirmed = true
-                };
-
-                await userManager.CreateAsync(emp2, "Password1!");
-                await userManager.AddToRoleAsync(emp2, "EmpleadoRol");
-
-                var emp3 = new Empleado
-                {
-                    UserName = "empleado3",
-                    Email = "empleado3@ort.edu.ar",
-                    Nombre = "Gerardo",
-                    Apellido = "Dominguez",
-                    DNI = "24242424",
-                    Telefono = "5566778899",
-                    Direccion = "Boulevard de las Rosas 720",
-                    FechaAlta = DateTime.Now,
-                    Activo = true,
-                    EmailConfirmed = true
-                };
-                
-                await userManager.CreateAsync(emp3, "Password1!");
-                await userManager.AddToRoleAsync(emp3, "EmpleadoRol");
+                    await userManager.CreateAsync(e, "Password1!");
+                    await userManager.AddToRoleAsync(e, "EmpleadoRol");
+                }
             }
 
-            //creo los profesores
-
+            // === PROFESORES ===
             if (!context.Users.Any(u => u is Profesor))
             {
-                var profesor1 = new Profesor
+                var profesores = new[]
                 {
-                    UserName = "profesor1",
-                    Email = "profesor1@ort.edu.ar",
-                    Nombre = "Walter",
-                    Apellido = "White",
-                    DNI = "23235689",
-                    Telefono = "1123748574",
-                    Direccion = "Cloruro 2114",
-                    FechaAlta = DateTime.Now,
-                    Activo = true,
-                    EmailConfirmed = true
+                    new Profesor { UserName = "profesor1", Email = "profesor1@ort.edu.ar", Nombre = "Walter", Apellido = "White", DNI = "23235689", Telefono = "1123748574", Direccion = "Cloruro 2114", FechaAlta = DateTime.Now, Activo = true, EmailConfirmed = true },
+                    new Profesor { UserName = "profesor2", Email = "profesor2@ort.edu.ar", Nombre = "Marie", Apellido = "Curie", DNI = "25251436", Telefono = "1174859674", Direccion = "Rayos 1375", FechaAlta = DateTime.Now, Activo = true, EmailConfirmed = true },
+                    new Profesor { UserName = "profesor3", Email = "profesor3@ort.edu.ar", Nombre = "Steve", Apellido = "Jobs", DNI = "74748596", Telefono = "1154896541", Direccion = "Silicon Valley 787", FechaAlta = DateTime.Now, Activo = true, EmailConfirmed = true }
                 };
-                await userManager.CreateAsync(profesor1, "Password1!");
-                await userManager.AddToRoleAsync(profesor1, "ProfesorRol");
-
-                var profesor2 = new Profesor
+                foreach (var p in profesores)
                 {
-                    UserName = "profesor2",
-                    Email = "profesor2@ort.edu.ar",
-                    Nombre = "Marie",
-                    Apellido = "Curie",
-                    DNI = "25251436",
-                    Telefono = "1174859674",
-                    Direccion = "Rayos 1375",
-                    FechaAlta = DateTime.Now,
-                    Activo = true,
-                    EmailConfirmed = true
-                };
-                await userManager.CreateAsync(profesor2, "Password1!");
-                await userManager.AddToRoleAsync(profesor2, "ProfesorRol");
-
-                var profesor3 = new Profesor
-                {
-                    UserName = "profesor3",
-                    Email = "profesor3@ort.edu.ar",
-                    Nombre = "Steave",
-                    Apellido = "Jobs",
-                    DNI = "74748596",
-                    Telefono = "1154896541",
-                    Direccion = "Silicon Valley 787",
-                    FechaAlta = DateTime.Now,
-                    Activo = true,
-                    EmailConfirmed = true
-                };
-                await userManager.CreateAsync(profesor3, "Password1!");
-                await userManager.AddToRoleAsync(profesor3, "ProfesorRol");
-
+                    await userManager.CreateAsync(p, "Password1!");
+                    await userManager.AddToRoleAsync(p, "ProfesorRol");
+                }
             }
-
-            Carrera carrera = null;
-            Carrera carrera1 = null;
-            Carrera carrera2 = null;
 
             // === CARRERAS ===
-            if (!context.Carreras.Any())
+            var carreraAnalista = context.Carreras.FirstOrDefault(c => c.CodigoCarrera == "ANSIS");
+            if (carreraAnalista == null)
             {
-                carrera = new Carrera
-                {
-                    Nombre = "Ciencias Naturales",
-                    CodigoCarrera = "CSNT"
-                };
-
-                carrera1 = new Carrera
-                {
-                    Nombre = "Ingeniería Química",
-                    CodigoCarrera = "INGQUI"
-                };
-
-                carrera2 = new Carrera
-                {
-                    Nombre = "Analista de Sistemas",
-                    CodigoCarrera = "ANSIS"
-                };
-
-                context.Carreras.AddRange(carrera, carrera1, carrera2);
-                context.SaveChanges();
+                carreraAnalista = new Carrera { Nombre = "Analista de Sistemas", CodigoCarrera = "ANSIS" };
+                context.Carreras.Add(carreraAnalista);
             }
-            else
+
+            var carreraCiencias = context.Carreras.FirstOrDefault(c => c.CodigoCarrera == "CSNT");
+            if (carreraCiencias == null)
             {
-                carrera = context.Carreras.FirstOrDefault(c => c.CodigoCarrera == "CSNT");
-                carrera1 = context.Carreras.FirstOrDefault(c => c.CodigoCarrera == "INGQUI");
-                carrera2 = context.Carreras.FirstOrDefault(c => c.CodigoCarrera == "ANSIS");
+                carreraCiencias = new Carrera { Nombre = "Ciencias Naturales", CodigoCarrera = "CSNT" };
+                context.Carreras.Add(carreraCiencias);
             }
+            context.SaveChanges();
 
             // === MATERIAS ===
-
-            // === DECLARACIÓN DE VARIABLES ===
-            Materia materia1 = null;
-            Materia materia2 = null;
-            Materia materia3 = null;
-            Materia materia4 = null;
-            Materia materia5 = null;
-            Materia materia6 = null;
-            Materia materia7 = null;
-            Materia materia8 = null;
-            Materia materia9 = null;
-            Materia materia10 = null;
-            Materia materia11 = null;
-            Materia materia12 = null;
-            Materia materia13 = null;
-            Materia materia14 = null;
-            Materia materia15 = null;
-            Materia materia16 = null;
-            Materia materia17 = null;
-            Materia materia18 = null;
-            Materia materia19 = null;
-            Materia materia20 = null;
-            Materia materia21 = null;
-            Materia materia22 = null;
-            Materia materia23 = null;
-            Materia materia24 = null;
-            Materia materia25 = null;
-            Materia materia26 = null;
-            Materia materia27 = null;
-            Materia materia28 = null;
-            Materia materia29 = null;
-            Materia materia30 = null;
-            Materia materia31 = null;
-            Materia materia32 = null;
-
             if (!context.Materias.Any())
             {
-                // === Ciencias Naturales ===
-                materia1 = new Materia { Nombre = "Biología General", CodigoMateria = "BIO101", Descripcion = "Estudio de los principios básicos de la biología", CupoMaximo = 2, CarreraId = carrera.Id };
-                materia2 = new Materia { Nombre = "Física I", CodigoMateria = "FIS101", Descripcion = "Conceptos fundamentales de la física clásica", CupoMaximo = 35, CarreraId = carrera.Id };
-                materia3 = new Materia { Nombre = "Química General", CodigoMateria = "QUI101", Descripcion = "Introducción a los conceptos básicos de química", CupoMaximo = 30, CarreraId = carrera.Id };
-                materia4 = new Materia { Nombre = "Matemática Aplicada", CodigoMateria = "MAT201", Descripcion = "Herramientas matemáticas aplicadas a las ciencias naturales", CupoMaximo = 30, CarreraId = carrera.Id };
-                materia5 = new Materia { Nombre = "Ecología y Medioambiente", CodigoMateria = "ECO301", Descripcion = "Relaciones entre los seres vivos y su entorno", CupoMaximo = 30, CarreraId = carrera.Id };
-                materia6 = new Materia { Nombre = "Métodos Científicos", CodigoMateria = "MET401", Descripcion = "Técnicas y métodos para la investigación científica", CupoMaximo = 25, CarreraId = carrera.Id };
-                materia7 = new Materia { Nombre = "Genética Molecular", CodigoMateria = "GEN302", Descripcion = "Estudio de la herencia y la función de los genes a nivel molecular", CupoMaximo = 25, CarreraId = carrera.Id };
-                materia8 = new Materia { Nombre = "Astronomía", CodigoMateria = "AST201", Descripcion = "Exploración de los cuerpos celestes y el universo", CupoMaximo = 30, CarreraId = carrera.Id };
-                materia9 = new Materia { Nombre = "Geología", CodigoMateria = "GEO101", Descripcion = "Estudio de la estructura y procesos de la Tierra", CupoMaximo = 35, CarreraId = carrera.Id };
-                materia10 = new Materia { Nombre = "Estadística para Ciencias", CodigoMateria = "EST204", Descripcion = "Fundamentos estadísticos aplicados a la investigación científica", CupoMaximo = 30, CarreraId = carrera.Id };
-                materia11 = new Materia { Nombre = "Filosofía de la Ciencia", CodigoMateria = "FIL301", Descripcion = "Reflexión crítica sobre los métodos y fundamentos de la ciencia", CupoMaximo = 20, CarreraId = carrera.Id };
+                var materias = new[]
+                {
+                    // Analista de Sistemas (cupo 5)
+                    new Materia { Nombre = "Organización Empresarial", CodigoMateria = "OE101", Descripcion = "Estructura y funcionamiento de organizaciones", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Introducción a la Informática", CodigoMateria = "INF101", Descripcion = "Conceptos básicos de informática", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Fundamentos de Programación", CodigoMateria = "FP101", Descripcion = "Lógica y estructuras de programación", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Taller de Herramientas de Programación", CodigoMateria = "THP101", Descripcion = "Herramientas actuales de desarrollo", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Matemática", CodigoMateria = "MAT101", Descripcion = "Fundamentos matemáticos", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Inglés Técnico", CodigoMateria = "ING101", Descripcion = "Inglés aplicado a sistemas", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Taller de Creatividad e Innovación", CodigoMateria = "TCI101", Descripcion = "Creatividad aplicada a tecnología", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Sistemas Administrativos", CodigoMateria = "SA201", Descripcion = "Sistemas de gestión", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Arquitectura y Sistemas Operativos", CodigoMateria = "ASO201", Descripcion = "Componentes de hardware y software base", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Programación I", CodigoMateria = "P1", Descripcion = "Estructuras básicas de programación", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Taller de Programación I", CodigoMateria = "TP1", Descripcion = "Resolución de problemas con código", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "PP I: Programación en Nuevas Tecnologías I", CodigoMateria = "PP1", Descripcion = "Desarrollo con tecnologías actuales", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
+                    new Materia { Nombre = "Base de Datos I", CodigoMateria = "BD1", Descripcion = "Modelado y consultas relacionales", CupoMaximo = 5, CarreraId = carreraAnalista.Id },
 
-                // === Ingeniería Química ===
-                materia12 = new Materia { Nombre = "Química General", CodigoMateria = "QUI101", Descripcion = "Fundamentos de la química general", CupoMaximo = 30, CarreraId = carrera1.Id };
-                materia13 = new Materia { Nombre = "Física I", CodigoMateria = "FIS101", Descripcion = "Mecánica clásica y leyes del movimiento", CupoMaximo = 35, CarreraId = carrera1.Id };
-                materia14 = new Materia { Nombre = "Matemática Aplicada", CodigoMateria = "MAT201", Descripcion = "Aplicaciones matemáticas a problemas de ingeniería", CupoMaximo = 40, CarreraId = carrera1.Id };
-                materia15 = new Materia { Nombre = "Termodinámica", CodigoMateria = "TER202", Descripcion = "Principios de la termodinámica en procesos químicos", CupoMaximo = 30, CarreraId = carrera1.Id };
-                materia16 = new Materia { Nombre = "Operaciones Unitarias I", CodigoMateria = "OPU301", Descripcion = "Procesos físicos fundamentales de la ingeniería química", CupoMaximo = 25, CarreraId = carrera1.Id };
-                materia17 = new Materia { Nombre = "Química Analítica", CodigoMateria = "QAN203", Descripcion = "Técnicas para análisis cualitativo y cuantitativo", CupoMaximo = 30, CarreraId = carrera1.Id };
-                materia18 = new Materia { Nombre = "Ingeniería de Procesos", CodigoMateria = "IPR302", Descripcion = "Diseño y análisis de procesos químicos industriales", CupoMaximo = 25, CarreraId = carrera1.Id };
-                materia19 = new Materia { Nombre = "Transferencia de Calor", CodigoMateria = "TCA304", Descripcion = "Estudio de mecanismos de transmisión de calor", CupoMaximo = 25, CarreraId = carrera1.Id };
-                materia20 = new Materia { Nombre = "Bioquímica Industrial", CodigoMateria = "BIO303", Descripcion = "Aplicaciones de la bioquímica en la industria química", CupoMaximo = 20, CarreraId = carrera1.Id };
-                materia21 = new Materia { Nombre = "Control de Procesos", CodigoMateria = "CPL305", Descripcion = "Sistemas de control y automatización de procesos químicos", CupoMaximo = 25, CarreraId = carrera1.Id };
-
-                // === Analista de Sistemas ===
-                materia22 = new Materia { Nombre = "Programación 1", CodigoMateria = "P1", Descripcion = "Fundamentos de la programación", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia23 = new Materia { Nombre = "Lógica Computacional", CodigoMateria = "LC101", Descripcion = "Conceptos básicos de lógica aplicados a la computación", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia24 = new Materia { Nombre = "Sistemas Operativos", CodigoMateria = "SO201", Descripcion = "Funcionamiento interno de los sistemas operativos", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia25 = new Materia { Nombre = "Base de Datos 1", CodigoMateria = "BD1", Descripcion = "Modelado y consultas sobre bases de datos relacionales", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia26 = new Materia { Nombre = "Redes de Computadoras", CodigoMateria = "RED301", Descripcion = "Principios y configuración de redes informáticas", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia27 = new Materia { Nombre = "Ingeniería de Software", CodigoMateria = "IS401", Descripcion = "Metodologías para el desarrollo de software a gran escala", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia28 = new Materia { Nombre = "Programación 2", CodigoMateria = "P2", Descripcion = "Programación orientada a objetos y estructuras avanzadas", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia29 = new Materia { Nombre = "Análisis de Sistemas", CodigoMateria = "AS501", Descripcion = "Técnicas de relevamiento, análisis y modelado de sistemas", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia30 = new Materia { Nombre = "Proyecto Final", CodigoMateria = "PF601", Descripcion = "Desarrollo completo de un sistema informático en equipo", CupoMaximo = 20, CarreraId = carrera2.Id };
-                materia31 = new Materia { Nombre = "Ética y Legislación Informática", CodigoMateria = "ELI701", Descripcion = "Aspectos legales y éticos del ejercicio profesional en informática", CupoMaximo = 25, CarreraId = carrera2.Id };
-                materia32 = new Materia { Nombre = "Base de Datos 2", CodigoMateria = "BD2", Descripcion = "Bases de datos avanzadas y no relacionales", CupoMaximo = 25, CarreraId = carrera2.Id };
-
-                context.Materias.AddRange(
-                    materia1, materia2, materia3, materia4, materia5, materia6,
-                    materia7, materia8, materia9, materia10, materia11, materia12,
-                    materia13, materia14, materia15, materia16, materia17, materia18,
-                    materia19, materia20, materia21, materia22, materia23, materia24,
-                    materia25, materia26, materia27, materia28, materia29, materia30,
-                    materia31, materia32
-                );
-
+                    // Ciencias Naturales
+                    new Materia { Nombre = "Biología General", CodigoMateria = "BIO101", Descripcion = "Estudio de los principios básicos de la biología", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Física I", CodigoMateria = "FIS101", Descripcion = "Conceptos fundamentales de la física clásica", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Química General", CodigoMateria = "QUI101", Descripcion = "Conceptos básicos de química", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Matemática Aplicada", CodigoMateria = "MAT201", Descripcion = "Aplicaciones matemáticas a las ciencias", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Métodos Científicos", CodigoMateria = "MC202", Descripcion = "Metodología de investigación científica", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Ecología y Medioambiente", CodigoMateria = "ECO301", Descripcion = "Relación entre seres vivos y su entorno", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Astronomía", CodigoMateria = "AST201", Descripcion = "Cuerpos celestes y universo", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Estadística para Ciencias", CodigoMateria = "EST204", Descripcion = "Estadística aplicada a investigación", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Genética Molecular", CodigoMateria = "GEN302", Descripcion = "Herencia y función de los genes", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Geología", CodigoMateria = "GEO101", Descripcion = "Estructura y procesos de la Tierra", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Filosofía de la Ciencia", CodigoMateria = "FIL301", Descripcion = "Fundamentos epistemológicos", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Bioquímica", CodigoMateria = "BIO201", Descripcion = "Procesos bioquímicos fundamentales", CupoMaximo = 30, CarreraId = carreraCiencias.Id },
+                    new Materia { Nombre = "Antropología Biológica", CodigoMateria = "ANT401", Descripcion = "Evolución y diversidad humana", CupoMaximo = 30, CarreraId = carreraCiencias.Id }
+                };
+                context.Materias.AddRange(materias);
                 context.SaveChanges();
             }
 
-            // VER DE BORRAR ESTO, NO SE SI ES NECESARIO, PUEDE SER QUE YA NO SEA NECESARIO, VERIFICAR SI SE PUEDE BORRAR
             // === ALUMNOS ===
             if (!context.Users.Any(u => u is Alumno))
             {
-                var alumno1 = new Alumno
+                string[] nombresTecnologia = new[]
                 {
-                    UserName = "alumno1",
-                    Email = "alumno1@ort.edu.ar",
-                    Nombre = "Lucas",
-                    Apellido = "Ramirez",
-                    DNI = "35123456",
-                    Telefono = "1144455566",
-                    Direccion = "Rivadavia 123",
-                    FechaAlta = DateTime.Now,
-                    Activo = false,
-                    CarreraId = carrera2.Id, // Analista de Sistemas
-                    EmailConfirmed = true
+                    "Ada", "Alan", "Grace", "Linus", "Dennis", "Ken", "Margaret", "Tim", "Elon", "Bill", "Steve", "Mark", "Guido", "James", "Donald"
                 };
 
-                var alumno2 = new Alumno
+                string[] apellidosTecnologia = new[]
                 {
-                    UserName = "alumno2",
-                    Email = "alumno2@ort.edu.ar",
-                    Nombre = "Sofía",
-                    Apellido = "Gómez",
-                    DNI = "36234567",
-                    Telefono = "1133344455",
-                    Direccion = "Corrientes 456",
-                    FechaAlta = DateTime.Now,
-                    Activo = false,
-                    CarreraId = carrera.Id, // Ciencias Naturales
-                    EmailConfirmed = true
+                    "Lovelace", "Turing", "Hopper", "Torvalds", "Ritchie", "Thompson", "Hamilton", "Berners-Lee", "Musk", "Gates", "Jobs", "Zuckerberg", "van Rossum", "Gosling", "Knuth"
                 };
 
-                var gestor = new GestorAlumnos();
-                gestor.AsignarNumeroMatricula(alumno1, context);
-                gestor.AsignarNumeroMatricula(alumno2, context);
+                string[] nombresCiencias = new[]
+                {
+                    "Marie", "Charles", "Isaac", "Rosalind", "Stephen", "Jane", "Gregor", "Carl", "Rachel", "Alexander", "Barbara", "Neil", "Lise", "Galileo", "Alfred"
+                };
 
-                await userManager.CreateAsync(alumno1, "Password1!");
-                await userManager.AddToRoleAsync(alumno1, "AlumnoRol");
+                string[] apellidosCiencias = new[]
+                {
+                    "Curie", "Darwin", "Newton", "Franklin", "Hawking", "Goodall", "Mendel", "Sagan", "Carson", "Fleming", "McClintock", "Tyson", "Meitner", "Galilei", "Wallace"
+                };
 
-                await userManager.CreateAsync(alumno2, "Password1!");
-                await userManager.AddToRoleAsync(alumno2, "AlumnoRol");
+                for (int i = 1; i <= 30; i++)
+                {
+                    bool esAnalista = i <= 15;
+                    string nombre = esAnalista ? nombresTecnologia[i - 1] : nombresCiencias[i - 16];
+                    string apellido = esAnalista ? apellidosTecnologia[i - 1] : apellidosCiencias[i - 16];
+                    var carreraAsignada = esAnalista ? carreraAnalista : carreraCiencias;
+
+                    var alumno = new Alumno
+                    {
+                        UserName = $"alumno{i}",
+                        Email = $"alumno{i}@ort.edu.ar",
+                        Nombre = nombre,
+                        Apellido = apellido,
+                        DNI = $"3500000{i:D2}",
+                        Telefono = $"11000000{i:D2}",
+                        Direccion = $"Calle {i}",
+                        FechaAlta = DateTime.Now,
+                        Activo = true,
+                        CarreraId = carreraAsignada.Id,
+                        EmailConfirmed = true
+                    };
+
+                    var gestor = new GestorAlumnos();
+                    gestor.AsignarNumeroMatricula(alumno, context);
+
+                    await userManager.CreateAsync(alumno, "Password1!");
+                    await userManager.AddToRoleAsync(alumno, "AlumnoRol");
+
+                    context.Update(alumno);
+                }
+                await context.SaveChangesAsync();
             }
+
+            //aca se sigue agregando
 
 
             // === MATERIAS CURSADAS ===
-            if (!context.MateriasCursadas.Any())
+            // === MATERIAS CURSADAS ===
+            var codigosAnalista = new[]
             {
-                var cursada1 = new MateriaCursada
+    "OE101", "INF101", "FP101", "THP101", "MAT101", "ING101", "TCI101",
+    "SA201", "ASO201", "P1", "TP1", "PP1", "BD1"
+};
+
+            var materiasAnalista = await context.Materias
+                .Where(m => codigosAnalista.Contains(m.CodigoMateria))
+                .ToListAsync();
+
+            var profesoresDisponibles = await context.Profesores.ToListAsync();
+            int anioActual = DateTime.Now.Year;
+            int cuatrimestre = 1;
+            string codigoInicial = "A";
+
+            int contadorCursadas = 0;
+            foreach (var materia in materiasAnalista)
+            {
+                bool yaTieneCursada = await context.MateriasCursadas
+                    .AnyAsync(mc => mc.MateriaId == materia.Id &&
+                                    mc.Anio == anioActual &&
+                                    mc.Cuatrimestre == cuatrimestre &&
+                                    mc.CodigoCursada == codigoInicial);
+
+                if (!yaTieneCursada)
                 {
-                    MateriaId = context.Materias.First(m => m.CodigoMateria == "P1" && m.CarreraId == carrera2.Id).Id,
-                    ProfesorId = context.Profesores.First().Id,
-                    CodigoCursada = "A",
-                    Anio = 2025,
-                    Cuatrimestre = 1,
-                    Activo = true,
-                    Nombre = MateriasHelper.GenerarNombreCursada(cursada1);
+                    var profesorAsignado = profesoresDisponibles[contadorCursadas % profesoresDisponibles.Count];
 
-                };
+                    var cursada = new MateriaCursada
+                    {
+                        MateriaId = materia.Id,
+                        ProfesorId = profesorAsignado.Id,
+                        Anio = anioActual,
+                        Cuatrimestre = cuatrimestre,
+                        CodigoCursada = codigoInicial,
+                        Activo = true,
+                        Nombre = $"{materia.CodigoMateria}-{anioActual}-{cuatrimestre}C-{codigoInicial}"
+                    };
 
-                var cursada2 = new MateriaCursada
-                {
-                    MateriaId = context.Materias.First(m => m.CodigoMateria == "BIO101" && m.CarreraId == carrera.Id).Id,
-                    ProfesorId = context.Profesores.Skip(1).First().Id,
-                    CodigoCursada = MateriasHelper.ObtenerSiguienteCodigoCursada(null)
-                    Anio = 2025,
-                    Cuatrimestre = 1,
-                    Activo = true,
-                    Nombre = MateriasHelper.GenerarNombreCursada(cursada1);
-
-                };
-
-                context.MateriasCursadas.AddRange(cursada1, cursada2);
-                context.SaveChanges();
+                    context.MateriasCursadas.Add(cursada);
+                    contadorCursadas++;
+                }
             }
 
+            await context.SaveChangesAsync();
 
+
+            // === INSCRIPCIONES PARA alumno1 a alumno5 ===
+            var alumnos = await context.Alumnos
+                .Where(a => a.UserName.StartsWith("alumno"))
+                .OrderBy(a => a.UserName)
+                .Take(5)
+                .ToListAsync();
+
+            var materiasCursadas = await context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Where(mc => mc.Activo && mc.Anio == DateTime.Now.Year && mc.Cuatrimestre == 1)
+                .OrderBy(mc => mc.Materia.CodigoMateria)
+                .Take(5)
+                .ToListAsync();
+
+            foreach (var alumno in alumnos)
+            {
+                foreach (var cursada in materiasCursadas)
+                {
+                    bool yaInscripto = await context.Inscripciones.AnyAsync(i =>
+                        i.AlumnoId == alumno.Id && i.MateriaCursadaId == cursada.Id);
+
+                    if (!yaInscripto)
+                    {
+                        var inscripcion = new Inscripcion
+                        {
+                            AlumnoId = alumno.Id,
+                            MateriaCursadaId = cursada.Id,
+                            FechaInscripcion = DateTime.Now,
+                            Activa = true
+                        };
+
+                        context.Inscripciones.Add(inscripcion);
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
 
 
         }
-
     }
 }
