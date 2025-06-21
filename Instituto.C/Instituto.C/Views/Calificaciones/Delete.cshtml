@@ -7,26 +7,27 @@
 <h1>Eliminar Calificación</h1>
 <hr />
 <h4>¿Estás seguro que deseas eliminar esta calificación?</h4>
+
 <div>
     <dl class="row">
-        <dt class="col-sm-4">Alumno</dt>
-        <dd class="col-sm-8">@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido</dd>
-
-        <dt class="col-sm-4">Profesor</dt>
-        <dd class="col-sm-8">@Model.Profesor?.Nombre @Model.Profesor?.Apellido</dd>
-
         <dt class="col-sm-4">Fecha</dt>
         <dd class="col-sm-8">@Model.Fecha.ToShortDateString()</dd>
 
         <dt class="col-sm-4">Nota</dt>
         <dd class="col-sm-8">@((int)Model.Nota)</dd>
 
-        <dt class="col-sm-4">Código de Inscripción</dt>
-        <dd class="col-sm-8">@Model.Inscripcion?.Id</dd>
+        <dt class="col-sm-4">Profesor</dt>
+        <dd class="col-sm-8">@Model.Profesor?.Nombre @Model.Profesor?.Apellido</dd>
+
+        <dt class="col-sm-4">Alumno</dt>
+        <dd class="col-sm-8">@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido</dd>
+
+        <dt class="col-sm-4">Materia Cursada</dt>
+        <dd class="col-sm-8">@Model.Inscripcion?.MateriaCursada?.CodigoCursada</dd>
     </dl>
 </div>
 
-<form asp-action="DeleteConfirmed">
+<form asp-action="Delete">
     <input type="hidden" asp-for="Id" />
     <input type="submit" value="Eliminar" class="btn btn-danger" /> |
     <a asp-action="Index">Cancelar</a>

@@ -6,33 +6,33 @@
 
 <h1>Carreras</h1>
 
-<p>
-    <a asp-action="Create">Crear Nueva</a>
-</p>
+@* Solo empleados pueden ver el botón para crear nuevas *@
+@if (User.IsInRole("EmpleadoRol"))
+{
+    <p>
+        <a class="btn btn-primary" asp-action="Create">Crear Nueva Carrera</a>
+    </p>
+}
 
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CodigoCarrera)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.CodigoCarrera)</th>
             <th>Materias</th>
-            <th></th>
+            @* Solo empleados ven la columna de acciones *@
+            @if (User.IsInRole("EmpleadoRol"))
+            {
+                <th>Acciones</th>
+            }
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Nombre)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CodigoCarrera)
-                </td>
+                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => item.CodigoCarrera)</td>
                 <td>
                     @if (item.Materias != null && item.Materias.Any())
                     {
@@ -48,12 +48,18 @@
                         <em>Sin materias</em>
                     }
                 </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-                </td>
+                @* Solo empleados ven las acciones *@
+                @if (User.IsInRole("EmpleadoRol"))
+                {
+                    <td>
+                        <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                        <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">Detalles</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </td>
+                }
             </tr>
         }
     </tbody>
 </table>
+
+

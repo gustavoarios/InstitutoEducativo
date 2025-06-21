@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Instituto.C.Helpers;
 using Microsoft.AspNetCore.Identity;
 
@@ -11,7 +12,7 @@ namespace Instituto.C.Models
 
         [Required(ErrorMessage = Messages.CampoObligatorio)]
         [StringLength(30,MinimumLength = 3, ErrorMessage = Messages.StrMaxMin)]
-        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,30}$", ErrorMessage = Messages.RegEx)]
+        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]{3,30}$", ErrorMessage = Messages.RegEx)]
         public override string UserName
         {
             get { return base.UserName; }
@@ -46,6 +47,9 @@ namespace Instituto.C.Models
         [StringLength(100, MinimumLength = 4, ErrorMessage = Messages.StrMaxMin)]
         public string Direccion { get; set; }
         public bool Activo { get; set; }
+
+        [NotMapped]
+        public string NombreCompleto => $"{Apellido}, {Nombre}";
 
     }
 }

@@ -11,10 +11,10 @@ namespace Instituto.C.Models
         //propiedades de la MateriaCursada
         public int Id { get; set; } //Id de la materia cursada
 
-        [Required(ErrorMessage = Messages.CampoObligatorio)]
-        [StringLength(1, ErrorMessage = Messages.StringMax)]
-        [RegularExpression(@"^[A-Z]+$", ErrorMessage = Messages.RestriccionLetras)]
-        [Display(Name = "Código de Cursada (A, B, C, etc)")]
+        //[Required(ErrorMessage = Messages.CampoObligatorio)]
+        //[StringLength(1, ErrorMessage = Messages.StringMax)]
+        //[RegularExpression(@"^[A-Z]+$", ErrorMessage = Messages.RestriccionLetras)]
+        //[Display(Name = "Código de Cursada (A, B, C, etc)")]
         public string CodigoCursada { get; set; } //Ej: "A", "B", "C", etc.
 
         [Range(2023, 2100, ErrorMessage = Messages.Rango)]
@@ -37,63 +37,31 @@ namespace Instituto.C.Models
 
         public List<Inscripcion> Inscripciones { get; set; } = new(); //Inscripciones a la materia 
 
-        //propiedad calculada
-        [Required(ErrorMessage = Messages.CampoObligatorio)]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = Messages.StrMaxMin)]
-        [RegularExpression(@"^[a-zA-Z0-9 ]+$", ErrorMessage = Messages.RestriccionAlfanumerica)]
-        [Display(Name = "Nombre de la Cursada")]
-        public string Nombre => $"{Materia?.CodigoMateria ?? "SinMateria"} {Anio} {Cuatrimestre}{CodigoCursada}";
+        ////propiedad calculada
+        //[Required(ErrorMessage = Messages.CampoObligatorio)]
+        //[StringLength(100, MinimumLength = 2, ErrorMessage = Messages.StrMaxMin)]
+        //[RegularExpression(@"^[a-zA-Z0-9\- ]+$", ErrorMessage = Messages.RestriccionAlfanumerica)]
+        //[Display(Name = "Nombre de la Cursada")]
+        public string Nombre { get; set; } //BIO101-2025-1C-A
 
-        // Método helper para saber si alcanzó el cupo
-        public bool EstaLleno()
+        //metodo para validar si la cursada está vigente o no
+        public bool EstaVigente()
         {
-            if (Inscripciones == null || Materia == null)
-                return false;
-
-            int inscripcionesActivas = Inscripciones.Count(i => i.Activa);
-
-            return inscripcionesActivas >= Materia.CupoMaximo;
-        }
-
-        // metodo para crear una nueva cursada si la actual está llena
-        public MateriaCursada CrearNuevaCursadaSiEstaLleno()
-        {
-            if (EstaLleno())
+            if (Cuatrimestre == 1)
             {
-                // Crear una nueva cursada con código siguiente
-                var nuevaCursada = new MateriaCursada
-                {
-                    Materia = this.Materia,
-                    Anio = this.Anio,
-                    Cuatrimestre = this.Cuatrimestre,
-                    // El código de cursada siguiente (A->B->C...)
-                    CodigoCursada = ObtenerSiguienteCodigoCursada(this.CodigoCursada),
-                    Activo = true,
-                    Profesor = this.Profesor
-                };
+                return DateTime.Now <= new DateTime(Anio, 7, 31); // 31 de Julio
+            }
+            else
+            {
 
-                // Aquí podrías agregar la nueva cursada a una colección si manejas una lista global, o devolverla para que la manejes afuera.
-                return nuevaCursada;
+                return DateTime.Now <= new DateTime(Anio, 12, 31); // 31 de Diciembre
             }
 
-            // Si no está lleno, no se crea nada (podrías devolver null o throw una excepción, según lo que quieras)
-            return null;
+
+
         }
 
-        // Método privado helper para obtener la siguiente letra de cursada
-        private string ObtenerSiguienteCodigoCursada(string codigoActual)
-        {
-            if (string.IsNullOrEmpty(codigoActual)) return "A";
 
-            char codigo = codigoActual[0];
-
-            if (codigo == 'Z')
-                throw new InvalidOperationException("No se pueden crear más cursadas, límite alcanzado.");
-
-            codigo++;
-
-            return codigo.ToString();
-        }
     }
-    }
+}
 

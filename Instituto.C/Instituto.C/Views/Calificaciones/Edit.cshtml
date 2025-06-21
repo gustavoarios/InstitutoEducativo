@@ -13,42 +13,42 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <!-- Fecha: campo de auditoría, no editable -->
+            <!-- Fecha: no editable -->
             <input asp-for="Fecha" type="hidden" />
             <div class="form-group">
                 <label class="control-label">Fecha de Calificación</label>
                 <input class="form-control" value="@Model.Fecha.ToShortDateString()" readonly />
             </div>
 
-            <!-- Nota editable -->
+            <!-- Nota -->
             <div class="form-group">
                 <label asp-for="Nota" class="control-label"></label>
                 <select asp-for="Nota" class="form-control" asp-items="ViewBag.Notas"></select>
                 <span asp-validation-for="Nota" class="text-danger"></span>
             </div>
 
-            <!-- Profesor editable -->
+            <!-- Profesor -->
             <div class="form-group">
                 <label asp-for="ProfesorId" class="control-label"></label>
                 <select asp-for="ProfesorId" class="form-control" asp-items="ViewBag.ProfesorId"></select>
                 <span asp-validation-for="ProfesorId" class="text-danger"></span>
             </div>
 
-            <!-- Alumno solo visible (readonly), pero Id oculto para que se mantenga en el form -->
+            <!-- AlumnoId oculto + visualización -->
             <input asp-for="AlumnoId" type="hidden" />
             <div class="form-group">
                 <label>Alumno</label>
-                <input class="form-control" value="@Model.Alumno?.Nombre @Model.Alumno?.Apellido" readonly />
+                <input class="form-control" value="@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido" readonly />
             </div>
 
-            <!-- Inscripción solo visible (readonly), pero Id oculto -->
-            <input asp-for="InscripcionId" type="hidden" />
+            <!-- MateriaCursadaId oculto + visualización -->
+            <input asp-for="MateriaCursadaId" type="hidden" />
             <div class="form-group">
-                <label>Inscripción</label>
-                <input class="form-control" value="Inscripción @Model.InscripcionId" readonly />
+                <label>Materia Cursada</label>
+                <input class="form-control" value="@Model.Inscripcion?.MateriaCursada?.CodigoCursada" readonly />
             </div>
 
-            <!-- Botón de envío -->
+            <!-- Botón -->
             <div class="form-group">
                 <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>
@@ -59,7 +59,6 @@
 <div>
     <a asp-action="Index">Volver a la lista</a>
 </div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

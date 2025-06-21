@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Instituto.C.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,7 +47,7 @@ namespace Instituto.C.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
                     CodigoMateria = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CupoMaximo = table.Column<int>(type: "int", nullable: false),
@@ -93,7 +93,8 @@ namespace Instituto.C.Migrations
                     Direccion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Activo = table.Column<bool>(type: "bit", nullable: true),
                     NumeroMatricula = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CarreraId = table.Column<int>(type: "int", nullable: true)
+                    CarreraId = table.Column<int>(type: "int", nullable: true),
+                    Legajo = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -198,8 +199,9 @@ namespace Instituto.C.Migrations
                     Anio = table.Column<int>(type: "int", nullable: false),
                     Cuatrimestre = table.Column<int>(type: "int", nullable: false),
                     Activo = table.Column<bool>(type: "bit", nullable: false),
-                    MateriaId = table.Column<int>(type: "int", nullable: false),
                     ProfesorId = table.Column<int>(type: "int", nullable: false),
+                    MateriaId = table.Column<int>(type: "int", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     MateriaId1 = table.Column<int>(type: "int", nullable: true),
                     ProfesorId1 = table.Column<int>(type: "int", nullable: true)
                 },
@@ -260,8 +262,6 @@ namespace Instituto.C.Migrations
                 {
                     AlumnoId = table.Column<int>(type: "int", nullable: false),
                     MateriaCursadaId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     FechaInscripcion = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Activa = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -292,18 +292,22 @@ namespace Instituto.C.Migrations
                     Nota = table.Column<int>(type: "int", nullable: false),
                     ProfesorId = table.Column<int>(type: "int", nullable: false),
                     AlumnoId = table.Column<int>(type: "int", nullable: false),
-                    InscripcionId = table.Column<int>(type: "int", nullable: false),
-                    InscripcionAlumnoId = table.Column<int>(type: "int", nullable: false),
-                    InscripcionMateriaCursadaId = table.Column<int>(type: "int", nullable: false)
+                    MateriaCursadaId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Calificaciones", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Calificaciones_Inscripciones_InscripcionAlumnoId_InscripcionMateriaCursadaId",
-                        columns: x => new { x.InscripcionAlumnoId, x.InscripcionMateriaCursadaId },
+                        name: "FK_Calificaciones_Inscripciones_AlumnoId_MateriaCursadaId",
+                        columns: x => new { x.AlumnoId, x.MateriaCursadaId },
                         principalTable: "Inscripciones",
                         principalColumns: new[] { "AlumnoId", "MateriaCursadaId" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Calificaciones_MateriasCursadas_MateriaCursadaId",
+                        column: x => x.MateriaCursadaId,
+                        principalTable: "MateriasCursadas",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Calificaciones_Personas_AlumnoId",
@@ -335,14 +339,15 @@ namespace Instituto.C.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Calificaciones_AlumnoId",
+                name: "IX_Calificaciones_AlumnoId_MateriaCursadaId",
                 table: "Calificaciones",
-                column: "AlumnoId");
+                columns: new[] { "AlumnoId", "MateriaCursadaId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Calificaciones_InscripcionAlumnoId_InscripcionMateriaCursadaId",
+                name: "IX_Calificaciones_MateriaCursadaId",
                 table: "Calificaciones",
-                columns: new[] { "InscripcionAlumnoId", "InscripcionMateriaCursadaId" });
+                column: "MateriaCursadaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Calificaciones_ProfesorId",
@@ -355,9 +360,10 @@ namespace Instituto.C.Migrations
                 column: "MateriaCursadaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Materias_CarreraId",
+                name: "IX_Materias_CarreraId_Nombre",
                 table: "Materias",
-                column: "CarreraId");
+                columns: new[] { "CarreraId", "Nombre" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MateriasCursadas_MateriaId",

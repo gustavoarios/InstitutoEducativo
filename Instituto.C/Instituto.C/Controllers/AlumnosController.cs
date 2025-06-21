@@ -28,6 +28,8 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos
+
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Index()
         {
             var institutoDb = _context.Alumnos.Include(a => a.Carrera);
@@ -35,6 +37,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos/Details/5
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -54,7 +57,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Alumnos/Create
-
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera");
@@ -66,18 +69,32 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
 
         public async Task<IActionResult> Create([Bind("CarreraId,UserName,Email,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
         {
             if (ModelState.IsValid)
             {
 
-                var resultado = await _userManager.CreateAsync(alumno);
+                IdentityResult resultado;
+
+                if (User.IsInRole("EmpleadoRol"))
+                {
+                    resultado = await _userManager.CreateAsync(alumno, "Password1!");
+                }
+                else
+                {
+                    resultado = await _userManager.CreateAsync(alumno);
+                }
+
+
 
 
                 if (resultado.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(alumno, "AlumnoRol"); //asigno el rol de AlumnoRol al usuario recien creado
+
+
 
                     //asigno el número de matrícula
                     var gestor = new GestorAlumnos(); //instancio al gestor para usar el metodo que asigna la matricula, pasandole el alumno recien creado
@@ -97,22 +114,9 @@ namespace Instituto.C.Controllers
         }
 
 
-        /*public async Task<IActionResult> Create([Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(alumno);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
-            return View(alumno);
-        }*/
-
-
         // GET: Alumnos/Edit/5
-        
 
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -147,61 +151,60 @@ namespace Instituto.C.Controllers
             return View(alumno);
         }
 
-
-
-        /* public async Task<IActionResult> Edit(int? id) //METODO ORIGINAL1
-         {
-             if (id == null)
-             {
-                 return NotFound();
-             }
-
-             var alumno = await _context.Alumnos.FindAsync(id);
-             if (alumno == null)
-             {
-                 return NotFound();
-             }
-             ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
-             return View(alumno);
-         }*/                                              //METODO ORIGINAL1
-
-
-
-
-
         // POST: Alumnos/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo,CarreraId")] Alumno alumno)
+        [Authorize(Roles = "EmpleadoRol")]
+        public async Task<IActionResult> Edit(int id, [Bind("UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo,CarreraId")] Alumno alumno)
         {
-            var userId = Int32.Parse(_userManager.GetUserId(User)); // obtener el ID real del usuario logueado
+            Alumno alumnoDb;
 
-            // buscamos el alumno desde la base
-            var alumnoDb = await _context.Alumnos.FindAsync(userId);
+            if (User.IsInRole("AlumnoRol"))
+            {
+                var userId = Int32.Parse(_userManager.GetUserId(User));
+
+                // Seguridad: el alumno solo puede editarse a sí mismo
+                if (userId != id)
+                {
+                    return Forbid();
+                }
+
+                alumnoDb = await _context.Alumnos.FindAsync(userId);
+            }
+            else
+            {
+                alumnoDb = await _context.Alumnos.FindAsync(id);
+            }
 
             if (alumnoDb == null)
             {
                 return NotFound();
             }
 
-            // actualizamos solo los campos permitidos
-            alumnoDb.UserName = alumno.UserName;
-            alumnoDb.Email = alumno.Email;
-            alumnoDb.FechaAlta = alumno.FechaAlta;
-            alumnoDb.Nombre = alumno.Nombre;
-            alumnoDb.Apellido = alumno.Apellido;
-            alumnoDb.DNI = alumno.DNI;
-            alumnoDb.Telefono = alumno.Telefono;
-            alumnoDb.Direccion = alumno.Direccion;
-            alumnoDb.Activo = alumno.Activo;
-            alumnoDb.CarreraId = alumno.CarreraId;
+            // Campos editables por todos
+
+
+            // Campos solo editables por empleados (no alumnos)
+            if (User.IsInRole("EmpleadoRol"))
+            {
+                alumnoDb.Email = alumno.Email;
+                alumnoDb.Telefono = alumno.Telefono;
+                alumnoDb.Activo = alumno.Activo;
+                alumnoDb.FechaAlta = alumno.FechaAlta;
+                alumnoDb.UserName = alumno.UserName;
+                alumnoDb.Nombre = alumno.Nombre;
+                alumnoDb.Apellido = alumno.Apellido;
+                alumnoDb.DNI = alumno.DNI;
+                alumnoDb.Direccion = alumno.Direccion;
+                alumnoDb.CarreraId = alumno.CarreraId;
+            }
 
             try
             {
-                await _context.SaveChangesAsync(); // actualiza correctamente porque alumnoDb viene del contexto
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -211,45 +214,9 @@ namespace Instituto.C.Controllers
         }
 
 
-
-
-
-
-        /*[HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NumeroMatricula,CarreraId,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Alumno alumno)
-        {
-            if (id != alumno.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(alumno);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AlumnoExists(alumno.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
-            return View(alumno);
-        }*/
-
-
         // GET: Alumnos/Delete/5
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -270,6 +237,7 @@ namespace Instituto.C.Controllers
 
         // POST: Alumnos/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

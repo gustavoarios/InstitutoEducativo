@@ -1,0 +1,47 @@
+﻿@model List<Instituto.C.Models.MateriaCursada>
+@{
+    ViewData["Title"] = "Cursadas Vigentes";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No tenés cursadas activas actualmente.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Materia</th>
+                <th>Cuatrimestre</th>
+                <th>Año</th>
+                <th>Inscriptos</th>
+                <th>Promedio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cursada in Model)
+            {
+        <tr>
+            <td>@cursada.Nombre</td>
+            <td>@cursada.Materia?.Nombre</td>
+            <td>@cursada.Cuatrimestre</td>
+            <td>@cursada.Anio</td>
+            <td>@cursada.Inscripciones?.Count ?? 0</td>
+            <td>
+                @string.Format("{0:0.0}", cursada.Inscripciones?
+                                .Where(i => i.Calificacion != null)
+                                .Average(i => (double?)i.Calificacion.Nota) ?? 0)
+            </td>
+            <td>
+                <a asp-controller="Inscripciones" asp-action="Alumnos" asp-route-id="@cursada.Id" class="btn btn-sm btn-info">Ver Alumnos</a>
+            </td>
+        </tr>
+                }
+        </tbody>
+    </table>
+}

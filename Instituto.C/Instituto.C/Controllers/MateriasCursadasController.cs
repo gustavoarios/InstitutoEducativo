@@ -1,15 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Instituto.C.Data;
+using Instituto.C.Helpers;
+using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Instituto.C.Data;
-using Instituto.C.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
+
+    [Authorize(Roles = "EmpleadoRol")]
     public class MateriasCursadasController : Controller
     {
         private readonly InstitutoDb _context;
@@ -20,6 +24,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: MateriasCursadas
+
         public async Task<IActionResult> Index()
         {
             var institutoDb = _context.MateriasCursadas.Include(m => m.Materia).Include(m => m.Profesor);
@@ -27,6 +32,8 @@ namespace Instituto.C.Controllers
         }
 
         // GET: MateriasCursadas/Details/5
+        [Authorize(Roles = "EmpleadoRol")]
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,30 +54,37 @@ namespace Instituto.C.Controllers
         }
 
         // GET: MateriasCursadas/Create
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria");
-            ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido");
+            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre");
+            ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "NombreCompleto");
             return View();
         }
 
         // POST: MateriasCursadas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CodigoCursada,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
+        [Authorize(Roles = "EmpleadoRol")]
+        public async Task<IActionResult> Create([Bind("Id,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
         {
-            //Chequeo la duplicidad antes de ModelState.IsValid
-            bool existeDuplicado = _context.MateriasCursadas.Any(mc =>
-                mc.Anio == materiaCursada.Anio &&
-                mc.Cuatrimestre == materiaCursada.Cuatrimestre &&
-                mc.MateriaId == materiaCursada.MateriaId &&
-                mc.CodigoCursada == materiaCursada.CodigoCursada);
+            var ultimaCursada = await _context.MateriasCursadas
+                .Where(mc => mc.Anio == materiaCursada.Anio &&
+                             mc.Cuatrimestre == materiaCursada.Cuatrimestre &&
+                             mc.MateriaId == materiaCursada.MateriaId)
+                .OrderByDescending(mc => mc.CodigoCursada)
+                .FirstOrDefaultAsync();
 
+            materiaCursada.CodigoCursada = MateriasHelper.ObtenerSiguienteCodigoCursada(ultimaCursada?.CodigoCursada);
+            materiaCursada.Materia = await _context.Materias.FindAsync(materiaCursada.MateriaId);
+            materiaCursada.Nombre = MateriasHelper.GenerarNombreCursada(materiaCursada);
+
+            // Validación de duplicado
+            bool existeDuplicado = await _context.MateriasCursadas
+                .AnyAsync(mc => mc.Nombre == materiaCursada.Nombre);
             if (existeDuplicado)
             {
-                ModelState.AddModelError("", "Ya existe una cursada con ese Año, Cuatrimestre y Código para esa materia.");
+                ModelState.AddModelError("Nombre", "Ya existe una cursada con ese nombre.");
             }
 
             if (ModelState.IsValid)
@@ -79,40 +93,54 @@ namespace Instituto.C.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria", materiaCursada.MateriaId);
-            ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", materiaCursada.ProfesorId);
 
+            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", materiaCursada.MateriaId);
+            ViewData["ProfesorId"] = new SelectList(_context.Profesores.Where(p => p.Activo), "Id", "NombreCompleto", materiaCursada.ProfesorId);
             return View(materiaCursada);
         }
 
+
+
+
         // GET: MateriasCursadas/Edit/5
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var materiaCursada = await _context.MateriasCursadas.FindAsync(id);
+            var materiaCursada = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Include(mc => mc.Profesor)
+                .FirstOrDefaultAsync(mc => mc.Id == id);
+
             if (materiaCursada == null)
-            {
                 return NotFound();
-            }
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria", materiaCursada.MateriaId);
-            ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", materiaCursada.ProfesorId);
+
+            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", materiaCursada.MateriaId);
+            ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "NombreCompleto", materiaCursada.ProfesorId);
+
             return View(materiaCursada);
         }
 
-        // POST: MateriasCursadas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoCursada,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
         {
             if (id != materiaCursada.Id)
-            {
                 return NotFound();
+
+            materiaCursada.Materia = await _context.Materias.FindAsync(materiaCursada.MateriaId);
+            materiaCursada.Nombre = MateriasHelper.GenerarNombreCursada(materiaCursada);
+
+            // Validación de duplicado en edición
+            bool duplicado = await _context.MateriasCursadas
+                .AnyAsync(mc => mc.Nombre == materiaCursada.Nombre && mc.Id != materiaCursada.Id);
+
+            if (duplicado)
+            {
+                ModelState.AddModelError("Nombre", "Ya existe otra cursada con ese nombre.");
             }
 
             if (ModelState.IsValid)
@@ -121,26 +149,27 @@ namespace Instituto.C.Controllers
                 {
                     _context.Update(materiaCursada);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MateriaCursadaExists(materiaCursada.Id))
-                    {
+                    if (!_context.MateriasCursadas.Any(mc => mc.Id == materiaCursada.Id))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "CodigoMateria", materiaCursada.MateriaId);
-            ViewData["ProfesorId"] = new SelectList(_context.Profesores, "Id", "Apellido", materiaCursada.ProfesorId);
+
+            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", materiaCursada.MateriaId);
+            ViewData["ProfesorId"] = new SelectList(_context.Profesores.Where(p => p.Activo), "Id", "NombreCompleto", materiaCursada.ProfesorId);
             return View(materiaCursada);
         }
 
+
+
+
         // GET: MateriasCursadas/Delete/5
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -163,11 +192,19 @@ namespace Instituto.C.Controllers
         // POST: MateriasCursadas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var materiaCursada = await _context.MateriasCursadas.FindAsync(id);
             if (materiaCursada != null)
             {
+                var tieneInscripciones = await _context.Inscripciones.AnyAsync(i => i.MateriaCursadaId == materiaCursada.Id);
+                if (tieneInscripciones)
+                {
+                    TempData["Error"] = "No podés eliminar una cursada que tiene alumnos inscriptos.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.MateriasCursadas.Remove(materiaCursada);
             }
 
@@ -179,5 +216,33 @@ namespace Instituto.C.Controllers
         {
             return _context.MateriasCursadas.Any(e => e.Id == id);
         }
+
+        [Authorize(Roles = "ProfesorRol")]
+        public async Task<IActionResult> CursadasVigentes()
+        {
+            var profe = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+
+            var vigentes = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Where(mc => mc.ProfesorId == profe.Id && mc.Activo)
+                .ToListAsync();
+
+            return View(vigentes);
+        }
+
+        [Authorize(Roles = "ProfesorRol")]
+        public async Task<IActionResult> CursadasPasadas()
+        {
+            var profe = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+
+            var pasadas = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Where(mc => mc.ProfesorId == profe.Id && !mc.Activo)
+                .ToListAsync();
+
+            return View(pasadas);
+        }
+
+
     }
 }

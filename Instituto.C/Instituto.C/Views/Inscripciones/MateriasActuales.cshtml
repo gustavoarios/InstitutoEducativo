@@ -1,0 +1,48 @@
+﻿@model List<Instituto.C.Models.Inscripcion>
+
+@{
+    ViewData["Title"] = "Materias Actuales";
+}
+
+<h2>Materias que estás cursando</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No estás cursando materias actualmente.</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Materia</th>
+                <th>Cursada</th>
+                <th>Profesor</th>
+                <th>Cuatrimestre</th>
+                <th>Año</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inscripcion in Model)
+            {
+                <tr>
+                    <td>@inscripcion.MateriaCursada?.Materia?.Nombre</td>
+                    <td>@inscripcion.MateriaCursada?.Nombre</td>
+                    <td>@inscripcion.MateriaCursada?.Profesor?.Nombre @inscripcion.MateriaCursada?.Profesor?.Apellido</td>
+                    <td>@inscripcion.MateriaCursada?.Cuatrimestre</td>
+                    <td>@inscripcion.MateriaCursada?.Anio</td>
+                    <td>
+                        <a asp-action="Companieros" asp-controller="Inscripciones" asp-route-materiaCursadaId="@inscripcion.MateriaCursadaId" class="btn btn-sm btn-info">
+                            Ver compañeros
+                        </a>
+                        <a asp-action="Delete" asp-route-alumnoId="@inscripcion.AlumnoId" asp-route-materiaCursadaId="@inscripcion.MateriaCursadaId" class="btn btn-sm btn-danger">
+                            Darse de baja
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

@@ -1,0 +1,84 @@
+﻿@model Instituto.C.ViewModels.MisMateriasViewModel
+@using Instituto.C.Helpers
+
+@{
+    ViewData["Title"] = "Mis Materias";
+}
+
+<h2>Materias Vigentes</h2>
+@if (Model.Vigentes.Count == 0)
+{
+    <p>No tenés materias vigentes asignadas.</p>
+}
+else
+{
+    foreach (var materia in Model.Vigentes)
+    {
+        var notasDeMateria = (Model.Calificaciones ?? new List<Instituto.C.Models.Calificacion>())
+            .Where(c => c.MateriaCursadaId == materia.Id)
+            .Select(c => c.Nota);
+
+        var promedio = NotasHelper.CalcularPromedio(notasDeMateria);
+
+        <div>
+            <h4>@materia.Materia.Nombre (@materia.Anio - Cuatrimestre @materia.Cuatrimestre)</h4>
+
+            @if (promedio > 0)
+            {
+                <p><strong>Promedio:</strong> @promedio.ToString("0.00")</p>
+            }
+            else
+            {
+                <p><em>Aún no hay calificaciones numéricas.</em></p>
+            }
+
+            <ul>
+                @foreach (var inscripcion in materia.Inscripciones)
+                {
+                    <li>
+                        @inscripcion.Alumno.Nombre @inscripcion.Alumno.Apellido |
+                        @Html.ActionLink("Calificar", "Create", "Calificaciones", new { alumnoId = inscripcion.AlumnoId, materiaCursadaId = materia.Id }, null)
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+}
+
+<h2>Materias Pasadas</h2>
+@if (Model.Pasadas.Count == 0)
+{
+    <p>No tenés materias pasadas.</p>
+}
+else
+{
+    foreach (var materia in Model.Pasadas)
+    {
+        var notasDeMateria = (Model.Calificaciones ?? new List<Instituto.C.Models.Calificacion>())
+            .Where(c => c.MateriaCursadaId == materia.Id)
+            .Select(c => c.Nota);
+
+        var promedio = NotasHelper.CalcularPromedio(notasDeMateria);
+
+        <div>
+            <h4>@materia.Materia.Nombre (@materia.Anio - Cuatrimestre @materia.Cuatrimestre)</h4>
+
+            @if (promedio > 0)
+            {
+                <p><strong>Promedio:</strong> @promedio.ToString("0.00")</p>
+            }
+            else
+            {
+                <p><em>Aún no hay calificaciones numéricas.</em></p>
+            }
+
+            <ul>
+                @foreach (var inscripcion in materia.Inscripciones)
+                {
+                    <li>@inscripcion.Alumno.Nombre @inscripcion.Alumno.Apellido</li>
+                }
+            </ul>
+        </div>
+    }
+}
+

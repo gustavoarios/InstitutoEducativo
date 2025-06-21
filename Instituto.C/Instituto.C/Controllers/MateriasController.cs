@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Instituto.C.Data;
+using Instituto.C.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Instituto.C.Data;
-using Instituto.C.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Instituto.C.Controllers
 {
@@ -26,6 +27,7 @@ namespace Instituto.C.Controllers
             return View(await institutoDb.ToListAsync());
         }
 
+        [Authorize(Roles = "EmpleadoRol")]
         // GET: Materias/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -46,6 +48,7 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Materias/Create
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
             var carreras = _context.Carreras
@@ -64,18 +67,23 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("Id,Nombre,CodigoMateria,Descripcion,CupoMaximo,CarreraId")] Materia materia)
         {
             if (ModelState.IsValid)
             {
-                // VALIDACIÓN: que no exista otra materia con el mismo nombre en la misma carrera
                 bool materiaRepetida = await _context.Materias
                     .AnyAsync(m => m.Nombre == materia.Nombre && m.CarreraId == materia.CarreraId);
 
                 if (materiaRepetida)
                 {
                     ModelState.AddModelError("Nombre", "Ya existe una materia con ese nombre en esta carrera.");
-                    ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", materia.CarreraId);
+
+                    var carreras = _context.Carreras
+                        .Select(c => new { c.Id, Display = c.CodigoCarrera + " - " + c.Nombre })
+                        .ToList();
+
+                    ViewData["CarreraId"] = new SelectList(carreras, "Id", "Display", materia.CarreraId);
                     return View(materia);
                 }
 
@@ -84,11 +92,17 @@ namespace Instituto.C.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", materia.CarreraId);
+            var allCarreras = _context.Carreras
+                .Select(c => new { c.Id, Display = c.CodigoCarrera + " - " + c.Nombre })
+                .ToList();
+
+            ViewData["CarreraId"] = new SelectList(allCarreras, "Id", "Display", materia.CarreraId);
             return View(materia);
         }
 
+
         // GET: Materias/Edit/5
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -110,6 +124,7 @@ namespace Instituto.C.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,CodigoMateria,Descripcion,CupoMaximo,CarreraId")] Materia materia)
         {
             if (id != materia.Id)
@@ -119,7 +134,7 @@ namespace Instituto.C.Controllers
 
             if (ModelState.IsValid)
             {
-                // VALIDACIÓN: evitar duplicado al editar (excluyendo el actual)
+                // validamoos para evitar duplicado al editar (excluyendo el actual)
                 bool materiaRepetida = await _context.Materias
                     .AnyAsync(m => m.Id != materia.Id && m.Nombre == materia.Nombre && m.CarreraId == materia.CarreraId);
 
@@ -154,6 +169,8 @@ namespace Instituto.C.Controllers
         }
 
         // GET: Materias/Delete/5
+        
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -175,6 +192,7 @@ namespace Instituto.C.Controllers
         // POST: Materias/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var materia = await _context.Materias.FindAsync(id);
