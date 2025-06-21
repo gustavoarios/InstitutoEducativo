@@ -79,7 +79,7 @@ namespace Instituto.C.Controllers
                 // Empleado: puede elegir cualquier alumno ACTIVO
                 var alumnosActivos = _context.Alumnos
                     .Where(a => a.Activo)
-                    .ToList(); // 👈 Necesario para evitar errores por herencia en propiedades
+                    .ToList(); // eso es para evitar errores por herencia en propiedades, por las dudas
 
                 ViewData["AlumnoId"] = new SelectList(
                     alumnosActivos.Select(a => new
@@ -150,7 +150,7 @@ namespace Instituto.C.Controllers
                 return View(new Inscripcion { AlumnoId = alumno.Id });
             }
 
-            // Seguridad extra: no debería llegar acá nadie más
+            // algo de seguridad extra, igual en teoria sabemos q no debería llegar acá nadie más
             return Unauthorized();
         }
 
@@ -354,17 +354,17 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
-            // Ya tiene una calificación → no se puede dar de baja
+            // si ya tiene una calificacion, el alumno no se puede dar de baja de la inscripcion hecha
             if (inscripcion.Calificacion != null)
             {
                 TempData["Error"] = "No podés cancelar la inscripción porque ya tenés una calificación registrada.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Obtenemos el profesor asignado a esa materia
+            // obtenemos el profesor asignado a esa materia
             var profesorId = inscripcion.MateriaCursada?.ProfesorId ?? 0;
 
-            // Creamos una calificación de Baja
+            // creamos una calificación de baja
             var calificacion = new Calificacion
             {
                 AlumnoId = alumnoId,

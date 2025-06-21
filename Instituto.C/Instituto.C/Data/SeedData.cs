@@ -26,9 +26,11 @@ namespace Instituto.C.Data
                 };
                 foreach (var e in empleados)
                 {
+                    e.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(e);
                     await userManager.CreateAsync(e, "Password1!");
                     await userManager.AddToRoleAsync(e, "EmpleadoRol");
                 }
+
             }
 
             // === PROFESORES ===
@@ -42,9 +44,11 @@ namespace Instituto.C.Data
                 };
                 foreach (var p in profesores)
                 {
+                    p.Legajo = GeneradorDeLegajo.GenerarLegajoParaProfesor(p);
                     await userManager.CreateAsync(p, "Password1!");
                     await userManager.AddToRoleAsync(p, "ProfesorRol");
                 }
+
             }
 
             // === CARRERAS ===

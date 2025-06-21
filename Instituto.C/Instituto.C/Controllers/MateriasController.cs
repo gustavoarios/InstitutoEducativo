@@ -134,7 +134,7 @@ namespace Instituto.C.Controllers
 
             if (ModelState.IsValid)
             {
-                // VALIDACIÓN: evitar duplicado al editar (excluyendo el actual)
+                // validamoos para evitar duplicado al editar (excluyendo el actual)
                 bool materiaRepetida = await _context.Materias
                     .AnyAsync(m => m.Id != materia.Id && m.Nombre == materia.Nombre && m.CarreraId == materia.CarreraId);
 
