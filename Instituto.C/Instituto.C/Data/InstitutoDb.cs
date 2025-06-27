@@ -50,13 +50,14 @@ namespace Instituto.C.Data
             // MateriaCursada
             modelBuilder.Entity<MateriaCursada>()
                 .HasOne(mc => mc.Profesor)
-                .WithMany()
+                .WithMany(p => p.MateriasCursada)
                 .HasForeignKey(mc => mc.ProfesorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
             modelBuilder.Entity<MateriaCursada>()
                 .HasOne(mc => mc.Materia)
-                .WithMany()
+                .WithMany(m => m.Cursadas)
                 .HasForeignKey(mc => mc.MateriaId)
                 .OnDelete(DeleteBehavior.Restrict);
 

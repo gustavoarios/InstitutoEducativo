@@ -1,15 +1,43 @@
 ﻿@{
 	ViewData["Title"] = "Home Page";
+	var estaLogueado = User.Identity.IsAuthenticated;
 }
 
-<div class="text-center">
-	<h1 class="display-4">Bienvenidos</h1>
-	<p>Una plataforma para la gestión académica de alumnos, profesores y materias.</p>
-</div>
-@if (ViewBag.Message is not null)
-{
-	<div class="card">
-		<p class="text-danger">@ViewBag.Message</p>
+<div class="container text-center py-5">
+
+	@if (!estaLogueado)
+	{
+		<h1 class="fw-bold">Accedé al Portal Académico</h1>
+		<p>Consultá materias, docentes, carreras e inscripciones.</p>
+	}
+	else
+	{
+		<h2>Hola, @User.Identity.Name, ¡bienvenido!</h2>
+
+		if (User.IsInRole("AlumnoRol"))
+		{
+			<p>En este portal vas a ver todo lo referido a tu carrera, materias, inscribirte y ver tus calificaciones.</p>
+		}
+		else if (User.IsInRole("ProfesorRol"))
+		{
+			<p>En este portal vas a ver todo lo referido a tus materias, tus alumnos y calificarlos.</p>
+		}
+		else if (User.IsInRole("EmpleadoRol"))
+		{
+			<p>En este portal vas a gestionar las carreras, materias, profesores, alumnos y empleados.</p>
+		}
+	}
+
+	@if (ViewBag.Message is not null)
+	{
+		<div class="card mt-3">
+			<p class="text-danger">@ViewBag.Message</p>
+		</div>
+	}
+
+	<div class="mt-5">
+		<img src="~/images/portada-instituto.png" alt="Oficina de Atención al Estudiante" class="img-fluid w-100" />
 	</div>
-}
+</div>
+
 

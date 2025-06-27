@@ -106,6 +106,8 @@ namespace Instituto.C.Controllers
                     alumno.DNI = model.DNI;
                     alumno.Telefono = model.Telefono;
                     alumno.CarreraId = model.CarreraId;
+                    alumno.Activo = false; //ponemos y seteamos el activo en false, porque el alumno no se activa hasta que un empleado lo de de alta
+
                 }
 
                 var resultado = await _userManager.CreateAsync(alumno, model.Password);
@@ -121,7 +123,7 @@ namespace Instituto.C.Controllers
                     await _context.SaveChangesAsync();
                     //si está ok registro
                     //aca se asignan los roles
-                    return RedirectToAction("Index", "Alumnos");
+                    return RedirectToAction("Index", "Home");
 
 
                 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Instituto.C.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class Final : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -195,15 +195,13 @@ namespace Instituto.C.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CodigoCursada = table.Column<string>(type: "nvarchar(1)", maxLength: 1, nullable: false),
+                    CodigoCursada = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Anio = table.Column<int>(type: "int", nullable: false),
                     Cuatrimestre = table.Column<int>(type: "int", nullable: false),
                     Activo = table.Column<bool>(type: "bit", nullable: false),
                     ProfesorId = table.Column<int>(type: "int", nullable: false),
                     MateriaId = table.Column<int>(type: "int", nullable: false),
-                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    MateriaId1 = table.Column<int>(type: "int", nullable: true),
-                    ProfesorId1 = table.Column<int>(type: "int", nullable: true)
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -215,21 +213,11 @@ namespace Instituto.C.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MateriasCursadas_Materias_MateriaId1",
-                        column: x => x.MateriaId1,
-                        principalTable: "Materias",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_MateriasCursadas_Personas_ProfesorId",
                         column: x => x.ProfesorId,
                         principalTable: "Personas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MateriasCursadas_Personas_ProfesorId1",
-                        column: x => x.ProfesorId1,
-                        principalTable: "Personas",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -371,19 +359,9 @@ namespace Instituto.C.Migrations
                 column: "MateriaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MateriasCursadas_MateriaId1",
-                table: "MateriasCursadas",
-                column: "MateriaId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MateriasCursadas_ProfesorId",
                 table: "MateriasCursadas",
                 column: "ProfesorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MateriasCursadas_ProfesorId1",
-                table: "MateriasCursadas",
-                column: "ProfesorId1");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",

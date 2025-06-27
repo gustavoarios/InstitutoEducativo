@@ -2,15 +2,15 @@
 
 @{
     ViewData["Title"] = "Profesores";
-    var esAlumno = User.IsInRole("AlumnoRol");
+    var esEmpleado = User.IsInRole("EmpleadoRol");
 }
 
 <h1>Profesores</h1>
 
-@if (User.IsInRole("EmpleadoRol"))
+@if (esEmpleado)
 {
     <p>
-        <a asp-action="Create">Create New</a>
+        <a class="btn btn-primary" asp-action="Create">Agregar Profesor</a>
     </p>
 }
 
@@ -20,7 +20,9 @@
             <th>@Html.DisplayNameFor(model => model.Nombre)</th>
             <th>@Html.DisplayNameFor(model => model.Apellido)</th>
             <th>@Html.DisplayNameFor(model => model.Email)</th>
-            @if (User.IsInRole("EmpleadoRol"))
+            <th>Materias que dicta</th>
+
+            @if (esEmpleado)
             {
                 <th>@Html.DisplayNameFor(model => model.Legajo)</th>
                 <th>@Html.DisplayNameFor(model => model.UserName)</th>
@@ -28,10 +30,9 @@
                 <th>@Html.DisplayNameFor(model => model.DNI)</th>
                 <th>@Html.DisplayNameFor(model => model.Telefono)</th>
                 <th>@Html.DisplayNameFor(model => model.Direccion)</th>
-                //<th>@Html.DisplayNameFor(model => model.Activo)</th>
             }
-            
-            @if (User.IsInRole("EmpleadoRol"))
+
+            @if (esEmpleado)
             {
                 <th>Acciones</th>
             }
@@ -44,7 +45,24 @@
                 <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
                 <td>@Html.DisplayFor(modelItem => item.Apellido)</td>
                 <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                @if (User.IsInRole("EmpleadoRol"))
+
+                <td>
+                    @if (item.MateriasCursada?.Any() == true)
+                    {
+                        <ul class="mb-0 ps-3">
+                            @foreach (var mc in item.MateriasCursada)
+                            {
+                                <li>@mc.Materia?.Nombre</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span>No asignado</span>
+                    }
+                </td>
+
+                @if (esEmpleado)
                 {
                     <td>@Html.DisplayFor(modelItem => item.Legajo)</td>
                     <td>@Html.DisplayFor(modelItem => item.UserName)</td>
@@ -52,19 +70,20 @@
                     <td>@Html.DisplayFor(modelItem => item.DNI)</td>
                     <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
                     <td>@Html.DisplayFor(modelItem => item.Direccion)</td>
-                    //<td>@Html.DisplayFor(modelItem => item.Activo)</td>
                 }
 
-                @if (User.IsInRole("EmpleadoRol"))
+                @if (esEmpleado)
                 {
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                        <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                        <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">Detalles</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
                     </td>
                 }
             </tr>
         }
     </tbody>
+</table>
+
     
 

@@ -13,6 +13,10 @@
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
 
 <div class="row">
     <div class="col-md-4">
@@ -20,46 +24,27 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <!-- Campo Alumno -->
-            <div class="form-group">
-                <label class="control-label">Alumno</label>
-                <label asp-for="AlumnoId" class="d-none"></label>
-
-
-                @if (User.IsInRole("AlumnoRol"))
-                {
-                    <input type="hidden" asp-for="AlumnoId" />
-                    <p class="form-control-plaintext">
-                        @{
-                            var list = ViewData["AlumnoId"] as SelectList;
-                            var item = list?.FirstOrDefault();
-                        }
-                        @item?.Text
-                    </p>
-                }
-                else
-                {
+            @if (User.IsInRole("AlumnoRol"))
+            {
+                <input type="hidden" asp-for="AlumnoId" />
+            }
+            else
+            {
+                <div class="form-group">
+                    <label class="control-label">Alumno</label>
                     <select asp-for="AlumnoId" class="form-control" asp-items="@(ViewData["AlumnoId"] as SelectList)"></select>
-
-                }
-
-                <span asp-validation-for="AlumnoId" class="text-danger"></span>
-            </div>
+                    <span asp-validation-for="AlumnoId" class="text-danger"></span>
+                </div>
+            }
 
             <!-- Campo MateriaCursada -->
             <div class="form-group">
-                <label class="control-label">Cursada</label>
-                <label asp-for="MateriaCursadaId" class="d-none"></label>
-
-                <select asp-for="MateriaCursadaId" class="form-control" asp-items="@(ViewData["MateriaCursadaId"] as SelectList)"></select>
+                <label class="control-label">Materia</label>
+                <select asp-for="MateriaCursadaId" class="form-control" asp-items="@(ViewData["MateriaCursadaId"] as SelectList)">
+                    <option value="">-- Seleccioná una cursada --</option>
+                </select>
                 <span asp-validation-for="MateriaCursadaId" class="text-danger"></span>
             </div>
-
-            @* <!-- Campo Activa-no va porque siempre va activa la inscripcion cuando se inscribe el alumno -->
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activa" /> @Html.DisplayNameFor(model => model.Activa)
-                </label>
-            </div> *@
 
             <div class="form-group">
                 <input type="submit" value="Crear" class="btn btn-primary" />
@@ -69,10 +54,12 @@
 </div>
 
 <div>
-    <a asp-action="Index">Volver al listado</a>
+    <a asp-action="MateriasActuales">Volver al listado</a>
 </div>
 
 @section Scripts {
     @Html.Partial("_ValidationScriptsPartial")
 }
+
+
 

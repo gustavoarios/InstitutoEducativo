@@ -12,7 +12,7 @@
 }
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
+    <a asp-action="Create" class="btn btn-primary">Crear Inscripcion</a>
 </p>
 
 <table class="table">
@@ -34,10 +34,11 @@
                 <td>@item.FechaInscripcion.ToShortDateString()</td>
                 <td>@(item.Activa ? "Sí" : "No")</td>
                 <td>
-                    <a asp-action="Edit" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Editar</a> |
-                    <a asp-action="Details" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Detalles</a> |
-                    <a asp-action="Delete" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Eliminar</a>
+                    <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Editar</a>
+                    <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Detalles</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Eliminar</a>
                 </td>
+
             </tr>
         }
     </tbody>

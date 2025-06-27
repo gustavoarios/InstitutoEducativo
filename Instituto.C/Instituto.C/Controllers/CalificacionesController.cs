@@ -256,6 +256,7 @@ namespace Instituto.C.Controllers
             return View(calificacion);
         }
 
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -274,6 +275,7 @@ namespace Instituto.C.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var calificacion = await _context.Calificaciones.FindAsync(id);

@@ -13,7 +13,7 @@
 		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
 			<div class="container-fluid">
 				<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-					<img src="~/images/logo.png" alt="Logo Instituto.C" style="height:40px; margin-right:8px;" />
+					<img src="~/images/logo-del-instituto.png" alt="Logo Instituto.C" style="height:40px; margin-right:8px;" />
 				</a>
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
 						aria-expanded="false" aria-label="Toggle navigation">
@@ -50,9 +50,7 @@
 							<li class="nav-item">
 								<a class="nav-link text-dark" asp-area="" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
 							</li>
-							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
-							</li>
+							
 							
 
 							if(User.IsInRole("EmpleadoRol")){
@@ -65,6 +63,9 @@
 								</li>
 								<li class="nav-item">
 									<a class="nav-link text-dark" asp-area="" asp-controller="MateriasCursadas" asp-action="Index">Materias Cursadas</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
 								</li>
 							}
 
@@ -126,7 +127,7 @@
 
 	<footer class="border-top footer text-muted">
 		<div class="container">
-			&copy; 2025 - Sprienfield Elementary School - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+			&copy; 2025 - Instituto Educativo -
 			<a asp-action="Seed" asp-controller="PreCarga" class="btn btn-sm btn-info">Pre Carga Db</a>
 		</div>
 	</footer>

@@ -31,10 +31,14 @@ namespace Instituto.C.Controllers
         {
             var activos = await _context.Profesores
                 .Where(p => p.Activo)
+                .Include(p => p.MateriasCursada)
+                    .ThenInclude(mc => mc.Materia)
+                        .ThenInclude(m => m.Carrera) // mostramos tamien la carrera del profesor 
                 .ToListAsync();
 
             return View(activos);
         }
+
 
 
         [Authorize(Roles = "EmpleadoRol")]
@@ -103,39 +107,6 @@ namespace Instituto.C.Controllers
             }
             return View(profesor);
         }
-
-        /*[HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "EmpleadoRol")]
-        public async Task<IActionResult> Edit(int id, [Bind("Legajo,Id,UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo")] Profesor profesor)
-        {
-            if (id != profesor.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(profesor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProfesorExists(profesor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(profesor);
-        }*/
 
         [HttpPost]
         [ValidateAntiForgeryToken]

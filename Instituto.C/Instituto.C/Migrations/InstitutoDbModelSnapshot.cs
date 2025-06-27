@@ -153,9 +153,7 @@ namespace Instituto.C.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CodigoCursada")
-                        .IsRequired()
-                        .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Cuatrimestre")
                         .HasColumnType("int");
@@ -163,29 +161,17 @@ namespace Instituto.C.Migrations
                     b.Property<int>("MateriaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MateriaId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProfesorId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProfesorId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MateriaId");
 
-                    b.HasIndex("MateriaId1");
-
                     b.HasIndex("ProfesorId");
-
-                    b.HasIndex("ProfesorId1");
 
                     b.ToTable("MateriasCursadas");
                 });
@@ -554,24 +540,16 @@ namespace Instituto.C.Migrations
             modelBuilder.Entity("Instituto.C.Models.MateriaCursada", b =>
                 {
                     b.HasOne("Instituto.C.Models.Materia", "Materia")
-                        .WithMany()
+                        .WithMany("Cursadas")
                         .HasForeignKey("MateriaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Instituto.C.Models.Materia", null)
-                        .WithMany("Cursadas")
-                        .HasForeignKey("MateriaId1");
-
                     b.HasOne("Instituto.C.Models.Profesor", "Profesor")
-                        .WithMany()
+                        .WithMany("MateriasCursada")
                         .HasForeignKey("ProfesorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Instituto.C.Models.Profesor", null)
-                        .WithMany("MateriasCursada")
-                        .HasForeignKey("ProfesorId1");
 
                     b.Navigation("Materia");
 

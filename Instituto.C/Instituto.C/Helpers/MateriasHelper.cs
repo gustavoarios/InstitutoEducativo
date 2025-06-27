@@ -1,4 +1,5 @@
-﻿using Instituto.C.Models;
+﻿using Instituto.C.Data;
+using Instituto.C.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,6 @@ namespace Instituto.C.Helpers
 {
     public class MateriasHelper
     {
-
         public static string ObtenerSiguienteCodigoCursada(string codigoActual)
         {
             if (string.IsNullOrEmpty(codigoActual)) return "A";
@@ -25,10 +25,32 @@ namespace Instituto.C.Helpers
             return inscripcionesActivas >= cursada.Materia.CupoMaximo;
         }
 
-        public static MateriaCursada CrearNuevaCursadaSiEstaLleno(MateriaCursada cursada)
+        // MODIFICADO: ahora recibe el contexto y evita duplicados
+        public static MateriaCursada CrearNuevaCursadaSiEstaLleno(MateriaCursada cursada, InstitutoDb context)
         {
             if (!EstaLleno(cursada)) return null;
 
+            // Buscar si ya existe una alternativa para la misma materia, mismo año, cuatrimestre y activa
+            var existentes = context.MateriasCursadas
+                .Where(mc =>
+                    mc.MateriaId == cursada.MateriaId &&
+                    mc.Anio == cursada.Anio &&
+                    mc.Cuatrimestre == cursada.Cuatrimestre &&
+                    mc.Activo &&
+                    mc.Id != cursada.Id)
+                .ToList();
+
+            // Si hay alguna alternativa que no esté llena, la usamos
+            foreach (var alt in existentes)
+            {
+                context.Entry(alt).Collection(x => x.Inscripciones).Load();
+                context.Entry(alt).Reference(x => x.Materia).Load();
+
+                if (!EstaLleno(alt))
+                    return alt;
+            }
+
+            // Si no hay ninguna alternativa libre, se crea una nueva
             return new MateriaCursada
             {
                 MateriaId = cursada.MateriaId,
@@ -52,8 +74,8 @@ namespace Instituto.C.Helpers
             var materiasYaCursadas = alumno.Inscripciones?
                 .Where(i => i.Calificacion != null || i.Activa)
                 .Select(i => i.MateriaCursada?.MateriaId)
-                .Where(id => id.HasValue) // Filter out null values
-                .Select(id => id.Value)  // Extract the actual values
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
                 .Distinct()
                 .ToHashSet() ?? new HashSet<int>();
 
@@ -62,8 +84,6 @@ namespace Instituto.C.Helpers
                              !materiasYaCursadas.Contains(mc.MateriaId))
                 .ToList();
         }
-
-
-
     }
 }
+
