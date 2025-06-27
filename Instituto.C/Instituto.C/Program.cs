@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,21 +15,14 @@ namespace Instituto.C
     public class Program
     {
         public static void Main(string[] args)
-
-
         {
-
             var builder = WebApplication.CreateBuilder(args);
-            //builder.Services.AddControllersWithViews();
 
-            // Add services to the container.
-            //builder.Services.AddDbContext<InstitutoDb>(options => options.UseInMemoryDatabase("InstitutoDb"));
-            builder.Services.AddDbContext<InstitutoDb>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
-
+            builder.Services.AddDbContext<InstitutoDb>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
 
             builder.Services.AddIdentity<Persona, Rol>()
                 .AddEntityFrameworkStores<InstitutoDb>();
-
 
             builder.Services.Configure<IdentityOptions>(opciones =>
             {
@@ -35,7 +30,7 @@ namespace Instituto.C
                 opciones.Password.RequireNonAlphanumeric = false;
                 opciones.Password.RequireUppercase = false;
                 opciones.Password.RequireDigit = false;
-                opciones.Password.RequiredLength = 5; //Antes era 6, también se puede hacer en AddIdentity.
+                opciones.Password.RequiredLength = 5;
                 opciones.User.RequireUniqueEmail = true;
             });
 
@@ -51,11 +46,37 @@ namespace Instituto.C
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // === SOLO EN DESARROLLO: aplicar migraciones y precargar si base está vacía y ya hay roles ===
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<InstitutoDb>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Persona>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Rol>>();
+
+                context.Database.Migrate(); // Aplica migraciones pendientes
+
+                // Verificamos si existen los roles necesarios
+                bool rolesExisten =
+                    roleManager.RoleExistsAsync("EmpleadoRol").Result &&
+                    roleManager.RoleExistsAsync("ProfesorRol").Result &&
+                    roleManager.RoleExistsAsync("AlumnoRol").Result;
+
+                // Solo precargar si la base está vacía Y los roles ya existen
+                if (!context.Users.Any() && rolesExisten)
+                {
+                    Console.WriteLine("?? Precargando datos automáticamente...");
+                    SeedData.InitializeAsync(context, userManager).Wait();
+                }
+                else
+                {
+                    Console.WriteLine("?? Datos ya existentes o roles no creados. Precarga automática omitida.");
+                }
+            }
+
+            // Configuración del pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -74,3 +95,5 @@ namespace Instituto.C
         }
     }
 }
+
+

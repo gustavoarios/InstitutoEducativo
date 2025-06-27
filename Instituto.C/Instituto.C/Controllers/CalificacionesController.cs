@@ -93,12 +93,13 @@ namespace Instituto.C.Controllers
             }), "Id", "Nombre");
 
             ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
-                .Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
-                }), "Id", "Nombre");
+                    .Include(mc => mc.Materia)
+                    .Select(mc => new
+                    {
+                     mc.Id,
+                     Nombre = mc.Materia.CodigoMateria + "-" + mc.Anio + "-" + mc.Cuatrimestre + "C-" + mc.CodigoCursada
+                    }), "Id", "Nombre");
+
 
             var userName = User.Identity.Name;
             var profesor = _context.Profesores.FirstOrDefault(p => p.UserName == userName);
@@ -135,6 +136,32 @@ namespace Instituto.C.Controllers
                 ModelState.AddModelError("", "No se puede calificar una materia que ya finalizó.");
                 return RecargarVistaConCombos(calificacion);
             }
+
+            DateTime hoy = DateTime.Now;
+
+            if (cursada.Cuatrimestre == 1)
+            {
+                if (hoy < new DateTime(hoy.Year, 1, 1) || hoy > new DateTime(hoy.Year, 7, 31))
+                {
+                    ModelState.AddModelError("", "Solo se pueden cargar calificaciones del 1er Cuatrimestre entre el 1 de enero y el 31 de julio.");
+                    return RecargarVistaConCombos(calificacion);
+                }
+            }
+            else if (cursada.Cuatrimestre == 2)
+            {
+                if (hoy < new DateTime(hoy.Year, 8, 1) || hoy > new DateTime(hoy.Year, 12, 31))
+                {
+                    ModelState.AddModelError("", "Solo se pueden cargar calificaciones del 2do Cuatrimestre entre el 1 de agosto y el 31 de diciembre.");
+                    return RecargarVistaConCombos(calificacion);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "El cuatrimestre de la materia no es válido.");
+                return RecargarVistaConCombos(calificacion);
+            }
+
+
 
             if (calificacion.Fecha == DateTime.MinValue)
                 calificacion.Fecha = DateTime.Now;
@@ -328,12 +355,13 @@ namespace Instituto.C.Controllers
             }), "Id", "Nombre", calificacion.AlumnoId);
 
             ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
-                .Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
-                }), "Id", "Nombre", calificacion.MateriaCursadaId);
+            .Include(mc => mc.Materia)
+            .Select(mc => new
+            {
+                mc.Id,
+                Nombre = mc.Materia.CodigoMateria + "-" + mc.Anio + "-" + mc.Cuatrimestre + "C-" + mc.CodigoCursada
+            }), "Id", "Nombre", calificacion.MateriaCursadaId);
+
 
             // mostramos el profesor actual
             var userName = User.Identity.Name;

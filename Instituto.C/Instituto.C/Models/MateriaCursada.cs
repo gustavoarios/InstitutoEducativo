@@ -48,18 +48,14 @@ namespace Instituto.C.Models
         public bool EstaVigente()
         {
             if (Cuatrimestre == 1)
-            {
-                return DateTime.Now <= new DateTime(Anio, 7, 31); // 31 de Julio
-            }
-            else
-            {
+                return DateTime.Now <= new DateTime(Anio, 7, 31);
 
-                return DateTime.Now <= new DateTime(Anio, 12, 31); // 31 de Diciembre
-            }
+            if (Cuatrimestre == 2)
+                return DateTime.Now <= new DateTime(Anio, 12, 31);
 
-
-
+            return false; // Por si Cuatrimestre tiene un valor inválido
         }
+
 
 
     }

@@ -13,6 +13,11 @@
 	</p>
 }
 
+@if (!Model.Any())
+{
+	<div class="alert alert-info">No tenés calificaciones todavía.</div>
+}
+
 <table class="table">
 	<thead>
 		<tr>
