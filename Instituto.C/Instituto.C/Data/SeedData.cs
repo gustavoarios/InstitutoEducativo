@@ -285,10 +285,38 @@ namespace Instituto.C.Data
 
                 foreach (var e in empleados)
                 {
-                    e.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(e);
-                    await userManager.CreateAsync(e, "Password1!");
-                    await userManager.AddToRoleAsync(e, "EmpleadoRol");
+                    var existente = await userManager.FindByNameAsync(e.UserName);
+                    if (existente == null)
+                    {
+                        e.Legajo = GeneradorDeLegajo.GenerarLegajoParaEmpleado(e);
+                        var resultadoCreacion = await userManager.CreateAsync(e, "Password1!");
+
+                        if (resultadoCreacion.Succeeded)
+                        {
+                            var resultadoRol = await userManager.AddToRoleAsync(e, "EmpleadoRol");
+                            if (!resultadoRol.Succeeded)
+                            {
+                                Console.WriteLine($"No se pudo asignar rol a {e.UserName}: {string.Join(", ", resultadoRol.Errors.Select(x => x.Description))}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No se pudo crear al empleado {e.UserName}: {string.Join(", ", resultadoCreacion.Errors.Select(x => x.Description))}");
+                        }
+                    }
+                    else
+                    {
+                        // Asegura que el rol sea el correcto
+                        var rolesActuales = await userManager.GetRolesAsync(existente);
+                        if (!rolesActuales.Contains("EmpleadoRol"))
+                        {
+                            await userManager.RemoveFromRolesAsync(existente, rolesActuales);
+                            await userManager.AddToRoleAsync(existente, "EmpleadoRol");
+                            Console.WriteLine($"Reasignado rol a {existente.UserName}");
+                        }
+                    }
                 }
+
             }
 
             // === PROFESORES ===
