@@ -160,45 +160,36 @@ namespace Instituto.C.Controllers
         [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Edit(int id, [Bind("UserName,Email,FechaAlta,Nombre,Apellido,DNI,Telefono,Direccion,Activo,CarreraId")] Alumno alumno)
         {
-            Alumno alumnoDb;
-
-            if (User.IsInRole("AlumnoRol"))
-            {
-                var userId = Int32.Parse(_userManager.GetUserId(User));
-
-                // Seguridad: el alumno solo puede editarse a sí mismo
-                if (userId != id)
-                {
-                    return Forbid();
-                }
-
-                alumnoDb = await _context.Alumnos.FindAsync(userId);
-            }
-            else
-            {
-                alumnoDb = await _context.Alumnos.FindAsync(id);
-            }
+            var alumnoDb = await _context.Alumnos
+                .Include(a => a.Inscripciones)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (alumnoDb == null)
-            {
                 return NotFound();
+
+            bool cambioCarrera = alumno.CarreraId != alumnoDb.CarreraId;
+            bool tieneInscripciones = alumnoDb.Inscripciones.Any();
+
+            if (cambioCarrera && tieneInscripciones)
+            {
+                ModelState.AddModelError("CarreraId", "No se puede cambiar de carrera porque el alumno ya tiene inscripciones.");
+                alumno.CarreraId = alumnoDb.CarreraId;
+                ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
+                return View(alumno);
             }
 
-            // Campos editables por todos
+            alumnoDb.Email = alumno.Email;
+            alumnoDb.Telefono = alumno.Telefono;
+            alumnoDb.Activo = alumno.Activo;
+            alumnoDb.FechaAlta = alumno.FechaAlta;
+            alumnoDb.UserName = alumno.UserName;
+            alumnoDb.Nombre = alumno.Nombre;
+            alumnoDb.Apellido = alumno.Apellido;
+            alumnoDb.DNI = alumno.DNI;
+            alumnoDb.Direccion = alumno.Direccion;
 
-
-            // Campos solo editables por empleados (no alumnos)
-            if (User.IsInRole("EmpleadoRol"))
+            if (!tieneInscripciones && cambioCarrera)
             {
-                alumnoDb.Email = alumno.Email;
-                alumnoDb.Telefono = alumno.Telefono;
-                alumnoDb.Activo = alumno.Activo;
-                alumnoDb.FechaAlta = alumno.FechaAlta;
-                alumnoDb.UserName = alumno.UserName;
-                alumnoDb.Nombre = alumno.Nombre;
-                alumnoDb.Apellido = alumno.Apellido;
-                alumnoDb.DNI = alumno.DNI;
-                alumnoDb.Direccion = alumno.Direccion;
                 alumnoDb.CarreraId = alumno.CarreraId;
             }
 
@@ -212,6 +203,12 @@ namespace Instituto.C.Controllers
                 return Problem("Hubo un problema de concurrencia al intentar guardar los cambios.");
             }
         }
+
+
+
+
+
+
 
 
         // GET: Alumnos/Delete/5

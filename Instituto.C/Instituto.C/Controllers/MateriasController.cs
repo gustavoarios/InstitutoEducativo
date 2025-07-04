@@ -1,6 +1,7 @@
 ﻿using Instituto.C.Data;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +15,43 @@ namespace Instituto.C.Controllers
     public class MateriasController : Controller
     {
         private readonly InstitutoDb _context;
+        private readonly UserManager<Persona> _userManager;
 
-        public MateriasController(InstitutoDb context)
+
+        public MateriasController(InstitutoDb context, UserManager<Persona> userManager)
         {
             _context = context;
+            _userManager = userManager;
+
         }
 
         // GET: Materias
         public async Task<IActionResult> Index()
         {
-            var institutoDb = _context.Materias.Include(m => m.Carrera);
-            return View(await institutoDb.ToListAsync());
+            if (User.IsInRole("AlumnoRol"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var alumno = await _context.Alumnos
+                    .Include(a => a.Carrera)
+                    .FirstOrDefaultAsync(a => a.Id == user.Id);
+
+                if (alumno != null)
+                {
+                    var materiasAlumno = await _context.Materias
+                        .Include(m => m.Carrera)
+                        .Where(m => m.CarreraId == alumno.CarreraId)
+                        .ToListAsync();
+
+                    return View(materiasAlumno);
+                }
+            }
+
+            // Si no es alumno o no se encontró el alumno, mostrar todas
+            var todasLasMaterias = await _context.Materias
+                .Include(m => m.Carrera)
+                .ToListAsync();
+
+            return View(todasLasMaterias);
         }
 
         [Authorize(Roles = "EmpleadoRol")]

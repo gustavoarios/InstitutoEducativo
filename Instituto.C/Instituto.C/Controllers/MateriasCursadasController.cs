@@ -126,15 +126,27 @@ namespace Instituto.C.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "EmpleadoRol")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoCursada,Anio,Cuatrimestre,Activo,MateriaId,ProfesorId")] MateriaCursada materiaCursada)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ProfesorId,Activo")] MateriaCursada datosEditados)
         {
-            if (id != materiaCursada.Id)
+            if (id != datosEditados.Id)
                 return NotFound();
 
-            materiaCursada.Materia = await _context.Materias.FindAsync(materiaCursada.MateriaId);
+            var materiaCursada = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Include(mc => mc.Profesor)
+                .FirstOrDefaultAsync(mc => mc.Id == id);
+
+            if (materiaCursada == null)
+                return NotFound();
+
+            // Solo se permiten modificar estos campos
+            materiaCursada.ProfesorId = datosEditados.ProfesorId;
+            materiaCursada.Activo = datosEditados.Activo;
+
+            // Actualizar el nombre por si se ve afectado
             materiaCursada.Nombre = MateriasHelper.GenerarNombreCursada(materiaCursada);
 
-            // Validación de duplicado en edición
+            // Validar si existe otra cursada con el mismo nombre
             bool duplicado = await _context.MateriasCursadas
                 .AnyAsync(mc => mc.Nombre == materiaCursada.Nombre && mc.Id != materiaCursada.Id);
 
@@ -142,6 +154,12 @@ namespace Instituto.C.Controllers
             {
                 ModelState.AddModelError("Nombre", "Ya existe otra cursada con ese nombre.");
             }
+
+            ModelState.Remove("Anio");
+            ModelState.Remove("Cuatrimestre");
+            ModelState.Remove("MateriaId");
+            ModelState.Remove("CodigoCursada");
+
 
             if (ModelState.IsValid)
             {
@@ -160,10 +178,10 @@ namespace Instituto.C.Controllers
                 }
             }
 
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", materiaCursada.MateriaId);
             ViewData["ProfesorId"] = new SelectList(_context.Profesores.Where(p => p.Activo), "Id", "NombreCompleto", materiaCursada.ProfesorId);
             return View(materiaCursada);
         }
+
 
 
 

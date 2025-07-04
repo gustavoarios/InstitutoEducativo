@@ -185,13 +185,13 @@ namespace Instituto.C.Controllers
             if (alumno == null)
             {
                 ModelState.AddModelError("", "Alumno no encontrado.");
-                return RedirectToAction("MateriasActuales");
+                return RedirectToAction("Index", "Materias");
             }
 
             if (!alumno.Activo)
             {
                 ModelState.AddModelError("", "Solo los alumnos activos pueden inscribirse.");
-                return RedirectToAction("MateriasActuales");
+                return RedirectToAction("Index", "Materias");
             }
 
             var cursada = await _context.MateriasCursadas
@@ -203,13 +203,13 @@ namespace Instituto.C.Controllers
             if (cursada == null)
             {
                 ModelState.AddModelError("", "Materia cursada no encontrada.");
-                return RedirectToAction("MateriasActuales");
+                return RedirectToAction("Index", "Materias");
             }
 
             if (alumno.CarreraId != cursada.Materia.CarreraId)
             {
                 ModelState.AddModelError("", "No podés inscribirte a materias que no pertenecen a tu carrera.");
-                return RedirectToAction("MateriasActuales");
+                return RedirectToAction("Index", "Materias");
             }
 
             bool yaCursada = alumno.Inscripciones.Any(i =>
@@ -219,14 +219,14 @@ namespace Instituto.C.Controllers
             if (yaCursada)
             {
                 ModelState.AddModelError("", "Ya cursaste o estás cursando esta materia.");
-                return RedirectToAction("MateriasActuales");
+                return RedirectToAction("Index", "Materias");
             }
 
             int materiasActivas = alumno.Inscripciones.Count(i => i.Activa);
             if (materiasActivas >= 5)
             {
                 TempData["Error"] = "No podés inscribirte en más de 5 materias a la vez.";
-                return RedirectToAction("MateriasActuales");
+                return RedirectToAction("Index", "Materias");
             }
 
 

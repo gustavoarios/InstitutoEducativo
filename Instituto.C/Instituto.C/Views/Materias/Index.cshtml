@@ -4,7 +4,29 @@
 	ViewData["Title"] = "Index";
 }
 
-<h1>Materias Disponibles</h1>
+@* @if (TempData["Success"] != null)
+{
+	<div class="alert alert-success">@TempData["Success"]</div>
+} *@
+@if (TempData["Error"] != null)
+{
+	<div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (User.IsInRole("AlumnoRol"))
+{
+	<h1>Materias de tu Carrera</h1>
+<p>
+	<a asp-controller="Inscripciones" asp-action="Create" class="btn btn-primary">Inscribirme</a>
+</p>
+}
+else
+{
+
+	<h1>Materias Disponibles</h1>
+}
+
+
 
 
 @if (User.IsInRole("EmpleadoRol"))
