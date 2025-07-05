@@ -178,24 +178,41 @@ namespace Instituto.C.Controllers
                 return View(alumno);
             }
 
-            alumnoDb.Email = alumno.Email;
+            //actualizamos campos personales comunes
             alumnoDb.Telefono = alumno.Telefono;
             alumnoDb.Activo = alumno.Activo;
             alumnoDb.FechaAlta = alumno.FechaAlta;
-            alumnoDb.UserName = alumno.UserName;
             alumnoDb.Nombre = alumno.Nombre;
             alumnoDb.Apellido = alumno.Apellido;
             alumnoDb.DNI = alumno.DNI;
             alumnoDb.Direccion = alumno.Direccion;
 
+            //solo cambiamos la carrera si está permitido
             if (!tieneInscripciones && cambioCarrera)
             {
                 alumnoDb.CarreraId = alumno.CarreraId;
             }
 
+            // actualizamos UserName y Email usando Identity
+            alumnoDb.Email = alumno.Email;
+            alumnoDb.UserName = alumno.UserName;
+
+            var result = await _userManager.UpdateAsync(alumnoDb);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                ViewData["CarreraId"] = new SelectList(_context.Carreras, "Id", "CodigoCarrera", alumno.CarreraId);
+                return View(alumno);
+            }
+
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // si hay otros cambios en contexto además del usuario
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -203,12 +220,6 @@ namespace Instituto.C.Controllers
                 return Problem("Hubo un problema de concurrencia al intentar guardar los cambios.");
             }
         }
-
-
-
-
-
-
 
 
         // GET: Alumnos/Delete/5
@@ -247,6 +258,31 @@ namespace Instituto.C.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [Authorize(Roles = "EmpleadoRol")]
+        public async Task<IActionResult> ToggleActivo(int id)
+        {
+            var alumno = await _context.Alumnos.FindAsync(id);
+
+            if (alumno == null)
+                return NotFound();
+
+            alumno.Activo = !alumno.Activo;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                TempData["Success"] = $"El alumno fue {(alumno.Activo ? "activado" : "desactivado")} correctamente.";
+            }
+            catch
+            {
+                TempData["Error"] = "Ocurrió un error al intentar actualizar el estado del alumno.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
         private bool AlumnoExists(int id)
         {

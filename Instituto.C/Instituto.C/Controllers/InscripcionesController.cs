@@ -165,7 +165,6 @@ namespace Instituto.C.Controllers
 
 
 
-        // POST: Inscripciones/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "EmpleadoRol,AlumnoRol")]
@@ -184,14 +183,14 @@ namespace Instituto.C.Controllers
 
             if (alumno == null)
             {
-                ModelState.AddModelError("", "Alumno no encontrado.");
-                return RedirectToAction("Index", "Materias");
+                TempData["Error"] = "Alumno no encontrado.";
+                return RedirigirSegunRol();
             }
 
             if (!alumno.Activo)
             {
-                ModelState.AddModelError("", "Solo los alumnos activos pueden inscribirse.");
-                return RedirectToAction("Index", "Materias");
+                TempData["Error"] = "Solo los alumnos activos pueden inscribirse.";
+                return RedirigirSegunRol();
             }
 
             var cursada = await _context.MateriasCursadas
@@ -202,79 +201,77 @@ namespace Instituto.C.Controllers
 
             if (cursada == null)
             {
-                ModelState.AddModelError("", "Materia cursada no encontrada.");
-                return RedirectToAction("Index", "Materias");
+                TempData["Error"] = "Materia cursada no encontrada.";
+                return RedirigirSegunRol();
             }
 
             if (alumno.CarreraId != cursada.Materia.CarreraId)
             {
-                ModelState.AddModelError("", "No podés inscribirte a materias que no pertenecen a tu carrera.");
-                return RedirectToAction("Index", "Materias");
+                TempData["Error"] = User.IsInRole("EmpleadoRol")
+                    ? "El alumno no puede inscribirse a materias que no pertenecen a su carrera."
+                    : "No podés inscribirte a materias que no pertenecen a tu carrera.";
+                return RedirigirSegunRol();
             }
 
-            bool yaCursada = alumno.Inscripciones.Any(i =>
+            // 🔍 Unificación de validación
+            bool yaLaCurso = alumno.Inscripciones.Any(i =>
                 i.MateriaCursada.MateriaId == cursada.MateriaId &&
                 (i.Activa || i.Calificacion != null));
 
-            if (yaCursada)
+            bool yaEstaInscriptoExacto = alumno.Inscripciones.Any(i =>
+                i.MateriaCursadaId == inscripcion.MateriaCursadaId);
+
+            if (yaLaCurso || yaEstaInscriptoExacto)
             {
-                ModelState.AddModelError("", "Ya cursaste o estás cursando esta materia.");
-                return RedirectToAction("Index", "Materias");
+                TempData["Error"] = User.IsInRole("EmpleadoRol")
+                    ? "El alumno ya cursó o está inscripto en esta materia."
+                    : "Ya cursaste o estás inscripto en esta materia.";
+                return RedirigirSegunRol();
             }
 
             int materiasActivas = alumno.Inscripciones.Count(i => i.Activa);
             if (materiasActivas >= 5)
             {
-                TempData["Error"] = "No podés inscribirte en más de 5 materias a la vez.";
-                return RedirectToAction("Index", "Materias");
+                TempData["Error"] = User.IsInRole("EmpleadoRol")
+                    ? "El alumno no puede inscribirse en más de 5 materias a la vez."
+                    : "No podés inscribirte en más de 5 materias a la vez.";
+                return RedirigirSegunRol();
             }
 
-
-            // uso helper si está llena
+            // 🧪 Verificar si la cursada está llena
             if (MateriasHelper.EstaLleno(cursada))
             {
                 var nuevaCursada = MateriasHelper.CrearNuevaCursadaSiEstaLleno(cursada, _context);
 
-
                 if (nuevaCursada == null)
                 {
-                    ModelState.AddModelError("", "No se pudo crear una nueva cursada automática.");
-                    return RedirectToAction("MateriasActuales");
+                    TempData["Error"] = "No se pudo crear una nueva cursada automática.";
+                    return RedirigirSegunRol();
                 }
 
-                // Asignar objeto Materia para poder generar nombre
                 nuevaCursada.Materia = cursada.Materia;
-
-                // Asignar nombre con helper
                 nuevaCursada.Nombre = MateriasHelper.GenerarNombreCursada(nuevaCursada);
-
-                // Asignar profesor automáticamente
                 nuevaCursada.ProfesorId = await ObtenerProfesorDisponible(nuevaCursada.MateriaId);
 
                 _context.MateriasCursadas.Add(nuevaCursada);
                 await _context.SaveChangesAsync();
 
-                // Redirigir inscripción a la nueva cursada
                 inscripcion.MateriaCursadaId = nuevaCursada.Id;
                 cursada = nuevaCursada;
             }
 
-            // Chequear duplicado exacto
-            bool inscripcionDuplicada = await _context.Inscripciones.AnyAsync(i =>
-                i.AlumnoId == inscripcion.AlumnoId &&
-                i.MateriaCursadaId == inscripcion.MateriaCursadaId);
-
-            if (inscripcionDuplicada)
-            {
-                ModelState.AddModelError("", "Ya estás inscripto en esta materia cursada.");
-                return RedirectToAction("MateriasActuales");
-            }
-
+            // ✅ Crear inscripción final
             _context.Inscripciones.Add(inscripcion);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("MateriasActuales");
+            TempData["Success"] = User.IsInRole("EmpleadoRol")
+                ? "Inscripción creada correctamente para el alumno."
+                : "Te inscribiste correctamente a la materia.";
+
+            return RedirigirSegunRol();
         }
+
+
 
 
         private async Task<int> ObtenerProfesorDisponible(int materiaId)
@@ -373,7 +370,9 @@ namespace Instituto.C.Controllers
             // si ya tiene una calificación, el alumno no se puede dar de baja
             if (inscripcion.Calificacion != null)
             {
-                TempData["Error"] = "No podés cancelar la inscripción porque ya tenés una calificación registrada.";
+                TempData["Error"] = User.IsInRole("EmpleadoRol")
+                    ? "No se puede dar de baja la inscripción porque el alumno ya tiene una calificación registrada."
+                    : "No podés cancelar la inscripción porque ya tenés una calificación registrada.";
                 return User.IsInRole("AlumnoRol")
                     ? RedirectToAction("MateriasActuales")
                     : RedirectToAction(nameof(Index));
@@ -397,7 +396,9 @@ namespace Instituto.C.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Te diste de baja correctamente. Se registró una calificación como 'Baja'.";
+            TempData["Success"] = User.IsInRole("EmpleadoRol")
+                ? "La inscripción fue dada de baja correctamente. Se registró una calificación como 'Baja'."
+                : "Te diste de baja correctamente. Se registró una calificación como 'Baja'.";
 
             return User.IsInRole("AlumnoRol")
                 ? RedirectToAction("MateriasActuales")
@@ -465,6 +466,15 @@ namespace Instituto.C.Controllers
 
             return View(inscripciones);
         }
+
+        //usamos este metodo para redirigir dependiendo de que rol creé la inscripcion
+        private IActionResult RedirigirSegunRol()
+        {
+            return User.IsInRole("EmpleadoRol")
+                ? RedirectToAction("Index", "Inscripciones")
+                : RedirectToAction("MateriasActuales");
+        }
+
 
     }
 }

@@ -119,10 +119,43 @@ namespace Instituto.C.Controllers
 
             if (ModelState.IsValid)
             {
+                var empleadoDb = await _context.Empleados.FindAsync(id);
+
+                if (empleadoDb == null)
+                {
+                    return NotFound();
+                }
+
+                //acualizamos los campos que no requieren UserManager
+                empleadoDb.Legajo = empleado.Legajo;
+                empleadoDb.FechaAlta = empleado.FechaAlta;
+                empleadoDb.Nombre = empleado.Nombre;
+                empleadoDb.Apellido = empleado.Apellido;
+                empleadoDb.DNI = empleado.DNI;
+                empleadoDb.Telefono = empleado.Telefono;
+                empleadoDb.Direccion = empleado.Direccion;
+                empleadoDb.Activo = empleado.Activo;
+
+                //actualizamos el Email y UserName usando Identity
+                empleadoDb.Email = empleado.Email;
+                empleadoDb.UserName = empleado.UserName;
+
+                var result = await _userManager.UpdateAsync(empleadoDb);
+
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    return View(empleado);
+                }
+
                 try
                 {
-                    _context.Update(empleado);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // por si hay otros cambios en el contexto
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -135,10 +168,11 @@ namespace Instituto.C.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+
             return View(empleado);
         }
+
 
         // GET: Empleados/Delete/5
         [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar

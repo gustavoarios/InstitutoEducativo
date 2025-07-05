@@ -1,46 +1,51 @@
 ﻿@model IEnumerable<Instituto.C.Models.Inscripcion>
 
 @{
-    ViewData["Title"] = "Inscripciones";
+	ViewData["Title"] = "Inscripciones";
 }
 
 <h1>Listado de Inscripciones</h1>
 
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">@TempData["Error"]</div>
+	<div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+	<div class="alert alert-success">@TempData["Success"]</div>
 }
 
+
 <p>
-    <a asp-action="Create" class="btn btn-primary">Crear Inscripcion</a>
+	<a asp-action="Create" class="btn btn-primary">Crear Inscripcion</a>
 </p>
 
 <table class="table">
-    <thead>
-        <tr>
-            <th>Alumno</th>
-            <th>Materia Cursada</th>
-            <th>Fecha de Inscripción</th>
-            <th>Activa</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
-                <td>@item.MateriaCursada?.Nombre</td> <!-- Mejor que mostrar cuatrimestre + código por separado -->
-                <td>@item.FechaInscripcion.ToShortDateString()</td>
-                <td>@(item.Activa ? "Sí" : "No")</td>
-                <td>
-                    <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Editar</a>
-                    <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Detalles</a>
-                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Eliminar</a>
-                </td>
+	<thead>
+		<tr>
+			<th>Alumno</th>
+			<th>Materia Cursada</th>
+			<th>Fecha de Inscripción</th>
+			<th>Activa</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>@item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
+				<td>@item.MateriaCursada?.Nombre</td>
+				<td>@item.FechaInscripcion.ToShortDateString()</td>
+				<td>@(item.Activa ? "Sí" : "No")</td>
+				<td>
+					<a class="btn btn-sm btn-info" asp-action="Edit" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Editar</a>
+					<a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Detalles</a>
+					<a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-alumnoId="@item.AlumnoId" asp-route-materiaCursadaId="@item.MateriaCursadaId">Eliminar</a>
+				</td>
 
-            </tr>
-        }
-    </tbody>
+			</tr>
+		}
+	</tbody>
 </table>
 

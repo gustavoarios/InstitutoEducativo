@@ -30,6 +30,7 @@ namespace Instituto.C.Controllers
             return View(carreras);
         }
 
+        [Authorize(Roles = "EmpleadoRol")]
         // GET: Carreras/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -39,7 +40,9 @@ namespace Instituto.C.Controllers
             }
 
             var carrera = await _context.Carreras
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(c => c.Materias)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (carrera == null)
             {
                 return NotFound();
@@ -82,7 +85,7 @@ namespace Instituto.C.Controllers
             return View(carrera);
         }
 
-
+        [Authorize(Roles = "EmpleadoRol")]
         // GET: Carreras/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -99,6 +102,7 @@ namespace Instituto.C.Controllers
             return View(carrera);
         }
 
+        [Authorize(Roles = "EmpleadoRol")]
         // POST: Carreras/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.

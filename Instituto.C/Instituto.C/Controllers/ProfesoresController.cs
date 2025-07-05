@@ -124,9 +124,7 @@ namespace Instituto.C.Controllers
                 return NotFound();
             }
 
-            // Solo campos que se pueden editar
-            profesorDb.UserName = profesor.UserName;
-            profesorDb.Email = profesor.Email;
+            //actualizamos los campos editables
             profesorDb.FechaAlta = profesor.FechaAlta;
             profesorDb.Nombre = profesor.Nombre;
             profesorDb.Apellido = profesor.Apellido;
@@ -136,9 +134,25 @@ namespace Instituto.C.Controllers
             profesorDb.Activo = profesor.Activo;
             profesorDb.Legajo = profesor.Legajo;
 
+            //actualizanos el Email y UserName correctamente
+            profesorDb.UserName = profesor.UserName;
+            profesorDb.Email = profesor.Email;
+
+            var result = await _userManager.UpdateAsync(profesorDb);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View(profesor);
+            }
+
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // por si hay otros cambios en el contexto
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -146,6 +160,7 @@ namespace Instituto.C.Controllers
                 return Problem("Hubo un problema de concurrencia al intentar guardar los cambios.");
             }
         }
+
 
 
         [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
@@ -204,23 +219,62 @@ namespace Instituto.C.Controllers
                 .Include(mc => mc.Materia)
                 .Include(mc => mc.Inscripciones)
                     .ThenInclude(i => i.Alumno)
+                .Include(mc => mc.Inscripciones)
+                    .ThenInclude(i => i.Calificacion)
                 .Where(mc => mc.ProfesorId == profesor.Id)
                 .ToListAsync();
 
-            var calificaciones = await _context.Calificaciones
-                .Where(c => c.ProfesorId == profesor.Id) // 🔐 solo las del profesor logueado
-                .ToListAsync();
+            // aca filtramo inscripciones activas directamente en cada materia
+            foreach (var materia in materias)
+            {
+                materia.Inscripciones = materia.Inscripciones
+                    .Where(i => i.Activa)
+                    .ToList();
+            }
 
             var model = new MisMateriasViewModel
             {
-                Vigentes = materias.Where(mc => mc.EstaVigente()).ToList(),
-                Pasadas = materias.Where(mc => !mc.EstaVigente()).ToList(),
-                Calificaciones = calificaciones
+                Vigentes = materias
+                    .Where(mc => mc.EstaVigente())
+                    .Select(mc => new MateriaCursadaConPromedioViewModel { MateriaCursada = mc })
+                    .ToList(),
+
+                Pasadas = materias
+                    .Where(mc => !mc.EstaVigente())
+                    .Select(mc => new MateriaCursadaConPromedioViewModel { MateriaCursada = mc })
+                    .ToList()
             };
 
             return View(model);
         }
 
+        [Authorize(Roles = "ProfesorRol")]
+        public async Task<IActionResult> DetallesMateriaProfesor(int id)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.Id == userId);
+
+            if (profesor == null)
+                return NotFound("Profesor no encontrado");
+
+            var materia = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Include(mc => mc.Inscripciones)
+                    .ThenInclude(i => i.Alumno)
+                .Include(mc => mc.Inscripciones)
+                    .ThenInclude(i => i.Calificacion)
+                .FirstOrDefaultAsync(mc => mc.Id == id && mc.ProfesorId == profesor.Id);
+
+            if (materia == null)
+                return NotFound("Materia no encontrada o no pertenece al profesor");
+
+            var model = new DetalleMateriaCursadaProfesorViewModel
+            {
+                MateriaCursada = materia
+            };
+
+            return View(model);
+        }
 
 
     }

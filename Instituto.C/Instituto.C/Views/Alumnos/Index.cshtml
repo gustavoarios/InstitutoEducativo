@@ -4,8 +4,19 @@
 	ViewData["Title"] = "Index";
 }
 
+@if (TempData["Success"] != null)
+{
+	<div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+	<div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+
 <h1>Alumnos</h1>
-@if (User.IsInRole("EmpleadoRol")){
+@if (User.IsInRole("EmpleadoRol"))
+{
 	<p>
 		<a class="btn btn-primary" asp-action="Create">Agregar Alumno</a>
 	</p>
@@ -55,7 +66,18 @@
 					<a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
 					<a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">Detalles</a>
 					<a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+
+					@if (User.IsInRole("EmpleadoRol"))
+					{
+						<form asp-action="ToggleActivo" method="post" style="display:inline">
+							<input type="hidden" name="id" value="@item.Id" />
+							<button type="submit" class="btn btn-sm @(item.Activo ? "btn-warning" : "btn-success")">
+								@(item.Activo ? "Desactivar" : "Activar")
+							</button>
+						</form>
+					}
 				</td>
+
 			</tr>
 		}
 	</tbody>

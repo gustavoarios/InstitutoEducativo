@@ -1,74 +1,93 @@
 ﻿@model IEnumerable<Instituto.C.Models.Calificacion>
 
 @{
-	ViewData["Title"] = "Calificaciones";
+    ViewData["Title"] = "Calificaciones";
+
+    string NombreNota(int numero) =>
+        Enum.GetName(typeof(Instituto.C.Models.Nota), numero) ?? numero.ToString();
 }
 
 <h1>Listado de Calificaciones</h1>
 
+@* @if (User.IsInRole("ProfesorRol"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
+    </p>! 
+} *@
+
 @if (User.IsInRole("ProfesorRol"))
 {
-	<p>
-		<a asp-action="Create" class="btn btn-primary">Crear Nueva</a>
-	</p>
+    var profesor = Model.FirstOrDefault()?.Profesor;
+    if (profesor != null)
+    {
+        <p><strong>Profesor:</strong> @profesor.Nombre @profesor.Apellido</p>
+    }
 }
 
 @if (!Model.Any())
 {
-	<div class="alert alert-info">No tenés calificaciones todavía.</div>
+    <div class="alert alert-info">No tenés calificaciones todavía.</div>
 }
 
 <table class="table">
-	<thead>
-		<tr>
-			<th>@Html.DisplayNameFor(model => model.Fecha)</th>
-			<th>@Html.DisplayNameFor(model => model.Nota)</th>
-			<th>Profesor</th>
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Fecha)</th>
+            <th>Nota</th>
 
-			@if (User.IsInRole("ProfesorRol") || User.IsInRole("EmpleadoRol"))
-			{
-				<th>Alumno</th>
-			}
+            @* Ocultamos columna "Profesor" porque ya se muestra arriba *@
+
+            @if (User.IsInRole("ProfesorRol") || User.IsInRole("EmpleadoRol"))
+            {
+                <th>Alumno</th>
+            }
+
+            <th>Materia Cursada</th>
+
+            @if (User.IsInRole("EmpleadoRol"))
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Fecha.ToShortDateString()</td>
+
+                <td>
+                    @((int)item.Nota < 0
+                        ? NombreNota((int)item.Nota)      //mostramos la palabra, sino el numero
+                        : ((int)item.Nota).ToString())    
+                </td>
 
 
 
+                @if (User.IsInRole("ProfesorRol") || User.IsInRole("EmpleadoRol"))
+                {
+                    <td>@item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
+                }
 
+                <td>
+                    @item.MateriaCursada?.Materia?.CodigoMateria
+                    - @item.MateriaCursada?.CodigoCursada
+                    (@item.MateriaCursada?.Anio)
+                </td>
 
-			<th>Materia Cursada</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model)
-		{
-			<tr>
-				<td>@item.Fecha.ToShortDateString()</td>
-				<td>@item.Nota</td>
-				<td>@item.Profesor?.Nombre @item.Profesor?.Apellido</td>
-
-				@if (User.IsInRole("ProfesorRol") || User.IsInRole("EmpleadoRol"))
-				{
-					<td>@item.Alumno?.NumeroMatricula - @item.Alumno?.Nombre @item.Alumno?.Apellido</td>
-				}
-
-				<td>
-					@item.MateriaCursada?.Materia?.CodigoMateria
-					- @item.MateriaCursada?.CodigoCursada
-					(@item.MateriaCursada?.Anio)
-				</td>
-
-				@if (User.IsInRole("EmpleadoRol"))
-				{
-					<td>
-						<a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
-						<a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">Detalles</a>
-						<a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-					</td>
-				}
-
-			</tr>
-		}
-	</tbody>
+                @if (User.IsInRole("EmpleadoRol"))
+                {
+                    <td>
+                        <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                        <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.Id">Detalles</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
 </table>
+
 
 

@@ -1,0 +1,72 @@
+﻿@model Instituto.C.ViewModels.DetalleMateriaCursadaProfesorViewModel
+
+@{
+    ViewData["Title"] = "Detalle de Materia Cursada";
+    var materia = Model.MateriaCursada;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<h2>Detalle - @materia.Materia.Nombre (@materia.Anio - Cuatrimestre @materia.Cuatrimestre)</h2>
+
+<p><strong>Promedio:</strong> @Model.Promedio.ToString("0.00")</p>
+<p><strong>Total inscriptos:</strong> @Model.TotalInscriptos</p>
+<p><strong>Activos:</strong> @Model.TotalActivos</p>
+<p><strong>Bajas:</strong> @Model.TotalBajas</p>
+<p><strong>Calificados:</strong> @Model.TotalCalificados</p>
+
+@if (Model.TotalActivos == 0)
+{
+    <p><em>No hay alumnos activos en esta materia.</em></p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Nota</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var insc in Model.InscriptosActivos)
+            {
+                <tr>
+                    <td>@insc.Alumno.NombreCompleto</td>
+                    <td>
+                        @(insc.Calificacion != null
+                            ? ((int)insc.Calificacion.Nota < 0
+                            ? insc.Calificacion.Nota.ToString()  // mostramos la palabra, onda baja, ausente, pendiente
+                            : ((int)insc.Calificacion.Nota).ToString()) // mostramos el número
+                            : "-")
+                    </td>
+
+                    <td>
+                        @if (insc.Calificacion != null)
+                        {
+                            <a asp-controller="Calificaciones"
+                               asp-action="Edit"
+                               asp-route-id="@insc.Calificacion.Id"
+                               class="btn btn-sm btn-secondary">Editar</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Calificaciones"
+                               asp-action="Create"
+                               asp-route-alumnoId="@insc.AlumnoId"
+                               asp-route-materiaCursadaId="@materia.Id"
+                               class="btn btn-sm btn-primary">Calificar</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<a asp-action="MisMaterias" class="btn btn-secondary">Volver</a>

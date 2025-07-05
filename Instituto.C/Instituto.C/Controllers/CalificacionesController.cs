@@ -72,46 +72,117 @@ namespace Instituto.C.Controllers
                 .Include(c => c.Alumno)
                 .Include(c => c.Profesor)
                 .Include(c => c.MateriaCursada)
-                .ThenInclude(mc => mc.Materia)
+                    .ThenInclude(mc => mc.Materia)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (calificacion == null) return NotFound();
 
-            return View(calificacion);
+            var viewModel = new CalificacionDetalleViewModel
+            {
+                Calificacion = calificacion,
+                NotaTexto = calificacion.Nota switch
+                {
+                    Nota.Ausente => "Ausente",
+                    Nota.Baja => "Baja",
+                    Nota.Pendiente => "Pendiente",
+                    _ => ((int)calificacion.Nota).ToString()
+                }
+
+            };
+
+            return View(viewModel);
         }
 
 
+        //GET CREATE
+
         [Authorize(Roles = "ProfesorRol")]
-        public IActionResult Create()
+        public IActionResult Create(int? alumnoId, int? materiaCursadaId)
         {
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
-
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
-            {
-                a.Id,
-                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-            }), "Id", "Nombre");
-
-            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
-                    .Include(mc => mc.Materia)
-                    .Select(mc => new
-                    {
-                     mc.Id,
-                     Nombre = mc.Materia.CodigoMateria + "-" + mc.Anio + "-" + mc.Cuatrimestre + "C-" + mc.CodigoCursada
-                    }), "Id", "Nombre");
-
-
             var userName = User.Identity.Name;
             var profesor = _context.Profesores.FirstOrDefault(p => p.UserName == userName);
-
             if (profesor == null) return Unauthorized();
 
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
             ViewBag.ProfesorNombre = profesor.Nombre + " " + profesor.Apellido;
             ViewBag.ProfesorId = profesor.Id;
 
+            // 1. Obtener materias activas del profesor
+            var materiasDelProfesor = _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Where(mc => mc.ProfesorId == profesor.Id && mc.Activo)
+                .ToList();
+
+            var materiasIds = materiasDelProfesor.Select(m => m.Id).ToList();
+
+            // 2. Si vienen parámetros por URL, precargar solo esos
+            if (alumnoId.HasValue && materiaCursadaId.HasValue)
+            {
+                var inscripcion = _context.Inscripciones
+                    .Include(i => i.Alumno)
+                    .Include(i => i.MateriaCursada)
+                    .ThenInclude(mc => mc.Materia)
+                    .FirstOrDefault(i =>
+                        i.AlumnoId == alumnoId.Value &&
+                        i.MateriaCursadaId == materiaCursadaId.Value &&
+                        i.MateriaCursada.ProfesorId == profesor.Id &&
+                        i.Activa);
+
+                if (inscripcion != null)
+                {
+                    ViewBag.MateriaCursadaId = new SelectList(
+                        new[] { inscripcion.MateriaCursada },
+                        "Id", "Nombre", inscripcion.MateriaCursadaId);
+
+                    ViewBag.AlumnoId = new SelectList(
+                        new[] { inscripcion.Alumno },
+                        "Id", "NombreCompleto", inscripcion.AlumnoId);
+
+                    return View(new Calificacion
+                    {
+                        AlumnoId = inscripcion.AlumnoId,
+                        MateriaCursadaId = inscripcion.MateriaCursadaId,
+                        Fecha = DateTime.Now
+                    });
+                }
+            }
+
+            // 3. Traer inscripciones activas en las materias del profesor
+            var inscripcionesValidas = _context.Inscripciones
+                .Include(i => i.Alumno)
+                .Where(i => i.Activa && materiasIds.Contains(i.MateriaCursadaId))
+                .ToList();
+
+            var clavesCalificadas = _context.Calificaciones
+                .Select(c => c.AlumnoId + "-" + c.MateriaCursadaId)
+                .ToHashSet();
+
+            var inscripcionesSinCalificar = inscripcionesValidas
+                .Where(i => !clavesCalificadas.Contains(i.AlumnoId + "-" + i.MateriaCursadaId))
+                .ToList();
+
+            var alumnosDisponibles = inscripcionesSinCalificar
+                .Select(i => i.Alumno)
+                .Distinct()
+                .ToList();
+
+            ViewBag.AlumnoId = new SelectList(alumnosDisponibles.Select(a => new
+            {
+                a.Id,
+                Nombre = a.NombreCompleto
+            }), "Id", "Nombre");
+
+            ViewBag.MateriaCursadaId = new SelectList(materiasDelProfesor.Select(mc => new
+            {
+                mc.Id,
+                Nombre = mc.Nombre // ya es BIO101-2025-1C-A
+            }), "Id", "Nombre");
 
             return View();
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -195,7 +266,8 @@ namespace Instituto.C.Controllers
             {
                 _context.Add(calificacion);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                TempData["Success"] = "La calificación se registró correctamente.";
+                return RedirectToAction("DetallesMateriaProfesor", "Profesores", new { id = calificacion.MateriaCursadaId });
             }
 
             return RecargarVistaConCombos(calificacion);
@@ -248,13 +320,15 @@ namespace Instituto.C.Controllers
                 {
                     _context.Update(calificacion);
                     await _context.SaveChangesAsync();
+
+                    TempData["Success"] = "La calificación fue actualizada correctamente.";
+                    return RedirectToAction("DetallesMateriaProfesor", "Profesores", new { id = calificacion.MateriaCursadaId });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!CalificacionExists(calificacion.Id)) return NotFound();
                     throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
 
             // En caso de error volver a cargar combos
@@ -282,6 +356,7 @@ namespace Instituto.C.Controllers
 
             return View(calificacion);
         }
+
 
         [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
         public async Task<IActionResult> Delete(int? id)

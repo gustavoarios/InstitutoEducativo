@@ -6,78 +6,83 @@
 }
 
 <h2>Materias Vigentes</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
 @if (Model.Vigentes.Count == 0)
 {
     <p>No tenés materias vigentes asignadas.</p>
 }
 else
 {
-    foreach (var materia in Model.Vigentes)
+    @foreach (var materiaVm in Model.Vigentes)
     {
-        var notasDeMateria = (Model.Calificaciones ?? new List<Instituto.C.Models.Calificacion>())
-            .Where(c => c.MateriaCursadaId == materia.Id)
-            .Select(c => c.Nota);
+        var materia = materiaVm.MateriaCursada;
 
-        var promedio = NotasHelper.CalcularPromedio(notasDeMateria);
-
-        <div>
+        <div class="mb-3">
             <h4>@materia.Materia.Nombre (@materia.Anio - Cuatrimestre @materia.Cuatrimestre)</h4>
 
-            @if (promedio > 0)
+            @if (materiaVm.Promedio > 0)
             {
-                <p><strong>Promedio:</strong> @promedio.ToString("0.00")</p>
+                <p><strong>Promedio:</strong> @materiaVm.Promedio.ToString("0.00")</p>
             }
             else
             {
-                <p><em>Aún no hay calificaciones numéricas.</em></p>
+                <p><em>Todavía no hay calificaciones.</em></p>
             }
 
-            <ul>
-                @foreach (var inscripcion in materia.Inscripciones)
-                {
-                    <li>
-                        @inscripcion.Alumno.Nombre @inscripcion.Alumno.Apellido |
-                        @Html.ActionLink("Calificar", "Create", "Calificaciones", new { alumnoId = inscripcion.AlumnoId, materiaCursadaId = materia.Id }, null)
-                    </li>
-                }
-            </ul>
+            @* con esto mostramos si no hay alumnos activos, mas alla de que lo mostramos en el detalle, para mejor entendimiento del profe *@
+            @if (!materia.Inscripciones.Any())
+            {
+                <p><em>No hay alumnos activos en esta materia.</em></p>
+            }
+
+            <a asp-action="DetallesMateriaProfesor"
+               asp-controller="Profesores"
+               asp-route-id="@materia.Id"
+               class="btn btn-outline-primary btn-sm">
+                Ver Detalle
+            </a>
         </div>
     }
+
 }
 
 <h2>Materias Pasadas</h2>
+
 @if (Model.Pasadas.Count == 0)
 {
     <p>No tenés materias pasadas.</p>
 }
 else
 {
-    foreach (var materia in Model.Pasadas)
+    foreach (var materiaVm in Model.Pasadas)
     {
-        var notasDeMateria = (Model.Calificaciones ?? new List<Instituto.C.Models.Calificacion>())
-            .Where(c => c.MateriaCursadaId == materia.Id)
-            .Select(c => c.Nota);
+        var materia = materiaVm.MateriaCursada;
 
-        var promedio = NotasHelper.CalcularPromedio(notasDeMateria);
-
-        <div>
+        <div class="mb-3">
             <h4>@materia.Materia.Nombre (@materia.Anio - Cuatrimestre @materia.Cuatrimestre)</h4>
 
-            @if (promedio > 0)
+            @if (materiaVm.Promedio > 0)
             {
-                <p><strong>Promedio:</strong> @promedio.ToString("0.00")</p>
+                <p><strong>Promedio:</strong> @materiaVm.Promedio.ToString("0.00")</p>
             }
             else
             {
-                <p><em>Aún no hay calificaciones numéricas.</em></p>
+                <p><em>Todavía no hay calificaciones.</em></p>
             }
 
-            <ul>
-                @foreach (var inscripcion in materia.Inscripciones)
-                {
-                    <li>@inscripcion.Alumno.Nombre @inscripcion.Alumno.Apellido</li>
-                }
-            </ul>
+            <a asp-action="DetallesMateriaProfesor"
+               asp-controller="Profesores"
+               asp-route-id="@materia.Id"
+               class="btn btn-outline-secondary btn-sm">
+                Ver Detalle
+            </a>
         </div>
     }
 }
