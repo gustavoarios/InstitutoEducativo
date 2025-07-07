@@ -101,7 +101,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Instituto.C.Data;
-using Instituto.C.Helpers; // << Asegurate de agregar este using
+using Instituto.C.Helpers;
 using Instituto.C.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -110,12 +110,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Instituto.C
 {
     public class Program
     {
-        public static async Task Main(string[] args) // 👈 Hacemos async el Main
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -154,12 +155,21 @@ namespace Instituto.C
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Persona>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Rol>>();
 
-                context.Database.Migrate(); // Aplica migraciones pendientes
+                // ✅ Aplica migraciones solo si hay pendientes (más seguro)
+                if (context.Database.GetPendingMigrations().Any())
+                {
+                    Console.WriteLine("Se detectaron migraciones pendientes. Aplicando...");
+                    context.Database.Migrate();
+                }
+                else
+                {
+                    Console.WriteLine("No hay migraciones pendientes.");
+                }
 
-                // Crear roles si no existen (evita fallos en bases nuevas)
+                // Crear roles si no existen
                 await RoleSeeder.CrearRolesAsync(roleManager);
 
-                // Solo precargar si no hay usuarios
+                // Precargar solo si no hay usuarios
                 if (!context.Users.Any())
                 {
                     Console.WriteLine("Precargando datos automáticamente...");
@@ -171,7 +181,6 @@ namespace Instituto.C
                 }
             }
 
-            // Configuración del pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -189,7 +198,7 @@ namespace Instituto.C
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            await app.RunAsync(); // 👈 Usamos RunAsync ya que el Main es async
+            await app.RunAsync();
         }
     }
 }
