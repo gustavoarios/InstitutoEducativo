@@ -46,8 +46,11 @@ namespace Instituto.C.Controllers
             }
 
             var alumno = await _context.Alumnos
-                .Include(a => a.Carrera)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                        .Include(a => a.Carrera)
+                        .Include(a => a.Inscripciones.Where(i => i.Activa))
+                        .ThenInclude(i => i.MateriaCursada)
+                        .ThenInclude(mc => mc.Materia)
+                        .FirstOrDefaultAsync(m => m.Id == id);
             if (alumno == null)
             {
                 return NotFound();
