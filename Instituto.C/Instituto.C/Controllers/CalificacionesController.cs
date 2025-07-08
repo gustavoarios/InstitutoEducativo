@@ -107,7 +107,7 @@ namespace Instituto.C.Controllers
             ViewBag.ProfesorNombre = profesor.Nombre + " " + profesor.Apellido;
             ViewBag.ProfesorId = profesor.Id;
 
-            // 1. Obtener materias activas del profesor
+            // obtenemos materias activas del profesor
             var materiasDelProfesor = _context.MateriasCursadas
                 .Include(mc => mc.Materia)
                 .Where(mc => mc.ProfesorId == profesor.Id && mc.Activo)
@@ -115,7 +115,7 @@ namespace Instituto.C.Controllers
 
             var materiasIds = materiasDelProfesor.Select(m => m.Id).ToList();
 
-            // 2. Si vienen parámetros por URL, precargar solo esos
+            //si vienen parámetros por URL, precargar solo esos
             if (alumnoId.HasValue && materiaCursadaId.HasValue)
             {
                 var inscripcion = _context.Inscripciones
@@ -147,7 +147,7 @@ namespace Instituto.C.Controllers
                 }
             }
 
-            // 3. Traer inscripciones activas en las materias del profesor
+            // traemos inscripciones activas en las materias del profesor
             var inscripcionesValidas = _context.Inscripciones
                 .Include(i => i.Alumno)
                 .Where(i => i.Activa && materiasIds.Contains(i.MateriaCursadaId))
@@ -304,6 +304,8 @@ namespace Instituto.C.Controllers
                 Nombre = p.Nombre + " " + p.Apellido
             }), "Id", "Nombre", calificacion.ProfesorId);
 
+            ViewBag.MateriaCursadaId = calificacion.MateriaCursadaId;
+
             return View(calificacion);
         }
 
@@ -353,6 +355,8 @@ namespace Instituto.C.Controllers
                 p.Id,
                 Nombre = p.Nombre + " " + p.Apellido
             }), "Id", "Nombre", calificacion.ProfesorId);
+
+            ViewBag.MateriaCursadaId = calificacion.MateriaCursadaId;
 
             return View(calificacion);
         }

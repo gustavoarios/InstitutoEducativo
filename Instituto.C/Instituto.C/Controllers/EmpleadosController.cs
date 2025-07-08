@@ -30,7 +30,7 @@ namespace Instituto.C.Controllers
         public async Task<IActionResult> Index()
         {
 
-            var soloEmpleados = await _context.Empleados.Where(e => !(e is Profesor)).ToListAsync(); // Filtra los que NO son profesores
+            var soloEmpleados = await _context.Empleados.Where(e => !(e is Profesor)).ToListAsync(); // filtramos los que NO son profesores
 
             return View(soloEmpleados);
         }

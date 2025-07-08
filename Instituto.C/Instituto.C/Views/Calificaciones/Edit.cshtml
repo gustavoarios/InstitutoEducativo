@@ -56,9 +56,12 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Volver a la lista</a>
-</div>
+<a asp-controller="Profesores"
+   asp-action="DetallesMateriaProfesor"
+   asp-route-id="@ViewBag.MateriaCursadaId">
+    Volver a la lista
+</a>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

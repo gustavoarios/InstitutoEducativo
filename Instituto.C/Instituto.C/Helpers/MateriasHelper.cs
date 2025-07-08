@@ -25,7 +25,7 @@ namespace Instituto.C.Helpers
             return inscripcionesActivas >= cursada.Materia.CupoMaximo;
         }
 
-        // MODIFICADO: ahora recibe el contexto y evita duplicados
+        //recibe el contexto y evita duplicados
         public static MateriaCursada CrearNuevaCursadaSiEstaLleno(MateriaCursada cursada, InstitutoDb context)
         {
             if (!EstaLleno(cursada)) return null;
