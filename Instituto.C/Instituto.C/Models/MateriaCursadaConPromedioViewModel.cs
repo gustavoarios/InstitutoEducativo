@@ -13,16 +13,14 @@ namespace Instituto.C.ViewModels
             get
             {
                 var notas = MateriaCursada.Inscripciones?
-                    .Where(i => i.Calificacion != null && (int)i.Calificacion.Nota > 0)
-                    .Select(i => i.Calificacion.Nota)
-                    .ToList();
-
-                if (notas == null || notas.Count == 0)
-                    return 0;
+                            .Where(i => i.Calificacion != null && (int)i.Calificacion.Nota >= 0 && (int)i.Calificacion.Nota <= 10)
+                            .Select(i => i.Calificacion.Nota) // Mantiene el tipo Nota
+                            .ToList();
 
                 return NotasHelper.CalcularPromedio(notas);
+
             }
         }
-
     }
+
 }
