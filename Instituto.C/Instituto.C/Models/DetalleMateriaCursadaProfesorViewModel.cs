@@ -10,7 +10,15 @@ namespace Instituto.C.ViewModels
         public MateriaCursada MateriaCursada { get; set; }
 
         public List<Inscripcion> InscriptosActivos =>
-            MateriaCursada?.Inscripciones?.Where(i => i.Activa).ToList() ?? new();
+    MateriaCursada?.Inscripciones?
+        .Where(i => i.Activa && (i.Calificacion == null || i.Calificacion.Nota != Nota.Baja))
+        .ToList() ?? new();
+
+
+        public List<Inscripcion> InscriptosParaMostrar =>
+    MateriaCursada?.Inscripciones?
+        .OrderBy(i => i.Alumno.Apellido)
+        .ToList() ?? new();
 
         public List<Inscripcion> InscriptosDadosDeBaja =>
             MateriaCursada?.Inscripciones?.Where(i => !i.Activa).ToList() ?? new();
@@ -26,7 +34,11 @@ namespace Instituto.C.ViewModels
 
         public int TotalActivos => InscriptosActivos.Count;
 
-        public int TotalBajas => InscriptosDadosDeBaja.Count;
+        public int TotalBajas =>
+    MateriaCursada?.Inscripciones?.Count(i =>
+        !i.Activa || (i.Calificacion != null && i.Calificacion.Nota == Nota.Baja)
+    ) ?? 0;
+
 
         public int TotalCalificados => InscriptosActivos.Count(i => i.Calificacion != null);
     }

@@ -35,7 +35,8 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var insc in Model.InscriptosActivos)
+            @foreach (var insc in Model.InscriptosParaMostrar)
+
             {
                 <tr>
                     <td>@insc.Alumno.NombreCompleto</td>

@@ -71,103 +71,43 @@ namespace Instituto.C.Controllers
             return View(inscripcion);
         }
 
+
         // GET: Inscripciones/Create
-        [Authorize(Roles = "EmpleadoRol,AlumnoRol")]
+        [Authorize(Roles = "EmpleadoRol")]
         public IActionResult Create()
         {
-            if (User.IsInRole("EmpleadoRol"))
-            {
-                var alumnosActivos = _context.Alumnos
-                    .Where(a => a.Activo)
-                    .ToList();
+            var alumnosActivos = _context.Alumnos
+                .Where(a => a.Activo)
+                .ToList();
 
-                ViewData["AlumnoId"] = new SelectList(
-                    alumnosActivos.Select(a => new
-                    {
-                        a.Id,
-                        Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-                    }), "Id", "Nombre");
-
-                var todasCursadas = _context.MateriasCursadas
-                    .Include(mc => mc.Materia)
-                    .ToList();
-
-                ViewData["MateriaCursadaId"] = new SelectList(
-                    todasCursadas.Select(mc => new
-                    {
-                        mc.Id,
-                        Nombre = mc.Nombre
-                    }), "Id", "Nombre");
-
-                return View();
-            }
-            else if (User.IsInRole("AlumnoRol"))
-            {
-                var alumno = _context.Alumnos
-                    .AsNoTracking()
-                    .Include(a => a.Inscripciones)
-                        .ThenInclude(i => i.MateriaCursada)
-                            .ThenInclude(mc => mc.Materia)
-                    .FirstOrDefault(a => a.UserName == User.Identity.Name);
-
-                if (alumno == null)
+            ViewData["AlumnoId"] = new SelectList(
+                alumnosActivos.Select(a => new
                 {
-                    TempData["Error"] = "No se pudo encontrar tu usuario.";
-                    return RedirectToAction("MateriasActuales");
-                }
+                    a.Id,
+                    Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
+                }), "Id", "Nombre");
 
-                if (!alumno.Activo)
+            var todasCursadas = _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .ToList();
+
+            ViewData["MateriaCursadaId"] = new SelectList(
+                todasCursadas.Select(mc => new
                 {
-                    TempData["Error"] = "Tu cuenta aún no está activa. No podés inscribirte.";
-                    return RedirectToAction("MateriasActuales");
-                }
+                    mc.Id,
+                    Nombre = mc.Nombre
+                }), "Id", "Nombre");
 
-                var todasLasCursadas = _context.MateriasCursadas
-                    .Include(mc => mc.Materia)
-                    .Include(mc => mc.Inscripciones)
-                    .Where(mc => mc.Activo && mc.Materia.CarreraId == alumno.CarreraId)
-                    .ToList();
-
-                var yaCursadas = alumno.Inscripciones
-                    .Where(i => i.Calificacion != null || i.Activa)
-                    .Select(i => i.MateriaCursada.MateriaId)
-                    .ToHashSet();
-
-                var opcionesFinales = todasLasCursadas
-                    .Where(mc => !yaCursadas.Contains(mc.MateriaId))
-                    .GroupBy(mc => new { mc.MateriaId, mc.Anio, mc.Cuatrimestre })
-                    .Select(grupo => grupo
-                        .OrderByDescending(mc => mc.CodigoCursada)
-                        .FirstOrDefault(mc => !MateriasHelper.EstaLleno(mc))
-                            ?? grupo.OrderByDescending(mc => mc.CodigoCursada).First()
-                    )
-                    .Select(mc => new
-                    {
-                        mc.Id,
-                        Nombre = mc.Nombre
-                    })
-                    .ToList();
-
-                ViewData["AlumnoId"] = new SelectList(new[] {
-                    new {
-                        alumno.Id,
-                        Nombre = alumno.NumeroMatricula + " - " + alumno.Nombre + " " + alumno.Apellido
-                    }
-                }, "Id", "Nombre", alumno.Id);
-
-                ViewData["MateriaCursadaId"] = new SelectList(opcionesFinales, "Id", "Nombre");
-
-                return View(new Inscripcion { AlumnoId = alumno.Id });
-            }
-
-            return Unauthorized();
+            return View();
         }
+
+
 
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "EmpleadoRol,AlumnoRol")]
+        [Authorize(Roles = "EmpleadoRol")]
         public async Task<IActionResult> Create([Bind("AlumnoId,MateriaCursadaId")] Inscripcion inscripcion)
         {
             if (inscripcion == null)
@@ -213,7 +153,7 @@ namespace Instituto.C.Controllers
                 return RedirigirSegunRol();
             }
 
-            // 🔍 Unificación de validación
+            // unifico la validación
             bool yaLaCurso = alumno.Inscripciones.Any(i =>
                 i.MateriaCursada.MateriaId == cursada.MateriaId &&
                 (i.Activa || i.Calificacion != null));
@@ -238,7 +178,7 @@ namespace Instituto.C.Controllers
                 return RedirigirSegunRol();
             }
 
-            // 🧪 Verificar si la cursada está llena
+            // chequeamos y verifico si la cursada está llena
             if (MateriasHelper.EstaLleno(cursada))
             {
                 var nuevaCursada = MateriasHelper.CrearNuevaCursadaSiEstaLleno(cursada, _context);
@@ -260,7 +200,7 @@ namespace Instituto.C.Controllers
                 cursada = nuevaCursada;
             }
 
-            // ✅ Crear inscripción final
+            // creamos la inscripción final
             _context.Inscripciones.Add(inscripcion);
             await _context.SaveChangesAsync();
 
@@ -271,9 +211,116 @@ namespace Instituto.C.Controllers
             return RedirigirSegunRol();
         }
 
+        [Authorize(Roles = "AlumnoRol")]
+        public async Task<IActionResult> InscribirmeAuto(int idMateria)
+        {
+            var alumno = await _context.Alumnos
+                .Include(a => a.Inscripciones)
+                    .ThenInclude(i => i.MateriaCursada)
+                .FirstOrDefaultAsync(a => a.UserName == User.Identity.Name);
 
+            if (alumno == null)
+            {
+                TempData["Error"] = "No se pudo encontrar tu usuario.";
+                return RedirectToAction("Index", "Materias");
+            }
 
+            if (!alumno.Activo)
+            {
+                TempData["Error"] = "Tu cuenta aún no está activa. No podés inscribirte.";
+                return RedirectToAction("Index", "Materias");
+            }
 
+            var cursadas = await _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .Include(mc => mc.Inscripciones)
+                .Where(mc => mc.Activo &&
+                             mc.Materia.CarreraId == alumno.CarreraId &&
+                             mc.MateriaId == idMateria)
+                .ToListAsync();
+
+            if (!cursadas.Any())
+            {
+                TempData["Error"] = "No hay comisiones activas disponibles para esta materia.";
+                return RedirectToAction("Index", "Materias");
+            }
+
+            var yaCursadas = alumno.Inscripciones
+                .Where(i => i.Calificacion != null || i.Activa)
+                .Select(i => i.MateriaCursada.MateriaId)
+                .ToHashSet();
+
+            if (yaCursadas.Contains(idMateria))
+            {
+                TempData["Error"] = "Ya cursaste o estás inscripto en esta materia.";
+                return RedirectToAction("Index", "Materias");
+            }
+
+            var materiaCursada = cursadas
+                .GroupBy(mc => new { mc.MateriaId, mc.Anio, mc.Cuatrimestre })
+                .Select(grupo => grupo
+                    .OrderByDescending(mc => mc.CodigoCursada)
+                    .FirstOrDefault(mc => !MateriasHelper.EstaLleno(mc))
+                        ?? grupo.OrderByDescending(mc => mc.CodigoCursada).First()
+                ).FirstOrDefault();
+
+            if (materiaCursada == null)
+            {
+                TempData["Error"] = "No se pudo determinar una cursada válida.";
+                return RedirectToAction("Index", "Materias");
+            }
+
+            if (alumno.Inscripciones.Count(i => i.Activa) >= 5)
+            {
+                TempData["Error"] = "No podés inscribirte en más de 5 materias a la vez.";
+                return RedirectToAction("Index", "Materias");
+            }
+
+            // validamos que no exista ya una inscripción exacta (clave primaria compuesta)
+            var yaInscriptoExacto = await _context.Inscripciones
+                .AnyAsync(i => i.AlumnoId == alumno.Id && i.MateriaCursadaId == materiaCursada.Id);
+
+            if (yaInscriptoExacto)
+            {
+                TempData["Error"] = "Ya estás inscripto o te inscribiste en esta comisión.";
+                return RedirectToAction("Index", "Materias");
+            }
+
+            // vrificamos si la cursada está llena
+            if (MateriasHelper.EstaLleno(materiaCursada))
+            {
+                var nueva = MateriasHelper.CrearNuevaCursadaSiEstaLleno(materiaCursada, _context);
+
+                if (nueva == null)
+                {
+                    TempData["Error"] = "No se pudo crear una nueva cursada automática.";
+                    return RedirectToAction("Index", "Materias");
+                }
+
+                nueva.Materia = materiaCursada.Materia;
+                nueva.Nombre = MateriasHelper.GenerarNombreCursada(nueva);
+                nueva.ProfesorId = await ObtenerProfesorDisponible(nueva.MateriaId);
+
+                _context.MateriasCursadas.Add(nueva);
+                await _context.SaveChangesAsync();
+
+                materiaCursada = nueva;
+            }
+
+            var inscripcion = new Inscripcion
+            {
+                AlumnoId = alumno.Id,
+                MateriaCursadaId = materiaCursada.Id,
+                FechaInscripcion = DateTime.Now,
+                Activa = true
+            };
+
+            _context.Inscripciones.Add(inscripcion);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Te inscribiste correctamente a la materia.";
+            return RedirectToAction("MateriasActuales");
+        }
         private async Task<int> ObtenerProfesorDisponible(int materiaId)
         {
             var profesor = await _context.Profesores
@@ -404,10 +451,6 @@ namespace Instituto.C.Controllers
                 ? RedirectToAction("MateriasActuales")
                 : RedirectToAction(nameof(Index));
         }
-
-
-
-
 
 
         private bool InscripcionExists(int alumnoId, int materiaCursadaId)

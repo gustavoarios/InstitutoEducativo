@@ -1,24 +1,25 @@
 ﻿@model Instituto.C.Models.Calificacion
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Calificación";
 }
 
-<h1>Edit</h1>
+<h1>Editar Calificación</h1>
 
-<h4>Calificación</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <!-- Fecha: no editable -->
+            <!-- Fecha (oculta) -->
             <input asp-for="Fecha" type="hidden" />
-            <div class="form-group">
-                <label class="control-label">Fecha de Calificación</label>
-                <input class="form-control" value="@Model.Fecha.ToShortDateString()" readonly />
-            </div>
+
+            <!-- Ids ocultos -->
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="AlumnoId" type="hidden" />
+            <input asp-for="ProfesorId" type="hidden" />
+            <input asp-for="MateriaCursadaId" type="hidden" />
 
             <!-- Nota -->
             <div class="form-group">
@@ -27,43 +28,32 @@
                 <span asp-validation-for="Nota" class="text-danger"></span>
             </div>
 
-            <!-- Profesor -->
+            <!-- Alumno (solo texto) -->
             <div class="form-group">
-                <label asp-for="ProfesorId" class="control-label"></label>
-                <select asp-for="ProfesorId" class="form-control" asp-items="ViewBag.ProfesorId"></select>
-                <span asp-validation-for="ProfesorId" class="text-danger"></span>
+                <label><strong>Alumno:</strong></label>
+                <p>@ViewBag.AlumnoNombre</p>
             </div>
 
-            <!-- AlumnoId oculto + visualización -->
-            <input asp-for="AlumnoId" type="hidden" />
+            <!-- Materia Cursada (solo texto) -->
             <div class="form-group">
-                <label>Alumno</label>
-                <input class="form-control" value="@Model.Alumno?.NumeroMatricula - @Model.Alumno?.Nombre @Model.Alumno?.Apellido" readonly />
+                <label><strong>Materia:</strong></label>
+                <p>@ViewBag.MateriaNombre</p>
             </div>
 
-            <!-- MateriaCursadaId oculto + visualización -->
-            <input asp-for="MateriaCursadaId" type="hidden" />
-            <div class="form-group">
-                <label>Materia Cursada</label>
-                <input class="form-control" value="@Model.Inscripcion?.MateriaCursada?.CodigoCursada" readonly />
-            </div>
-
-            <!-- Botón -->
-            <div class="form-group">
+            <!-- Botones -->
+            <div class="form-group mt-3">
                 <input type="submit" value="Guardar" class="btn btn-primary" />
+                <a asp-controller="Profesores"
+                   asp-action="DetallesMateriaProfesor"
+                   asp-route-id="@ViewBag.MateriaCursadaId"
+                   class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<a asp-controller="Profesores"
-   asp-action="DetallesMateriaProfesor"
-   asp-route-id="@ViewBag.MateriaCursadaId">
-    Volver a la lista
-</a>
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
+
+

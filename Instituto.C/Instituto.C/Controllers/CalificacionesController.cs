@@ -105,9 +105,9 @@ namespace Instituto.C.Controllers
 
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
             ViewBag.ProfesorNombre = profesor.Nombre + " " + profesor.Apellido;
-            ViewBag.ProfesorId = profesor.Id;
+            ViewBag.ProfesorIdValor = profesor.Id;
 
-            // obtenemos materias activas del profesor
+            // Obtener materias activas del profesor
             var materiasDelProfesor = _context.MateriasCursadas
                 .Include(mc => mc.Materia)
                 .Where(mc => mc.ProfesorId == profesor.Id && mc.Activo)
@@ -115,13 +115,12 @@ namespace Instituto.C.Controllers
 
             var materiasIds = materiasDelProfesor.Select(m => m.Id).ToList();
 
-            //si vienen parámetros por URL, precargar solo esos
             if (alumnoId.HasValue && materiaCursadaId.HasValue)
             {
                 var inscripcion = _context.Inscripciones
                     .Include(i => i.Alumno)
                     .Include(i => i.MateriaCursada)
-                    .ThenInclude(mc => mc.Materia)
+                        .ThenInclude(mc => mc.Materia)
                     .FirstOrDefault(i =>
                         i.AlumnoId == alumnoId.Value &&
                         i.MateriaCursadaId == materiaCursadaId.Value &&
@@ -130,13 +129,11 @@ namespace Instituto.C.Controllers
 
                 if (inscripcion != null)
                 {
-                    ViewBag.MateriaCursadaId = new SelectList(
-                        new[] { inscripcion.MateriaCursada },
-                        "Id", "Nombre", inscripcion.MateriaCursadaId);
+                    ViewBag.MateriaNombre = inscripcion.MateriaCursada.Nombre;
+                    ViewBag.AlumnoNombre = inscripcion.Alumno.NombreCompleto;
 
-                    ViewBag.AlumnoId = new SelectList(
-                        new[] { inscripcion.Alumno },
-                        "Id", "NombreCompleto", inscripcion.AlumnoId);
+                    ViewBag.MateriaCursadaIdValor = inscripcion.MateriaCursadaId;
+                    ViewBag.AlumnoIdValor = inscripcion.AlumnoId;
 
                     return View(new Calificacion
                     {
@@ -147,41 +144,14 @@ namespace Instituto.C.Controllers
                 }
             }
 
-            // traemos inscripciones activas en las materias del profesor
-            var inscripcionesValidas = _context.Inscripciones
-                .Include(i => i.Alumno)
-                .Where(i => i.Activa && materiasIds.Contains(i.MateriaCursadaId))
-                .ToList();
+            // caso general, no debería usarse con flujo actual
+            ViewBag.AlumnoNombre = null;
+            ViewBag.MateriaNombre = null;
+            ViewBag.AlumnoIdValor = 0;
+            ViewBag.MateriaCursadaIdValor = 0;
 
-            var clavesCalificadas = _context.Calificaciones
-                .Select(c => c.AlumnoId + "-" + c.MateriaCursadaId)
-                .ToHashSet();
-
-            var inscripcionesSinCalificar = inscripcionesValidas
-                .Where(i => !clavesCalificadas.Contains(i.AlumnoId + "-" + i.MateriaCursadaId))
-                .ToList();
-
-            var alumnosDisponibles = inscripcionesSinCalificar
-                .Select(i => i.Alumno)
-                .Distinct()
-                .ToList();
-
-            ViewBag.AlumnoId = new SelectList(alumnosDisponibles.Select(a => new
-            {
-                a.Id,
-                Nombre = a.NombreCompleto
-            }), "Id", "Nombre");
-
-            ViewBag.MateriaCursadaId = new SelectList(materiasDelProfesor.Select(mc => new
-            {
-                mc.Id,
-                Nombre = mc.Nombre // ya es BIO101-2025-1C-A
-            }), "Id", "Nombre");
-
-            return View();
+            return View(new Calificacion());
         }
-
-
 
 
         [HttpPost]
@@ -195,7 +165,10 @@ namespace Instituto.C.Controllers
 
             calificacion.ProfesorId = profesor.Id;
 
-            var cursada = await _context.MateriasCursadas.FindAsync(calificacion.MateriaCursadaId);
+            var cursada = await _context.MateriasCursadas
+                                        .Include(mc => mc.Materia)
+                                        .FirstOrDefaultAsync(mc => mc.Id == calificacion.MateriaCursadaId);
+
             if (cursada == null)
             {
                 ModelState.AddModelError("", "La materia cursada no existe.");
@@ -279,35 +252,37 @@ namespace Instituto.C.Controllers
         {
             if (id == null) return NotFound();
 
-            var calificacion = await _context.Calificaciones.FindAsync(id);
-            if (calificacion == null) return NotFound();
+            // Buscar calificación incluyendo relaciones necesarias
+            var calificacion = await _context.Calificaciones
+                .Include(c => c.Alumno)
+                .Include(c => c.Inscripcion)
+                    .ThenInclude(i => i.MateriaCursada)
+                        .ThenInclude(mc => mc.Materia)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
+            if (calificacion == null)
+                return NotFound();
+
+            // Obtener profesor logueado
+            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+
+            // Validar que la materia cursada de esta calificación pertenezca al profesor logueado
+            if (calificacion.Inscripcion.MateriaCursada.ProfesorId != profesor.Id)
+            {
+                return RedirectToAction("AccesoDenegado", "Account");
+            }
+
+            // Cargar datos para la vista
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
 
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
-            {
-                a.Id,
-                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-            }), "Id", "Nombre", calificacion.AlumnoId);
-
-            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
-                .Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
-                }), "Id", "Nombre", calificacion.MateriaCursadaId);
-
-            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
-            {
-                p.Id,
-                Nombre = p.Nombre + " " + p.Apellido
-            }), "Id", "Nombre", calificacion.ProfesorId);
-
+            ViewBag.AlumnoNombre = $"{calificacion.Alumno?.NumeroMatricula} - {calificacion.Alumno?.Nombre} {calificacion.Alumno?.Apellido}";
+            ViewBag.MateriaNombre = $"{calificacion.Inscripcion?.MateriaCursada?.Materia?.CodigoMateria} - {calificacion.Inscripcion?.MateriaCursada?.CodigoCursada} ({calificacion.Inscripcion?.MateriaCursada?.Anio})";
             ViewBag.MateriaCursadaId = calificacion.MateriaCursadaId;
 
             return View(calificacion);
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -315,6 +290,20 @@ namespace Instituto.C.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Fecha,Nota,ProfesorId,AlumnoId,MateriaCursadaId")] Calificacion calificacion)
         {
             if (id != calificacion.Id) return NotFound();
+
+            // Obtener el profesor actual
+            var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+            if (profesor == null) return Unauthorized();
+
+            // Revalidar que la materia cursada pertenezca al profesor
+            var materiaCursada = await _context.MateriasCursadas.FindAsync(calificacion.MateriaCursadaId);
+            if (materiaCursada == null || materiaCursada.ProfesorId != profesor.Id)
+            {
+                return RedirectToAction("AccesoDenegado", "Account");
+            }
+
+            // Forzar que la calificación quede asociada al profesor correcto
+            calificacion.ProfesorId = profesor.Id;
 
             if (ModelState.IsValid)
             {
@@ -333,33 +322,21 @@ namespace Instituto.C.Controllers
                 }
             }
 
-            // En caso de error volver a cargar combos
-            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
-
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
-            {
-                a.Id,
-                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-            }), "Id", "Nombre", calificacion.AlumnoId);
-
-            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
+            // Recargar los textos en caso de error
+            var alumno = await _context.Alumnos.FindAsync(calificacion.AlumnoId);
+            var materia = await _context.MateriasCursadas
                 .Include(mc => mc.Materia)
-                .Select(mc => new
-                {
-                    mc.Id,
-                    Nombre = mc.Materia.CodigoMateria + " - " + mc.CodigoCursada + " (" + mc.Anio + ")"
-                }), "Id", "Nombre", calificacion.MateriaCursadaId);
+                .FirstOrDefaultAsync(mc => mc.Id == calificacion.MateriaCursadaId);
 
-            ViewBag.ProfesorId = new SelectList(_context.Profesores.Select(p => new
-            {
-                p.Id,
-                Nombre = p.Nombre + " " + p.Apellido
-            }), "Id", "Nombre", calificacion.ProfesorId);
-
+            ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)), calificacion.Nota);
+            ViewBag.AlumnoNombre = $"{alumno?.NumeroMatricula} - {alumno?.Nombre} {alumno?.Apellido}";
+            ViewBag.MateriaNombre = $"{materia?.Materia?.CodigoMateria} - {materia?.CodigoCursada} ({materia?.Anio})";
             ViewBag.MateriaCursadaId = calificacion.MateriaCursadaId;
 
             return View(calificacion);
         }
+
+
 
 
         [Authorize(Roles = "Admin")] //aunque no existe, potencialmente sí y nadie los puede borrar
@@ -427,33 +404,30 @@ namespace Instituto.C.Controllers
         {
             ViewBag.Notas = new SelectList(Enum.GetValues(typeof(Nota)));
 
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos.Select(a => new
-            {
-                a.Id,
-                Nombre = a.NumeroMatricula + " - " + a.Nombre + " " + a.Apellido
-            }), "Id", "Nombre", calificacion.AlumnoId);
+            //seteamos los ids crudos para evitar errores en campos hidden
+            ViewBag.AlumnoIdValor = calificacion.AlumnoId;
+            ViewBag.MateriaCursadaIdValor = calificacion.MateriaCursadaId;
 
-            ViewBag.MateriaCursadaId = new SelectList(_context.MateriasCursadas
-            .Include(mc => mc.Materia)
-            .Select(mc => new
-            {
-                mc.Id,
-                Nombre = mc.Materia.CodigoMateria + "-" + mc.Anio + "-" + mc.Cuatrimestre + "C-" + mc.CodigoCursada
-            }), "Id", "Nombre", calificacion.MateriaCursadaId);
+            var alumno = _context.Alumnos.FirstOrDefault(a => a.Id == calificacion.AlumnoId);
+            var materia = _context.MateriasCursadas
+                .Include(mc => mc.Materia)
+                .FirstOrDefault(mc => mc.Id == calificacion.MateriaCursadaId);
 
+            ViewBag.AlumnoNombre = alumno?.NombreCompleto;
+            ViewBag.MateriaNombre = materia?.Nombre;
 
-            // mostramos el profesor actual
             var userName = User.Identity.Name;
             var profesor = _context.Profesores.FirstOrDefault(p => p.UserName == userName);
-
             if (profesor != null)
             {
                 ViewBag.ProfesorNombre = profesor.Nombre + " " + profesor.Apellido;
-                ViewBag.ProfesorId = profesor.Id;
+                ViewBag.ProfesorIdValor = profesor.Id;
             }
 
-            return View(calificacion);
+            return View("Create", calificacion);
         }
+
+
 
     }
 }

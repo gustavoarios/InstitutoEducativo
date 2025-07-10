@@ -12,32 +12,34 @@
         <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+            <!-- Fecha oculta -->
             <input asp-for="Fecha" type="hidden" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
 
+            <!-- Nota (select) -->
             <div class="form-group">
                 <label asp-for="Nota" class="control-label"></label>
                 <select asp-for="Nota" class="form-control" asp-items="ViewBag.Notas"></select>
                 <span asp-validation-for="Nota" class="text-danger"></span>
             </div>
 
+            <!-- Alumno (texto plano + hidden) -->
             <div class="form-group">
-                <label>Profesor</label>
-                <input type="text" class="form-control" value="@ViewBag.ProfesorNombre" readonly />
-                <input type="hidden" name="ProfesorId" value="@ViewBag.ProfesorId" />
+                <label><strong>Alumno:</strong></label>
+                <p>@ViewBag.AlumnoNombre</p>
+                <input asp-for="AlumnoId" type="hidden" value="@ViewBag.AlumnoIdValor" />
             </div>
 
+            <!-- Materia (texto plano + hidden) -->
             <div class="form-group">
-                <label asp-for="AlumnoId" class="control-label"></label>
-                <select asp-for="AlumnoId" class="form-control" asp-items="ViewBag.AlumnoId"></select>
-                <span asp-validation-for="AlumnoId" class="text-danger"></span>
+                <label><strong>Materia:</strong></label>
+                <p>@ViewBag.MateriaNombre</p>
+                <input asp-for="MateriaCursadaId" type="hidden" value="@ViewBag.MateriaCursadaIdValor" />
             </div>
 
-            <div class="form-group">
-                <label asp-for="MateriaCursadaId" class="control-label"></label>
-                <select asp-for="MateriaCursadaId" class="form-control" asp-items="ViewBag.MateriaCursadaId"></select>
-                <span asp-validation-for="MateriaCursadaId" class="text-danger"></span>
-            </div>
+            <!-- Profesor oculto -->
+            <input asp-for="ProfesorId" type="hidden" value="@ViewBag.ProfesorIdValor" />
 
+            <!-- Botones -->
             <div class="form-group mt-3">
                 <input type="submit" value="Crear" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
@@ -51,6 +53,10 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+
+
+
 
 
 

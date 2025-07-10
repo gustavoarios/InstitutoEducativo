@@ -144,7 +144,9 @@ namespace Instituto.C.Controllers
                 }
             }
 
-            var alumno = await _context.Alumnos.FindAsync(id);
+            var alumno = await _context.Alumnos
+                .Include(a => a.Carrera)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (alumno == null)
             {

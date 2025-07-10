@@ -19,17 +19,13 @@
             <input type="hidden" asp-for="Id" />
 
             <div class="form-group">
-                <label asp-for="CarreraId" class="control-label"></label>
-                @if (isAlumno)
-                {
-                    <select asp-for="CarreraId" class="form-control" asp-items="ViewBag.CarreraId" disabled></select>
-                }
-                else
-                {
-                    <select asp-for="CarreraId" class="form-control" asp-items="ViewBag.CarreraId"></select>
-                }
+                <label class="control-label">Código de la carrera</label>
+                <input class="form-control text-dark bg-light" value="@Model.Carrera?.Nombre" readonly />
+                <input type="hidden" asp-for="CarreraId" />
                 <span asp-validation-for="CarreraId" class="text-danger"></span>
             </div>
+
+
 
             <div class="form-group">
                 <label asp-for="UserName" class="control-label"></label>
