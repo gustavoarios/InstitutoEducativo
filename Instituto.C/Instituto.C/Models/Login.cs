@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Instituto.C.Helpers;
 
 namespace Instituto.C.Models
 {
@@ -8,11 +9,14 @@ namespace Instituto.C.Models
         //esto sería un modelo dedicado para manejar la vista
 
         [Required]
+        [Display(Name = Alias.UserName)]
+
         public string UserName { get; set; }
 
 
         [Required]
         [DataType(DataType.Password)]
+        [Display(Name = Alias.Contrasenia)]
         public string Password { get; set; }
 
 

@@ -20,3 +20,60 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+@media (max-width: 767.98px) {
+    img[alt="Soporte"] {
+        max-width: 100% !important;
+        height: auto;
+    }
+}
+
+.nav-link {
+    transition: all 0.25s ease;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+    .nav-link:hover {
+        background-color: #f0f6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+
+.recuadro-beneficios {
+    background-color: #f0f8ff; /* o el celeste que uses */
+    border-radius: 12px; /* Podés probar con 8px, 12px o 16px según el estilo que busques */
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.login-card {
+    max-width: 400px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.login-card {
+    max-width: 400px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+    .login-card h2 {
+        font-family: 'Etna', sans-serif;
+    }
+
+
+@font-face {
+    font-family: 'Etna';
+    src: url('/fonts/Etna/EtnaSans-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.titulo-etna {
+    font-family: 'Etna', sans-serif;
+}
+

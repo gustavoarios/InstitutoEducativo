@@ -3,11 +3,20 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>@ViewData["Title"] - Instituto.C</title>
+	<title>Instituto Educativo - @ViewData["Title"]</title>
+
+
+	<!-- Bootstrap -->
 	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+	<!-- FontAwesome para íconos (✉ ☎ headset, etc.) -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-1Z8s2eIqYIvD1W3cC8yAA2C8q7T5QsXYeL+NzkeY9IqWqZbKAIrA2M9Uz0N57Mk1p/jNMuPIx9OyNGm8eEGZ3g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+	<!-- Estilos personalizados -->
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/Instituto.C.styles.css" asp-append-version="true" />
 </head>
+
 <body>
 	<header>
 		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -21,12 +30,16 @@
 				</button>
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 					<ul class="navbar-nav flex-grow-1">
-
-
-
+						@if(User.IsInRole("EmpleadoRol")){
+							<li class="nav-item">
+							<a class="nav-link text-dark" asp-controller="Home" asp-action="Dashboard">Inicio</a>
+							</li>
+						} else{							
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
 						</li>
+						}
+
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-controller="Home" asp-action="Nosotros">Nosotros</a>
 						</li>
@@ -37,28 +50,17 @@
 							<a class="nav-link text-dark" asp-area="" asp-controller="Carreras" asp-action="Index">Carreras</a>
 						</li>
 
-
-						
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Materias" asp-action="Index">Materias</a>
 						</li>
-						
-						
-
-
-
 
 						@if (User.Identity.IsAuthenticated)
 						{
 
-							
-
 							<li class="nav-item">
 								<a class="nav-link text-dark" asp-area="" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
 							</li>
-							
-							
-
+				
 							if(User.IsInRole("EmpleadoRol")){
 								<li class="nav-item">
 									<a class="nav-link text-dark" asp-area="" asp-controller="Empleados" asp-action="Index">Empleados</a>
@@ -93,9 +95,6 @@
 								</li>
 							}
 
-							
-
-							
 						}
 					</ul>
 					<ul class="navbar-nav">

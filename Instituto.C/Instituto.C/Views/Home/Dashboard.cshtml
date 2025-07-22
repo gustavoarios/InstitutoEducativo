@@ -1,0 +1,56 @@
+﻿@model Instituto.C.Models.DashboardViewModel
+
+
+
+@{
+    ViewData["Title"] = "Dashboard del Empleado";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Resumen Actual</h2>
+
+    <!-- Estado del sistema -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            ✅ Estado del sistema
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Alumnos activos: <strong>@Model.CantidadAlumnosActivos</strong></li>
+                <li class="list-group-item">Profesores activos: <strong>@Model.CantidadProfesoresActivos</strong></li>
+                <li class="list-group-item">Materias en curso: <strong>@Model.CantidadMateriasEnCurso</strong></li>
+                <li class="list-group-item">Inscripciones activas: <strong>@Model.CantidadInscripcionesActivas</strong></li>
+            </ul>
+
+        </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            📌 Accesos rápidos
+        </div>
+        <div class="card-body">
+            <a class="btn btn-outline-primary me-2 mb-2" asp-controller="Carreras" asp-action="Create">+ Crear Carrera</a>
+            <a class="btn btn-outline-primary me-2 mb-2" asp-controller="Materias" asp-action="Create">+ Crear Materia</a>
+            <a class="btn btn-outline-primary me-2 mb-2" asp-controller="Alumnos" asp-action="Create">+ Alta de Alumno</a>
+            <a class="btn btn-outline-primary me-2 mb-2" asp-controller="Empleados" asp-action="Create">+ Alta de Empleado</a>
+            <a class="btn btn-outline-primary me-2 mb-2" asp-controller="Profesores" asp-action="Create">+ Alta de Profesor</a>
+        </div>
+    </div>
+
+    <!-- Próximas acciones importantes -->
+    <div class="card">
+        <div class="card-header bg-warning">
+            📊 Próximas acciones importantes
+        </div>
+        <div class="card-body">
+            <ul>
+                <li>Revisar inscripciones pendientes</li>
+                <li>Validar activación de nuevos alumnos</li>
+                <li>Generar reportes de cursadas</li>
+            </ul>
+        </div>
+    </div>
+</div>
+

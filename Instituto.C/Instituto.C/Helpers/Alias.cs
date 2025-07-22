@@ -10,6 +10,8 @@
         public const string FechaInscripcion = "Fecha de inscripicion";
         public const string Carrera = "Nombre de la carrera";
         public const string RolName = "Nombre del rol";
+        public const string UserName = "Nombre de usuario";
+        public const string Contrasenia = "Constraseña";
 
 
 

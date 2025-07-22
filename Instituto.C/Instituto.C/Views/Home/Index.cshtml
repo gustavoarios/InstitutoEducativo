@@ -3,41 +3,138 @@
 	var estaLogueado = User.Identity.IsAuthenticated;
 }
 
-<div class="container text-center py-5">
+<div class="container py-5">
 
 	@if (!estaLogueado)
 	{
-		<h1 class="fw-bold">Accedé al Portal Académico</h1>
-		<p>Consultá materias, docentes, carreras e inscripciones.</p>
+		@* <div class="text-center mb-5">
+			<h1 class="fw-bold text-primary">Accedé al Portal Académico</h1>
+			<p class="text-muted">Consultá materias, docentes, carreras e inscripciones.</p>
+		</div> *@
+
+		<div class="text-center mb-5 p-4 recuadro-beneficios" style="background-color: #f0f6ff;">
+			<h1 class="fw-bold text-primary titulo-etna">Accedé al Portal Académico</h1>
+			<p class="text-muted">Consultá materias, docentes, carreras e inscripciones.</p>
+		</div>
+
+
+
+
 	}
 	else
 	{
-		<h2>Hola, @User.Identity.Name, ¡bienvenido!</h2>
+		<div class="mb-4">
+			<h2 class="fw-bold text-primary">Hola, @User.Identity.Name, ¡bienvenido!</h2>
 
-		if (User.IsInRole("AlumnoRol"))
-		{
-			<p>En este portal vas a ver todo lo referido a tu carrera, materias, inscribirte y ver tus calificaciones.</p>
-		}
-		else if (User.IsInRole("ProfesorRol"))
-		{
-			<p>En este portal vas a ver todo lo referido a tus materias, tus alumnos y calificarlos.</p>
-		}
-		else if (User.IsInRole("EmpleadoRol"))
-		{
-			<p>En este portal vas a gestionar las carreras, materias, profesores, alumnos y empleados.</p>
-		}
-	}
-
-	@if (ViewBag.Message is not null)
-	{
-		<div class="card mt-3">
-			<p class="text-danger">@ViewBag.Message</p>
+			@if (User.IsInRole("AlumnoRol"))
+			{
+				<p>En este portal vas a ver todo lo referido a tu carrera, materias, inscribirte y ver tus calificaciones.</p>
+			}
+			else if (User.IsInRole("ProfesorRol"))
+			{
+				<p>En este portal vas a ver todo lo referido a tus materias, tus alumnos y calificarlos.</p>
+			}
+			else if (User.IsInRole("EmpleadoRol"))
+			{
+				<p>En este portal vas a gestionar las carreras, materias, profesores, alumnos y empleados.</p>
+			}
 		</div>
 	}
 
-	<div class="mt-5">
-		<img src="~/images/portada-instituto.png" alt="Oficina de Atención al Estudiante" class="img-fluid w-100" />
+
+
+	@if (ViewBag.Message is not null)
+	{
+		<div class="alert alert-danger mt-3">@ViewBag.Message</div>
+	}
+
+	<!-- NUEVA SECCIÓN VISUAL -->
+	<div class="row align-items-center mt-5">
+		<div class="col-md-6 text-center mb-4 mb-md-0">
+			<img src="~/images/icono-atencion.png" alt="Soporte" class="img-fluid" style="max-width: 580px;" />
+		</div>
+		<div class="col-md-6">
+			<h2 class="fw-bold text-primary fs-1 titulo-etna">OFICINA DE ATENCIÓN</h2> <!-- más grande -->
+
+			<p class="fs-5 mb-1">¿Tenés dudas o necesitás ayuda?</p>
+			<p class="fs-5">Estamos para acompañarte en cada paso.</p>
+
+			<p class="fs-6 mt-4 mb-0">
+				<i class="fa fa-envelope text-secondary me-2"></i>
+				<a href="mailto:contacto@instituto.edu.ar">contacto@instituto.edu.ar</a><br />
+				<i class="fa fa-phone text-secondary me-2"></i>
+				0800-123-4567
+			</p>
+		</div>
+
+		<!-- Línea divisoria -->
+		<hr class="my-5" />
+
+		<!-- Nueva sección -->
+		@* <div class="text-center">
+			<h3 class="fw-bold text-primary">¿Por qué elegir nuestro Instituto?</h3>
+			<p class="fs-5">Ofrecemos carreras oficiales, docentes capacitados y acompañamiento personalizado.</p>
+		</div> *@
+
+		<div class="py-5 text-center recuadro-beneficios" style="background-color: #f0f6ff;">
+			<h3 class="fw-bold text-primary titulo-etna">¿Por qué elegir nuestro Instituto?</h3>
+			<p class="fs-5 mb-4">
+				Ofrecemos carreras oficiales, docentes capacitados y acompañamiento personalizado.
+			</p>
+			<p class="mx-auto" style="max-width: 720px; font-size: 1.1rem;">
+				Nuestro compromiso es brindarte una formación académica de calidad, adaptada a las exigencias del mundo actual.
+				Contamos con un cuerpo docente con amplia experiencia, herramientas digitales actualizadas y una comunidad educativa
+				que te acompaña desde el primer día. Además, impulsamos el desarrollo profesional mediante prácticas, tutorías y
+				orientación permanente para ayudarte a alcanzar tus objetivos.
+			</p>
+		</div>
+
+		<!-- Línea divisoria -->
+		<hr class="my-5" />
+
+		<div class="container-fluid py-5 recuadro-beneficios" style="background-color: #f0f6ff;">
+			<div class="container text-center">
+				<h3 class="fw-bold text-primary mb-4 titulo-etna">Nuestras instalaciones</h3>
+
+				<p class="mx-auto mb-5" style="max-width: 720px; font-size: 1.1rem;">
+					Contamos con espacios modernos, luminosos y equipados para acompañar cada etapa del aprendizaje.
+					Desde el ingreso hasta las aulas y el gimnasio, buscamos ofrecer un ambiente cómodo, seguro y estimulante.
+					Cada rincón de nuestro Instituto está pensado para fomentar la participación, el bienestar y el desarrollo integral
+					de nuestros estudiantes. Te invitamos a recorrerlos y ser parte de esta experiencia educativa.
+				</p>
+
+				<div class="row g-3 justify-content-center">
+					<div class="col-md-4">
+						<img src="~/images/entrada_colegio.png" alt="Entrada del colegio" class="img-fluid rounded shadow-sm" />
+					</div>
+					<div class="col-md-4">
+						<img src="~/images/salon_clases.png" alt="Salón de clases" class="img-fluid rounded shadow-sm" />
+					</div>
+					<div class="col-md-4">
+						<img src="~/images/salon_gimnasia.png" alt="Salón de gimnasia" class="img-fluid rounded shadow-sm" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		@if(!estaLogueado){
+
+		<!-- Línea divisoria -->
+		<hr class="my-5" />
+		<div class="py-5 text-center recuadro-beneficios" style="background-color: #d6e6ff;">
+			<h4 class="fw-bold mb-3">¿Listo para comenzar?</h4>
+			<p class="mb-4">Registrate hoy y empezá a construir tu futuro con nosotros.</p>
+			<a href="/Account/Registrar" class="btn btn-primary btn-lg">Registrarme</a>
+		</div>
+		}
+
+
+
+
+
 	</div>
 </div>
+
 
 
