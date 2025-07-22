@@ -22,7 +22,11 @@ namespace Instituto.C
             var builder = WebApplication.CreateBuilder(args);
             ////comentamos lo de "InstitutoDb-C" para usar SQLite
             builder.Services.AddDbContext<InstitutoDb>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("InstitutoDb-C"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure() // 👉 esto es lo nuevo
+    ));
+
 
 
             //        // Cambiamos a SQLite para el ejemplo
