@@ -20,9 +20,15 @@ namespace Instituto.C
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            ////comentamos lo de "InstitutoDb-C" para usar SQLite
             builder.Services.AddDbContext<InstitutoDb>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("InstitutoDb-C")));
+
+
+            //        // Cambiamos a SQLite para el ejemplo
+            //        builder.Services.AddDbContext<InstitutoDb>(options =>
+            //options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
             builder.Services.AddIdentity<Persona, Rol>()
                 .AddEntityFrameworkStores<InstitutoDb>();

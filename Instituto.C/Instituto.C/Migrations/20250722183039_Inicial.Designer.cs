@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instituto.C.Migrations
 {
     [DbContext(typeof(InstitutoDb))]
-    [Migration("20250627011752_Final")]
-    partial class Final
+    [Migration("20250722183039_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
